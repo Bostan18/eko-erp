@@ -36,13 +36,13 @@
 - [x]  Charges : liste par catégorie, totaux dynamiques
 - [x]  Sidebar : sous-menus RH (Employés / Pointage) et Comptabilité (Factures / Charges)
 
-## Phase 4 — Reporting & Déploiement (À venir)
+## Phase 4 — Reporting & Déploiement (En cours)
 
-- [ ]  Tableau de bord KPIs dynamique (chiffres réels depuis l'API)
-- [ ]  KPIs RH : masse salariale du mois, présences journaliers
-- [ ]  KPIs Projets : projets en cours par type, budget engagé
-- [ ]  KPIs Finance : CA facturé, encaissé, charges, marge
-- [ ]  KPIs Stocks : articles en alerte, valeur du stock
-- [ ]  Exports Excel / PDF (factures, feuilles de paie, rapports)
-- [ ]  Tests automatisés (pytest)
+- [x]  Tableau de bord KPIs dynamique (chiffres réels depuis l'API)
+- [x]  KPIs RH : masse salariale du mois, présences journaliers
+- [x]  KPIs Projets : projets en cours par type, budget engagé
+- [x]  KPIs Finance : CA facturé, encaissé, charges, marge
+- [x]  KPIs Stocks : articles en alerte, valeur du stock
+- [x]  Exports Excel / PDF (factures, feuilles de paie, rapports)
+- [x]  Tests automatisés (pytest — 28 tests, 100% pass)
 - [ ]  Déploiement VPS (Nginx + Gunicorn + Docker)

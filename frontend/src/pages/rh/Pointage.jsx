@@ -88,13 +88,29 @@ export default function Pointage() {
             Saisie des présences — journaliers actifs
           </p>
         </div>
-        <button
-          onClick={sauvegarder}
-          disabled={saving || loading || rows.length === 0}
-          className="btn-primary min-w-[140px]"
-        >
-          {saving ? 'Enregistrement…' : 'Enregistrer tout'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              const d = new Date(date)
+              api.get(`/rh/presences/export_paie/?mois=${d.getMonth()+1}&annee=${d.getFullYear()}`, { responseType: 'blob' })
+                .then(({ data }) => {
+                  const href = URL.createObjectURL(data)
+                  Object.assign(document.createElement('a'), { href, download: `paie_${d.getMonth()+1}_${d.getFullYear()}.xlsx` }).click()
+                  URL.revokeObjectURL(href)
+                })
+            }}
+          >
+            ↓ Feuille de paie
+          </button>
+          <button
+            onClick={sauvegarder}
+            disabled={saving || loading || rows.length === 0}
+            className="btn-primary min-w-[140px]"
+          >
+            {saving ? 'Enregistrement…' : 'Enregistrer tout'}
+          </button>
+        </div>
       </div>
 
       {/* Date + stats */}

@@ -1,9 +1,11 @@
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Employe, PresenceJournaliere
 from .serializers import EmployeSerializer, PresenceJournaliereSerializer
+from .exports import paie_excel
 
 
 class EmployeViewSet(viewsets.ModelViewSet):
@@ -70,3 +72,26 @@ class PresenceJournaliereViewSet(viewsets.ModelViewSet):
             results.append(PresenceJournaliereSerializer(obj).data)
 
         return Response(results, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"])
+    def export_paie(self, request):
+        """Export Excel de la feuille de paie pour un mois donné."""
+        mois  = int(request.query_params.get("mois",  timezone.now().month))
+        annee = int(request.query_params.get("annee", timezone.now().year))
+
+        employes = Employe.objects.filter(statut="actif", is_deleted=False).order_by("type_contrat", "nom")
+        presences = PresenceJournaliere.objects.filter(
+            date__month=mois, date__year=annee
+        ).select_related("employe")
+
+        presences_par_employe = {}
+        for p in presences:
+            presences_par_employe.setdefault(p.employe_id, []).append(p)
+
+        buffer = paie_excel(employes, presences_par_employe, mois, annee)
+        response = HttpResponse(
+            buffer,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="paie_{mois}_{annee}.xlsx"'
+        return response

@@ -3,6 +3,17 @@ import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import ChargeForm from '../../components/forms/ChargeForm'
 
+function exportCharges(filtre) {
+  const params = new URLSearchParams()
+  if (filtre !== 'toutes') params.set('categorie', filtre)
+  api.get(`/comptabilite/charges/export_excel/?${params}`, { responseType: 'blob' })
+    .then(({ data }) => {
+      const href = URL.createObjectURL(data)
+      Object.assign(document.createElement('a'), { href, download: 'charges.xlsx' }).click()
+      URL.revokeObjectURL(href)
+    })
+}
+
 function fmt(n) { return Number(n).toLocaleString('fr-FR') }
 
 const CAT_LABEL = {
@@ -55,7 +66,10 @@ export default function ChargeList() {
             {loading ? '…' : `${charges.length} charge${charges.length !== 1 ? 's' : ''} · Total : ${fmt(totalGlobal)} F`}
           </p>
         </div>
-        <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle charge</button>
+        <div className="flex gap-2">
+          <button className="btn-secondary" onClick={() => exportCharges(filtre)}>↓ Excel</button>
+          <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle charge</button>
+        </div>
       </div>
 
       {/* Filtres par catégorie */}

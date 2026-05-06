@@ -17,8 +17,14 @@ python-dotenv==1.0.1
 Pillow==10.4.0
 openpyxl==3.1.5
 
+# Exports
+reportlab==4.5.0
+
 # Dev
 django-debug-toolbar==4.4.2
+pytest==8.3.5
+pytest-django==4.12.0
+factory-boy==3.3.3
 
 # Prod
 gunicorn==22.0.0

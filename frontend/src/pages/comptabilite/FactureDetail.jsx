@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import api from '../../services/api'
 
+function exportFile(url, filename) {
+  api.get(url, { responseType: 'blob' }).then(({ data }) => {
+    const href = URL.createObjectURL(data)
+    Object.assign(document.createElement('a'), { href, download: filename }).click()
+    URL.revokeObjectURL(href)
+  })
+}
+
 function fmt(n) { return Number(n).toLocaleString('fr-FR') }
 function today() { return new Date().toISOString().slice(0, 10) }
 
@@ -80,10 +88,16 @@ export default function FactureDetail() {
           <p className="font-body text-gray-600">{facture.client_nom}</p>
           {facture.projet_nom && <p className="font-body text-gray-400 text-sm">{facture.projet_nom}</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {facture.statut !== 'payee' && (
             <button className="btn-primary" onClick={() => setShowPaie(true)}>+ Enregistrer paiement</button>
           )}
+          <button className="btn-secondary" onClick={() => exportFile(`/comptabilite/factures/${id}/export_excel/`, `facture_${facture.numero}.xlsx`)}>
+            ↓ Excel
+          </button>
+          <button className="btn-secondary" onClick={() => exportFile(`/comptabilite/factures/${id}/export_pdf/`, `facture_${facture.numero}.pdf`)}>
+            ↓ PDF
+          </button>
           <Link to="/comptabilite/factures" className="btn-secondary">← Retour</Link>
         </div>
       </div>

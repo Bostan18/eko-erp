@@ -21,7 +21,8 @@ const nav = [
     ),
     children: [
       { label: 'Employés', path: '/rh' },
-      { label: 'Pointage', path: '/rh/pointage' },
+      { label: 'Pointage journée', path: '/rh/pointage' },
+      { label: 'Pointage semaine', path: '/rh/pointage-semaine' },
     ],
   },
   {

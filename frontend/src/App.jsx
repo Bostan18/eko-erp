@@ -1,17 +1,21 @@
+import { lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import MainLayout from './components/layout/MainLayout'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import EmployeList from './pages/rh/EmployeList'
-import EmployeDetail from './pages/rh/EmployeDetail'
-import Pointage from './pages/rh/Pointage'
-import ProjetList from './pages/projets/ProjetList'
-import ProjetDetail from './pages/projets/ProjetDetail'
-import ClientList from './pages/crm/ClientList'
-import StockList from './pages/stocks/StockList'
-import FactureList from './pages/comptabilite/FactureList'
-import FactureDetail from './pages/comptabilite/FactureDetail'
-import ChargeList from './pages/comptabilite/ChargeList'
+
+const Dashboard       = lazy(() => import('./pages/Dashboard'))
+const EmployeList     = lazy(() => import('./pages/rh/EmployeList'))
+const EmployeDetail   = lazy(() => import('./pages/rh/EmployeDetail'))
+const Pointage        = lazy(() => import('./pages/rh/Pointage'))
+const PointageSemaine = lazy(() => import('./pages/rh/PointageSemaine'))
+const ProjetList      = lazy(() => import('./pages/projets/ProjetList'))
+const ProjetDetail    = lazy(() => import('./pages/projets/ProjetDetail'))
+const TacheDetail     = lazy(() => import('./pages/projets/TacheDetail'))
+const ClientList      = lazy(() => import('./pages/crm/ClientList'))
+const StockList       = lazy(() => import('./pages/stocks/StockList'))
+const FactureList     = lazy(() => import('./pages/comptabilite/FactureList'))
+const FactureDetail   = lazy(() => import('./pages/comptabilite/FactureDetail'))
+const ChargeList      = lazy(() => import('./pages/comptabilite/ChargeList'))
 
 export default function App() {
   return (
@@ -22,8 +26,10 @@ export default function App() {
         <Route path="/rh"                           element={<EmployeList />} />
         <Route path="/rh/:id"                       element={<EmployeDetail />} />
         <Route path="/rh/pointage"                  element={<Pointage />} />
+        <Route path="/rh/pointage-semaine"          element={<PointageSemaine />} />
         <Route path="/projets"                      element={<ProjetList />} />
         <Route path="/projets/:id"                  element={<ProjetDetail />} />
+        <Route path="/projets/:projetId/taches/:tacheId" element={<TacheDetail />} />
         <Route path="/crm"                          element={<ClientList />} />
         <Route path="/stocks"                       element={<StockList />} />
         <Route path="/comptabilite/factures"        element={<FactureList />} />

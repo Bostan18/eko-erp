@@ -1,9 +1,19 @@
 import { useState } from 'react'
 import api from '../../services/api'
+import { apiErrorMessage } from '../../utils/errors'
 
 const INIT = {
   code: '', nom: '', type_client: 'prospect', secteur: '',
   statut: 'actif', telephone: '', email: '', localite: '', notes: '',
+}
+
+function validate(form) {
+  if (!form.code.trim()) return 'Le code est requis (ex : CLI-001).'
+  if (!/^[A-Z]+-\d+$/.test(form.code.trim())) return 'Format de code invalide (ex : CLI-001).'
+  if (!form.nom.trim()) return 'Le nom est requis.'
+  if (form.nom.trim().length < 2) return 'Le nom doit contenir au moins 2 caractères.'
+  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Adresse email invalide.'
+  return null
 }
 
 export default function ClientForm({ onSuccess, onClose }) {
@@ -11,20 +21,19 @@ export default function ClientForm({ onSuccess, onClose }) {
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
-  function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }))
-  }
+  function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    const validErr = validate(form)
+    if (validErr) { setError(validErr); return }
     setSaving(true)
     setError('')
     try {
       await api.post('/crm/clients/', form)
       onSuccess()
     } catch (err) {
-      const data = err.response?.data
-      setError(data ? JSON.stringify(data) : 'Erreur lors de la création.')
+      setError(apiErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -33,16 +42,14 @@ export default function ClientForm({ onSuccess, onClose }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">
-          {error}
-        </div>
+        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
       )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Code *</label>
           <input className="input" placeholder="CLI-001" value={form.code}
-            onChange={(e) => set('code', e.target.value)} required />
+            onChange={(e) => set('code', e.target.value.toUpperCase())} />
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Type *</label>
@@ -57,7 +64,7 @@ export default function ClientForm({ onSuccess, onClose }) {
       <div>
         <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom / Raison sociale *</label>
         <input className="input" placeholder="BOUAKÉ CONSTRUCTIONS SARL" value={form.nom}
-          onChange={(e) => set('nom', e.target.value)} required />
+          onChange={(e) => set('nom', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -107,9 +114,7 @@ export default function ClientForm({ onSuccess, onClose }) {
       </div>
 
       <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>
-          Annuler
-        </button>
+        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary flex-1" disabled={saving}>
           {saving ? 'Enregistrement…' : 'Créer le client'}
         </button>

@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true)
     try {
       const { data } = await axios.post('/api/token/', form)
-      login(data.access, { username: form.username })
+      login(data.access, data.refresh, { username: form.username })
       navigate('/')
     } catch {
       setError('Identifiants incorrects. Veuillez réessayer.')

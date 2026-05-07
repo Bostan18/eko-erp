@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
+import { apiErrorMessage } from '../../utils/errors'
+import { fmt, today } from '../../utils/format'
 
 const LIGNE_INIT = { designation: '', quantite: '1', prix_unitaire: '' }
 
-function today() { return new Date().toISOString().slice(0, 10) }
-function fmt(n)   { return Number(n).toLocaleString('fr-FR') }
+function validate(form, lignes) {
+  if (!form.numero.trim()) return 'Le numéro de facture est requis.'
+  if (!form.client) return 'Veuillez sélectionner un client.'
+  if (!form.date_echeance) return "La date d'échéance est requise."
+  if (form.date_echeance < form.date_emission) return "La date d'échéance doit être postérieure à la date d'émission."
+  const lignesValides = lignes.filter((l) => l.designation && l.prix_unitaire)
+  if (lignesValides.length === 0) return 'Ajoutez au moins une ligne de facturation avec désignation et prix.'
+  return null
+}
 
 export default function FactureForm({ onSuccess, onClose }) {
   const [form, setForm]       = useState({
@@ -37,6 +46,8 @@ export default function FactureForm({ onSuccess, onClose }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    const validErr = validate(form, lignes)
+    if (validErr) { setError(validErr); return }
     setSaving(true)
     setError('')
     try {
@@ -61,8 +72,7 @@ export default function FactureForm({ onSuccess, onClose }) {
       )
       onSuccess()
     } catch (err) {
-      const data = err.response?.data
-      setError(data ? JSON.stringify(data) : 'Erreur lors de la création.')
+      setError(apiErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -74,23 +84,22 @@ export default function FactureForm({ onSuccess, onClose }) {
         <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
       )}
 
-      {/* En-tête facture */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Numéro *</label>
           <input className="input" placeholder="FAC-001" value={form.numero}
-            onChange={(e) => set('numero', e.target.value)} required />
+            onChange={(e) => set('numero', e.target.value.toUpperCase())} />
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">TVA (%)</label>
-          <input type="number" className="input" value={form.taux_tva}
+          <input type="number" min="0" max="100" step="0.5" className="input" value={form.taux_tva}
             onChange={(e) => set('taux_tva', e.target.value)} />
         </div>
       </div>
 
       <div>
         <label className="block font-display text-xs font-medium text-gray-600 mb-1">Client *</label>
-        <select className="input" value={form.client} onChange={(e) => set('client', e.target.value)} required>
+        <select className="input" value={form.client} onChange={(e) => set('client', e.target.value)}>
           <option value="">— Choisir un client —</option>
           {clients.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
         </select>
@@ -108,19 +117,19 @@ export default function FactureForm({ onSuccess, onClose }) {
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date d'émission *</label>
           <input type="date" className="input" value={form.date_emission}
-            onChange={(e) => set('date_emission', e.target.value)} required />
+            onChange={(e) => set('date_emission', e.target.value)} />
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date d'échéance *</label>
           <input type="date" className="input" value={form.date_echeance}
-            onChange={(e) => set('date_echeance', e.target.value)} required />
+            min={form.date_emission || undefined}
+            onChange={(e) => set('date_echeance', e.target.value)} />
         </div>
       </div>
 
-      {/* Lignes */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="font-display text-xs font-medium text-gray-600">Lignes de facturation</label>
+          <label className="font-display text-xs font-medium text-gray-600">Lignes de facturation *</label>
           <button type="button" onClick={ajouterLigne}
             className="text-xs font-display font-medium text-forest-700 hover:text-forest-800">
             + Ajouter une ligne
@@ -131,9 +140,9 @@ export default function FactureForm({ onSuccess, onClose }) {
             <div key={idx} className="flex gap-2 items-center">
               <input className="input flex-1 text-sm py-1.5" placeholder="Désignation"
                 value={ligne.designation} onChange={(e) => setLigne(idx, 'designation', e.target.value)} />
-              <input type="number" className="input w-16 text-sm py-1.5 text-center" placeholder="Qté"
+              <input type="number" min="0.01" step="0.01" className="input w-16 text-sm py-1.5 text-center" placeholder="Qté"
                 value={ligne.quantite} onChange={(e) => setLigne(idx, 'quantite', e.target.value)} />
-              <input type="number" className="input w-28 text-sm py-1.5" placeholder="Prix unit."
+              <input type="number" min="0" step="1" className="input w-28 text-sm py-1.5" placeholder="Prix unit."
                 value={ligne.prix_unitaire} onChange={(e) => setLigne(idx, 'prix_unitaire', e.target.value)} />
               <span className="font-display text-sm font-medium text-gray-600 w-24 text-right shrink-0">
                 {fmt(Number(ligne.quantite) * Number(ligne.prix_unitaire || 0))} F
@@ -151,7 +160,6 @@ export default function FactureForm({ onSuccess, onClose }) {
         </div>
       </div>
 
-      {/* Totaux */}
       <div className="bg-forest-50 rounded-lg p-4 space-y-1.5 text-sm font-body">
         <div className="flex justify-between text-gray-600">
           <span>Montant HT</span><span className="font-medium">{fmt(montantHT)} F</span>

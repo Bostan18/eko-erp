@@ -1,58 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import FactureForm from '../../components/forms/FactureForm'
-
-function fmt(n) { return Number(n).toLocaleString('fr-FR') }
-
-const STATUT_BADGE = {
-  brouillon:            'badge-gray',
-  envoyee:              'badge-blue',
-  partiellement_payee:  'badge-yellow',
-  payee:                'badge-green',
-  en_retard:            'badge-red',
-  annulee:              'badge-gray',
-}
-
-const STATUT_LABEL = {
-  brouillon:            'Brouillon',
-  envoyee:              'Envoyée',
-  partiellement_payee:  'Partiel',
-  payee:                'Payée',
-  en_retard:            'En retard',
-  annulee:              'Annulée',
-}
+import { useFetchList } from '../../hooks/useFetchList'
+import { FACTURE_STATUT_BADGE, FACTURE_STATUT_LABEL } from '../../utils/constants'
+import { fmt } from '../../utils/format'
 
 export default function FactureList() {
-  const [factures, setFactures] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState('')
-  const [filtre, setFiltre]     = useState('toutes')
-  const [modal, setModal]       = useState(false)
+  const { items: factures, loading, error, charger } = useFetchList('/comptabilite/factures/', 'Impossible de charger les factures.')
+  const [filtre, setFiltre] = useState('toutes')
+  const [modal, setModal]   = useState(false)
 
-  function charger() {
-    setLoading(true)
-    api.get('/comptabilite/factures/')
-      .then(({ data }) => setFactures(data.results ?? data))
-      .catch(() => setError('Impossible de charger les factures.'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { charger() }, [])
-
-  const filtrees = factures.filter((f) =>
-    filtre === 'toutes' ? true : f.statut === filtre
-  )
-
-  const totalEncaisse = factures.filter((f) => f.statut === 'payee').reduce((s, f) => s + Number(f.montant_ttc), 0)
+  const filtrees = factures.filter((f) => filtre === 'toutes' ? true : f.statut === filtre)
+  const totalEncaisse  = factures.filter((f) => f.statut === 'payee').reduce((s, f) => s + Number(f.montant_ttc), 0)
   const totalEnAttente = factures.filter((f) => ['envoyee', 'partiellement_payee'].includes(f.statut))
-                                  .reduce((s, f) => s + Number(f.solde_restant ?? 0), 0)
+                                 .reduce((s, f) => s + Number(f.solde_restant ?? 0), 0)
   const nbEnRetard = factures.filter((f) => f.statut === 'en_retard').length
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-display font-bold text-gray-900 text-2xl">Factures</h1>
@@ -63,7 +29,6 @@ export default function FactureList() {
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle facture</button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="card p-4 border-forest-100 bg-forest-50">
           <p className="font-display text-xs text-forest-600 uppercase tracking-wide mb-1">Encaissé</p>
@@ -79,7 +44,6 @@ export default function FactureList() {
         </div>
       </div>
 
-      {/* Filtres */}
       <div className="flex gap-1 flex-wrap">
         {[
           { key: 'toutes', label: 'Toutes' },
@@ -103,7 +67,6 @@ export default function FactureList() {
         ))}
       </div>
 
-      {/* Table */}
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
         {loading ? (
@@ -135,7 +98,7 @@ export default function FactureList() {
                     {fmt(f.solde_restant)} F
                   </td>
                   <td className="px-4 py-3">
-                    <span className={STATUT_BADGE[f.statut] ?? 'badge-gray'}>{STATUT_LABEL[f.statut] ?? f.statut}</span>
+                    <span className={FACTURE_STATUT_BADGE[f.statut] ?? 'badge-gray'}>{FACTURE_STATUT_LABEL[f.statut] ?? f.statut}</span>
                   </td>
                   <td className={`px-4 py-3 font-body text-sm ${f.statut === 'en_retard' ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
                     {f.date_echeance || '—'}

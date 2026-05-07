@@ -1,38 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import EmployeForm from '../../components/forms/EmployeForm'
-
-const TYPE_BADGE = {
-  cdi:        'badge-green',
-  journalier: 'badge-blue',
-  moo:        'badge-yellow',
-  stagiaire:  'badge-gray',
-}
-
-const STATUT_BADGE = {
-  actif:   'badge-green',
-  inactif: 'badge-gray',
-  conge:   'badge-yellow',
-}
+import { useFetchList } from '../../hooks/useFetchList'
+import { EMPLOYE_TYPE_BADGE, EMPLOYE_STATUT_BADGE } from '../../utils/constants'
+import { fmt } from '../../utils/format'
 
 export default function EmployeList() {
-  const [employes, setEmployes] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState('')
-  const [search, setSearch]     = useState('')
-  const [modal, setModal]       = useState(false)
-
-  function charger() {
-    setLoading(true)
-    api.get('/rh/employes/')
-      .then(({ data }) => setEmployes(data.results ?? data))
-      .catch(() => setError('Impossible de charger les employés.'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { charger() }, [])
+  const { items: employes, loading, error, charger } = useFetchList('/rh/employes/', 'Impossible de charger les employés.')
+  const [search, setSearch] = useState('')
+  const [modal, setModal]   = useState(false)
 
   const filtered = employes.filter(
     (e) =>
@@ -43,7 +20,6 @@ export default function EmployeList() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display font-bold text-gray-900 text-2xl">RH & Paie</h1>
@@ -54,7 +30,6 @@ export default function EmployeList() {
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvel employé</button>
       </div>
 
-      {/* Search */}
       <input
         type="text"
         className="input max-w-xs"
@@ -63,10 +38,8 @@ export default function EmployeList() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Table */}
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm font-body">{error}</p>}
-
         {loading ? (
           <div className="p-12 text-center text-gray-400 font-body text-sm">Chargement…</div>
         ) : (
@@ -98,17 +71,17 @@ export default function EmployeList() {
                     </td>
                     <td className="px-4 py-3 font-body text-gray-500">{emp.poste || '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={TYPE_BADGE[emp.type_contrat] ?? 'badge-gray'}>
+                      <span className={EMPLOYE_TYPE_BADGE[emp.type_contrat] ?? 'badge-gray'}>
                         {emp.type_contrat.toUpperCase()}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={STATUT_BADGE[emp.statut] ?? 'badge-gray'}>
+                      <span className={EMPLOYE_STATUT_BADGE[emp.statut] ?? 'badge-gray'}>
                         {emp.statut}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-body text-gray-600">
-                      {emp.taux_journalier ? `${Number(emp.taux_journalier).toLocaleString('fr-FR')} F` : '—'}
+                      {emp.taux_journalier ? `${fmt(emp.taux_journalier)} F` : '—'}
                     </td>
                   </tr>
                 ))
@@ -120,10 +93,7 @@ export default function EmployeList() {
 
       {modal && (
         <Modal titre="Nouvel employé" onClose={() => setModal(false)}>
-          <EmployeForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
-          />
+          <EmployeForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
       )}
     </div>

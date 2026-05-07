@@ -1,35 +1,15 @@
-import { useEffect, useState } from 'react'
-import api from '../../services/api'
+import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import ArticleForm from '../../components/forms/ArticleForm'
-
-const CAT_LABEL = {
-  intrant:     'Intrant agricole',
-  materiau:    'Matériau BTP',
-  equipement:  'Équipement',
-  consommable: 'Consommable',
-  piece:       'Pièce détachée',
-}
-
-function fmt(n) { return Number(n).toLocaleString('fr-FR') }
+import { useFetchList } from '../../hooks/useFetchList'
+import { ARTICLE_CAT_LABEL } from '../../utils/constants'
+import { fmt } from '../../utils/format'
 
 export default function StockList() {
-  const [articles, setArticles] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState('')
-  const [search, setSearch]     = useState('')
-  const [filtre, setFiltre]     = useState('tous')
-  const [modal, setModal]       = useState(false)
-
-  function charger() {
-    setLoading(true)
-    api.get('/stocks/articles/')
-      .then(({ data }) => setArticles(data.results ?? data))
-      .catch(() => setError('Impossible de charger les articles.'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { charger() }, [])
+  const { items: articles, loading, error, charger } = useFetchList('/stocks/articles/', 'Impossible de charger les articles.')
+  const [search, setSearch] = useState('')
+  const [filtre, setFiltre] = useState('tous')
+  const [modal, setModal]   = useState(false)
 
   const alertes = articles.filter((a) => Number(a.stock_actuel) <= Number(a.seuil_minimum))
 
@@ -44,7 +24,6 @@ export default function StockList() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-display font-bold text-gray-900 text-2xl">Stocks</h1>
@@ -55,7 +34,6 @@ export default function StockList() {
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvel article</button>
       </div>
 
-      {/* Bannière alertes */}
       {alertes.length > 0 && (
         <div
           className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl cursor-pointer"
@@ -72,7 +50,6 @@ export default function StockList() {
         </div>
       )}
 
-      {/* Filtres + recherche */}
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="text"
@@ -92,13 +69,12 @@ export default function StockList() {
                   : 'bg-white border border-gray-200 text-gray-600 hover:border-forest-300'
               }`}
             >
-              {f === 'tous' ? 'Tous' : f === 'alertes' ? '⚠ Alertes' : CAT_LABEL[f]}
+              {f === 'tous' ? 'Tous' : f === 'alertes' ? '⚠ Alertes' : ARTICLE_CAT_LABEL[f]}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Table */}
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
         {loading ? (
@@ -117,9 +93,7 @@ export default function StockList() {
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-400 font-body">
-                    Aucun article trouvé
-                  </td>
+                  <td colSpan={8} className="px-4 py-10 text-center text-gray-400 font-body">Aucun article trouvé</td>
                 </tr>
               ) : (
                 filtered.map((a) => {
@@ -128,14 +102,12 @@ export default function StockList() {
                     <tr key={a.id} className={`transition-colors ${enAlerte ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}`}>
                       <td className="px-4 py-3 font-display font-medium text-forest-700">{a.code}</td>
                       <td className="px-4 py-3 font-body font-medium text-gray-800">{a.nom}</td>
-                      <td className="px-4 py-3 font-body text-gray-500 text-xs">{CAT_LABEL[a.categorie] ?? a.categorie}</td>
+                      <td className="px-4 py-3 font-body text-gray-500 text-xs">{ARTICLE_CAT_LABEL[a.categorie] ?? a.categorie}</td>
                       <td className="px-4 py-3">
                         <span className={`font-display font-bold ${enAlerte ? 'text-red-600' : 'text-gray-800'}`}>
                           {fmt(a.stock_actuel)}
                         </span>
-                        {enAlerte && (
-                          <span className="ml-1 text-red-500" title="Stock sous le seuil minimum">⚠</span>
-                        )}
+                        {enAlerte && <span className="ml-1 text-red-500" title="Stock sous le seuil minimum">⚠</span>}
                       </td>
                       <td className="px-4 py-3 font-body text-gray-500">{fmt(a.seuil_minimum)}</td>
                       <td className="px-4 py-3 font-body text-gray-500">{a.unite}</td>
@@ -152,10 +124,7 @@ export default function StockList() {
 
       {modal && (
         <Modal titre="Nouvel article" onClose={() => setModal(false)}>
-          <ArticleForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
-          />
+          <ArticleForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
       )}
     </div>

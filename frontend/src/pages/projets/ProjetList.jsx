@@ -1,40 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import ProjetForm from '../../components/forms/ProjetForm'
-
-const STATUT_BADGE = {
-  planifie: 'badge-gray',
-  en_cours: 'badge-blue',
-  suspendu: 'badge-yellow',
-  termine:  'badge-green',
-  annule:   'badge-red',
-}
-
-const TYPE_LABEL = {
-  btp:          'BTP',
-  agriculture:  'Agriculture',
-  pepiniere:    'Pépinière',
-  location:     'Location',
-  espaces_verts: 'Espaces verts',
-}
+import { useFetchList } from '../../hooks/useFetchList'
+import { PROJET_STATUT_BADGE, PROJET_TYPE_LABEL } from '../../utils/constants'
+import { fmt } from '../../utils/format'
 
 export default function ProjetList() {
-  const [projets, setProjets] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [modal, setModal]     = useState(false)
-
-  function charger() {
-    setLoading(true)
-    api.get('/projets/projets/')
-      .then(({ data }) => setProjets(data.results ?? data))
-      .catch(() => setError('Impossible de charger les projets.'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { charger() }, [])
+  const { items: projets, loading, error, charger } = useFetchList('/projets/projets/', 'Impossible de charger les projets.')
+  const [modal, setModal] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -79,14 +53,14 @@ export default function ProjetList() {
                         {p.nom}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-body text-gray-500">{TYPE_LABEL[p.type_projet] ?? p.type_projet}</td>
+                    <td className="px-4 py-3 font-body text-gray-500">{PROJET_TYPE_LABEL[p.type_projet] ?? p.type_projet}</td>
                     <td className="px-4 py-3">
-                      <span className={STATUT_BADGE[p.statut] ?? 'badge-gray'}>{p.statut}</span>
+                      <span className={PROJET_STATUT_BADGE[p.statut] ?? 'badge-gray'}>{p.statut}</span>
                     </td>
                     <td className="px-4 py-3 font-body text-gray-500">{p.client_nom ?? '—'}</td>
                     <td className="px-4 py-3 font-body text-gray-500">{p.date_debut ?? '—'}</td>
                     <td className="px-4 py-3 font-body text-gray-600">
-                      {p.budget_estime ? `${Number(p.budget_estime).toLocaleString('fr-FR')} F` : '—'}
+                      {p.budget_estime ? `${fmt(p.budget_estime)} F` : '—'}
                     </td>
                   </tr>
                 ))
@@ -98,10 +72,7 @@ export default function ProjetList() {
 
       {modal && (
         <Modal titre="Nouveau projet" onClose={() => setModal(false)}>
-          <ProjetForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
-          />
+          <ProjetForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
       )}
     </div>

@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import ChargeForm from '../../components/forms/ChargeForm'
+import { useFetchList } from '../../hooks/useFetchList'
+import { CHARGE_CAT_LABEL, CHARGE_CAT_BADGE } from '../../utils/constants'
+import { fmt } from '../../utils/format'
 
 function exportCharges(filtre) {
   const params = new URLSearchParams()
@@ -12,48 +15,15 @@ function exportCharges(filtre) {
       Object.assign(document.createElement('a'), { href, download: 'charges.xlsx' }).click()
       URL.revokeObjectURL(href)
     })
-}
-
-function fmt(n) { return Number(n).toLocaleString('fr-FR') }
-
-const CAT_LABEL = {
-  salaire:        'Salaires',
-  materiel:       'Matériel',
-  carburant:      'Carburant',
-  sous_traitance: 'Sous-traitance',
-  location:       'Location',
-  fourniture:     'Fournitures',
-  autre:          'Autre',
-}
-
-const CAT_BADGE = {
-  salaire:        'badge-blue',
-  materiel:       'badge-gray',
-  carburant:      'badge-yellow',
-  sous_traitance: 'badge-green',
-  location:       'badge-yellow',
-  fourniture:     'badge-gray',
-  autre:          'badge-gray',
+    .catch(() => alert('Échec du téléchargement.'))
 }
 
 export default function ChargeList() {
-  const [charges, setCharges] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [filtre, setFiltre]   = useState('toutes')
-  const [modal, setModal]     = useState(false)
+  const { items: charges, loading, error, charger } = useFetchList('/comptabilite/charges/', 'Impossible de charger les charges.')
+  const [filtre, setFiltre] = useState('toutes')
+  const [modal, setModal]   = useState(false)
 
-  function charger() {
-    setLoading(true)
-    api.get('/comptabilite/charges/')
-      .then(({ data }) => setCharges(data.results ?? data))
-      .catch(() => setError('Impossible de charger les charges.'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { charger() }, [])
-
-  const filtrees = charges.filter((c) => filtre === 'toutes' ? true : c.categorie === filtre)
+  const filtrees    = charges.filter((c) => filtre === 'toutes' ? true : c.categorie === filtre)
   const totalFiltre = filtrees.reduce((s, c) => s + Number(c.montant), 0)
   const totalGlobal = charges.reduce((s, c) => s + Number(c.montant), 0)
 
@@ -72,7 +42,6 @@ export default function ChargeList() {
         </div>
       </div>
 
-      {/* Filtres par catégorie */}
       <div className="flex gap-1 flex-wrap">
         <button
           onClick={() => setFiltre('toutes')}
@@ -82,7 +51,7 @@ export default function ChargeList() {
         >
           Toutes
         </button>
-        {Object.entries(CAT_LABEL).map(([key, label]) => (
+        {Object.entries(CHARGE_CAT_LABEL).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setFiltre(key)}
@@ -97,7 +66,7 @@ export default function ChargeList() {
 
       {filtre !== 'toutes' && (
         <div className="card p-4 bg-amber-50 border-amber-100 flex items-center justify-between">
-          <span className="font-display text-sm text-amber-700">Total {CAT_LABEL[filtre]}</span>
+          <span className="font-display text-sm text-amber-700">Total {CHARGE_CAT_LABEL[filtre]}</span>
           <span className="font-display font-bold text-amber-800 text-lg">{fmt(totalFiltre)} F</span>
         </div>
       )}
@@ -123,7 +92,7 @@ export default function ChargeList() {
                   <td className="px-4 py-3 font-body text-gray-700">{c.date}</td>
                   <td className="px-4 py-3 font-body font-medium text-gray-800">{c.libelle}</td>
                   <td className="px-4 py-3">
-                    <span className={CAT_BADGE[c.categorie] ?? 'badge-gray'}>{CAT_LABEL[c.categorie] ?? c.categorie}</span>
+                    <span className={CHARGE_CAT_BADGE[c.categorie] ?? 'badge-gray'}>{CHARGE_CAT_LABEL[c.categorie] ?? c.categorie}</span>
                   </td>
                   <td className="px-4 py-3 font-display font-semibold text-gray-800">{fmt(c.montant)} F</td>
                   <td className="px-4 py-3 font-body text-gray-500 text-xs">{c.projet_nom || '—'}</td>
@@ -135,7 +104,7 @@ export default function ChargeList() {
             <tfoot className="bg-gray-50 border-t-2 border-gray-100">
               <tr>
                 <td colSpan={3} className="px-4 py-3 font-display font-semibold text-gray-600 text-sm">
-                  Total {filtre !== 'toutes' ? CAT_LABEL[filtre] : 'charges'}
+                  Total {filtre !== 'toutes' ? CHARGE_CAT_LABEL[filtre] : 'charges'}
                 </td>
                 <td className="px-4 py-3 font-display font-bold text-gray-800">{fmt(totalFiltre)} F</td>
                 <td colSpan={3} />

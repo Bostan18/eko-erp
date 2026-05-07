@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
-
-function fmt(n) { return Number(n).toLocaleString('fr-FR') }
-
-const MOIS_FR = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+import { fmt, MOIS_FR } from '../utils/format'
 
 export default function Dashboard() {
   const [kpis, setKpis]       = useState(null)
@@ -21,7 +17,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="font-display font-bold text-gray-900 text-2xl">Tableau de bord</h1>
         <p className="font-body text-gray-500 text-sm mt-1">
@@ -29,7 +24,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* KPIs principaux */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           label="Employés actifs"
@@ -65,7 +59,6 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Finance du mois */}
       <div>
         <h2 className="font-display font-semibold text-gray-800 text-base mb-4">Finance — {moisLabel}</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -86,7 +79,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* RH du mois */}
       <div>
         <h2 className="font-display font-semibold text-gray-800 text-base mb-4">RH — {moisLabel}</h2>
         <div className="grid grid-cols-2 gap-4 max-w-sm">
@@ -95,7 +87,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Accès rapide */}
       <div>
         <h2 className="font-display font-semibold text-gray-800 text-base mb-4">Accès rapide</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

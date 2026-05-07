@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
-
-function today() { return new Date().toISOString().slice(0, 10) }
+import { apiErrorMessage } from '../../utils/errors'
+import { today } from '../../utils/format'
 
 const INIT = {
   libelle: '', categorie: 'materiel', montant: '',
   date: today(), projet: '', fournisseur: '', reference: '', notes: '',
+}
+
+function validate(form) {
+  if (!form.libelle.trim()) return 'Le libellé est requis.'
+  if (form.libelle.trim().length < 2) return 'Le libellé doit contenir au moins 2 caractères.'
+  if (!form.montant || Number(form.montant) <= 0) return 'Le montant doit être supérieur à 0.'
+  if (!form.date) return 'La date est requise.'
+  return null
 }
 
 export default function ChargeForm({ onSuccess, onClose }) {
@@ -22,17 +30,15 @@ export default function ChargeForm({ onSuccess, onClose }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    const validErr = validate(form)
+    if (validErr) { setError(validErr); return }
     setSaving(true)
     setError('')
     try {
-      await api.post('/comptabilite/charges/', {
-        ...form,
-        projet: form.projet || null,
-      })
+      await api.post('/comptabilite/charges/', { ...form, projet: form.projet || null })
       onSuccess()
     } catch (err) {
-      const data = err.response?.data
-      setError(data ? JSON.stringify(data) : 'Erreur lors de la création.')
+      setError(apiErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -47,7 +53,7 @@ export default function ChargeForm({ onSuccess, onClose }) {
       <div>
         <label className="block font-display text-xs font-medium text-gray-600 mb-1">Libellé *</label>
         <input className="input" placeholder="Achat ciment — 50 sacs" value={form.libelle}
-          onChange={(e) => set('libelle', e.target.value)} required />
+          onChange={(e) => set('libelle', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -65,8 +71,8 @@ export default function ChargeForm({ onSuccess, onClose }) {
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Montant (F) *</label>
-          <input type="number" className="input" placeholder="0" value={form.montant}
-            onChange={(e) => set('montant', e.target.value)} required />
+          <input type="number" min="0" step="1" className="input" placeholder="0" value={form.montant}
+            onChange={(e) => set('montant', e.target.value)} />
         </div>
       </div>
 
@@ -74,7 +80,7 @@ export default function ChargeForm({ onSuccess, onClose }) {
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date *</label>
           <input type="date" className="input" value={form.date}
-            onChange={(e) => set('date', e.target.value)} required />
+            onChange={(e) => set('date', e.target.value)} />
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Projet lié</label>

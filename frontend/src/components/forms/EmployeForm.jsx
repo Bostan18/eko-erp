@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import api from '../../services/api'
+import { apiErrorMessage } from '../../utils/errors'
 
 const INIT = {
   code: '', nom: '', prenom: '', type_contrat: 'journalier',
@@ -7,17 +8,32 @@ const INIT = {
   date_entree: '', salaire_mensuel: '', taux_journalier: '',
 }
 
+function validate(form) {
+  if (!form.code.trim()) return 'Le code est requis (ex : EMP-001).'
+  if (!/^[A-Z]+-\d+$/.test(form.code.trim())) return 'Format de code invalide (ex : EMP-001).'
+  if (!form.nom.trim()) return 'Le nom est requis.'
+  if (!form.prenom.trim()) return 'Le prénom est requis.'
+  const isJournalier = ['journalier', 'moo'].includes(form.type_contrat)
+  if (isJournalier && form.taux_journalier && Number(form.taux_journalier) <= 0) {
+    return 'Le taux journalier doit être supérieur à 0.'
+  }
+  if (form.type_contrat === 'cdi' && form.salaire_mensuel && Number(form.salaire_mensuel) <= 0) {
+    return 'Le salaire mensuel doit être supérieur à 0.'
+  }
+  return null
+}
+
 export default function EmployeForm({ onSuccess, onClose }) {
   const [form, setForm]   = useState(INIT)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }))
-  }
+  function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    const validErr = validate(form)
+    if (validErr) { setError(validErr); return }
     setSaving(true)
     setError('')
     try {
@@ -29,8 +45,7 @@ export default function EmployeForm({ onSuccess, onClose }) {
       })
       onSuccess()
     } catch (err) {
-      const data = err.response?.data
-      setError(data ? JSON.stringify(data) : 'Erreur lors de la création.')
+      setError(apiErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -41,20 +56,18 @@ export default function EmployeForm({ onSuccess, onClose }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">
-          {error}
-        </div>
+        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
       )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Code *</label>
           <input className="input" placeholder="EMP-001" value={form.code}
-            onChange={(e) => set('code', e.target.value)} required />
+            onChange={(e) => set('code', e.target.value.toUpperCase())} />
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Type contrat *</label>
-          <select className="input" value={form.type_contrat} onChange={(e) => set('type_contrat', e.target.value)} required>
+          <select className="input" value={form.type_contrat} onChange={(e) => set('type_contrat', e.target.value)}>
             <option value="cdi">CDI Permanent</option>
             <option value="journalier">Journalier</option>
             <option value="moo">MOO</option>
@@ -67,12 +80,12 @@ export default function EmployeForm({ onSuccess, onClose }) {
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom *</label>
           <input className="input" placeholder="KONÉ" value={form.nom}
-            onChange={(e) => set('nom', e.target.value)} required />
+            onChange={(e) => set('nom', e.target.value)} />
         </div>
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Prénom *</label>
           <input className="input" placeholder="Moussa" value={form.prenom}
-            onChange={(e) => set('prenom', e.target.value)} required />
+            onChange={(e) => set('prenom', e.target.value)} />
         </div>
       </div>
 
@@ -108,23 +121,21 @@ export default function EmployeForm({ onSuccess, onClose }) {
       {isJournalier ? (
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Taux journalier (F)</label>
-          <input type="number" className="input" placeholder="5000" value={form.taux_journalier}
+          <input type="number" min="0" step="100" className="input" placeholder="5000" value={form.taux_journalier}
             onChange={(e) => set('taux_journalier', e.target.value)} />
         </div>
       ) : (
         <div>
           <label className="block font-display text-xs font-medium text-gray-600 mb-1">Salaire mensuel (F)</label>
-          <input type="number" className="input" placeholder="150000" value={form.salaire_mensuel}
+          <input type="number" min="0" step="1000" className="input" placeholder="150000" value={form.salaire_mensuel}
             onChange={(e) => set('salaire_mensuel', e.target.value)} />
         </div>
       )}
 
       <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>
-          Annuler
-        </button>
+        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary flex-1" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer l\'employé'}
+          {saving ? 'Enregistrement…' : "Créer l'employé"}
         </button>
       </div>
     </form>

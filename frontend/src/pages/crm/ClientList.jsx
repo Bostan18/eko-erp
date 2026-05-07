@@ -1,36 +1,13 @@
-import { useEffect, useState } from 'react'
-import api from '../../services/api'
+import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import ClientForm from '../../components/forms/ClientForm'
-
-const TYPE_BADGE = {
-  client:     'badge-green',
-  prospect:   'badge-blue',
-  partenaire: 'badge-yellow',
-}
-
-const STATUT_BADGE = {
-  actif:       'badge-green',
-  inactif:     'badge-gray',
-  negociation: 'badge-yellow',
-}
+import { useFetchList } from '../../hooks/useFetchList'
+import { CLIENT_TYPE_BADGE, CLIENT_STATUT_BADGE } from '../../utils/constants'
 
 export default function ClientList() {
-  const [clients, setClients] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [search, setSearch]   = useState('')
-  const [modal, setModal]     = useState(false)
-
-  function charger() {
-    setLoading(true)
-    api.get('/crm/clients/')
-      .then(({ data }) => setClients(data.results ?? data))
-      .catch(() => setError('Impossible de charger les clients.'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { charger() }, [])
+  const { items: clients, loading, error, charger } = useFetchList('/crm/clients/', 'Impossible de charger les clients.')
+  const [search, setSearch] = useState('')
+  const [modal, setModal]   = useState(false)
 
   const filtered = clients.filter(
     (c) =>
@@ -86,11 +63,11 @@ export default function ClientList() {
                     <td className="px-4 py-3 font-display font-medium text-forest-700">{c.code}</td>
                     <td className="px-4 py-3 font-body font-medium text-gray-800">{c.nom}</td>
                     <td className="px-4 py-3">
-                      <span className={TYPE_BADGE[c.type_client] ?? 'badge-gray'}>{c.type_client}</span>
+                      <span className={CLIENT_TYPE_BADGE[c.type_client] ?? 'badge-gray'}>{c.type_client}</span>
                     </td>
                     <td className="px-4 py-3 font-body text-gray-500 capitalize">{c.secteur || '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={STATUT_BADGE[c.statut] ?? 'badge-gray'}>{c.statut}</span>
+                      <span className={CLIENT_STATUT_BADGE[c.statut] ?? 'badge-gray'}>{c.statut}</span>
                     </td>
                     <td className="px-4 py-3 font-body text-gray-500">{c.telephone || '—'}</td>
                     <td className="px-4 py-3 font-body text-gray-500">{c.localite || '—'}</td>
@@ -104,10 +81,7 @@ export default function ClientList() {
 
       {modal && (
         <Modal titre="Nouveau client" onClose={() => setModal(false)}>
-          <ClientForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
-          />
+          <ClientForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
       )}
     </div>

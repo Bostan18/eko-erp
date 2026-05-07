@@ -13,9 +13,23 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  async (error) => {
+    const original = error.config
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true
+      const refresh = localStorage.getItem('refresh_token')
+      if (refresh) {
+        try {
+          const { data } = await axios.post('/api/token/refresh/', { refresh })
+          localStorage.setItem('access_token', data.access)
+          original.headers.Authorization = `Bearer ${data.access}`
+          return api(original)
+        } catch {
+          // refresh also failed — fall through to logout
+        }
+      }
       localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
       window.location.href = '/login'
     }

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import api from '../../services/api'
-
-function fmt(n) { return Number(n).toLocaleString('fr-FR') }
+import { fmt } from '../../utils/format'
+import Modal from '../../components/ui/Modal'
+import TacheForm from '../../components/forms/TacheForm'
 
 const STATUT_BADGE = {
   planifie: 'badge-gray', en_cours: 'badge-blue', suspendu: 'badge-yellow',
@@ -14,23 +15,38 @@ const TYPE_LABEL = {
   location: 'Location', espaces_verts: 'Espaces verts',
 }
 
+const TACHE_STATUT_BADGE = {
+  a_faire: 'badge-gray', en_cours: 'badge-blue', terminee: 'badge-green', annulee: 'badge-red',
+}
+const TACHE_STATUT_LABEL = {
+  a_faire: 'À faire', en_cours: 'En cours', terminee: 'Terminée', annulee: 'Annulée',
+}
+
 export default function ProjetDetail() {
   const { id } = useParams()
-  const [projet, setProjet]           = useState(null)
-  const [intervenants, setIntervenants] = useState([])
-  const [mouvements, setMouvements]   = useState([])
-  const [loading, setLoading]         = useState(true)
+  const [projet, setProjet]               = useState(null)
+  const [intervenants, setIntervenants]   = useState([])
+  const [mouvements, setMouvements]       = useState([])
+  const [taches, setTaches]               = useState([])
+  const [loading, setLoading]             = useState(true)
+  const [modalTache, setModalTache]       = useState(false)
+
+  const chargerTaches = useCallback(() => {
+    api.get(`/projets/taches/?projet=${id}`).then(({ data }) => setTaches(data.results ?? data))
+  }, [id])
 
   useEffect(() => {
     Promise.all([
       api.get(`/projets/projets/${id}/`),
       api.get(`/projets/intervenants/?projet=${id}`),
       api.get(`/stocks/mouvements/?projet=${id}`),
+      api.get(`/projets/taches/?projet=${id}`),
     ])
-      .then(([{ data: p }, { data: i }, { data: m }]) => {
+      .then(([{ data: p }, { data: i }, { data: m }, { data: t }]) => {
         setProjet(p)
         setIntervenants(i.results ?? i)
         setMouvements(m.results ?? m)
+        setTaches(t.results ?? t)
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -84,6 +100,68 @@ export default function ProjetDetail() {
           <p className="font-display font-bold text-amber-700 text-3xl">{fmt(projet.budget_estime)}</p>
           <p className="font-body text-amber-600 text-sm mt-1">F CFA</p>
         </div>
+      </div>
+
+      {/* Tâches */}
+      <div className="card overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <p className="font-display font-semibold text-gray-800 text-sm">
+            Tâches ({taches.length})
+          </p>
+          <button onClick={() => setModalTache(true)} className="btn-primary text-xs px-3 py-1.5">
+            + Nouvelle tâche
+          </button>
+        </div>
+        {taches.length === 0 ? (
+          <p className="px-4 py-6 text-center text-gray-400 font-body text-sm">Aucune tâche créée</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                {['Tâche', 'Objectif', 'Tarif/unité', 'Réalisé', 'Progression', 'Statut', ''].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {taches.map((t) => (
+                <tr key={t.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="font-body font-medium text-gray-800">{t.nom}</div>
+                    {t.unite_label && <div className="text-xs text-gray-400">{t.unite_label}</div>}
+                  </td>
+                  <td className="px-4 py-3 font-body text-gray-600">{fmt(t.objectif_cible)}</td>
+                  <td className="px-4 py-3 font-body text-gray-600">{fmt(t.tarif_unitaire)} F</td>
+                  <td className="px-4 py-3 font-display font-semibold text-gray-700">{fmt(t.total_realise)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-1.5 min-w-[60px]">
+                        <div
+                          className="h-1.5 rounded-full bg-forest-500 transition-all"
+                          style={{ width: `${Math.min(100, t.progression_pct)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-600 shrink-0">{t.progression_pct}%</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={TACHE_STATUT_BADGE[t.statut] ?? 'badge-gray'}>
+                      {TACHE_STATUT_LABEL[t.statut] ?? t.statut}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      to={`/projets/${id}/taches/${t.id}`}
+                      className="text-xs font-display font-medium text-forest-700 hover:text-forest-800"
+                    >
+                      Pointage →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Intervenants */}
@@ -154,6 +232,16 @@ export default function ProjetDetail() {
           </table>
         )}
       </div>
+
+      {modalTache && (
+        <Modal titre="Nouvelle tâche" onClose={() => setModalTache(false)}>
+          <TacheForm
+            projetId={id}
+            onSuccess={() => { setModalTache(false); chargerTaches() }}
+            onClose={() => setModalTache(false)}
+          />
+        </Modal>
+      )}
     </div>
   )
 }

@@ -32,7 +32,6 @@ local_settings.py
 .env.*
 !.env.example
 backend/config/settings/local.py
-backend/config/settings/production.py
 
 # ─── Node / React / Vite ───────────────────────────────────────────
 frontend/node_modules/

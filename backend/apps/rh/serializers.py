@@ -7,7 +7,13 @@ class EmployeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employe
-        fields = "__all__"
+        fields = [
+            "id", "code", "nom", "prenom", "nom_complet", "type_contrat",
+            "poste", "telephone", "statut", "date_entree",
+            "salaire_mensuel", "taux_journalier",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
 
 class PresenceJournaliereSerializer(serializers.ModelSerializer):
@@ -15,4 +21,9 @@ class PresenceJournaliereSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PresenceJournaliere
-        fields = "__all__"
+        fields = [
+            "id", "employe", "employe_nom", "date", "present",
+            "heures_travaillees", "montant_du", "projet_ref", "notes",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "montant_du", "created_at", "updated_at"]

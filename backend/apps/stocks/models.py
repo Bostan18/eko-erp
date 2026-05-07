@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import models, transaction
+from django.db.models import F
 from apps.core.models import SoftDeleteModel, TimeStampedModel
 
 
@@ -67,9 +68,11 @@ class MouvementStock(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            if self.type_mouvement == "entree":
-                self.article.stock_actuel += self.quantite
-            else:
-                self.article.stock_actuel -= self.quantite
-            self.article.save()
-        super().save(*args, **kwargs)
+            delta = self.quantite if self.type_mouvement == "entree" else -self.quantite
+            with transaction.atomic():
+                Article.objects.filter(pk=self.article_id).update(
+                    stock_actuel=F("stock_actuel") + delta
+                )
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)

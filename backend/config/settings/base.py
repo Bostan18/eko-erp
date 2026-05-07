@@ -9,8 +9,8 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "changeme-in-production")
-DEBUG = os.getenv("DEBUG", "True") == "True"
+SECRET_KEY = os.environ["SECRET_KEY"]  # Erreur explicite si absent — ne jamais mettre de fallback
+DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 DJANGO_APPS = [
@@ -70,7 +70,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME", "eko_erp"),
         "USER": os.getenv("DB_USER", "eko_user"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "eko_password"),
+        "PASSWORD": os.getenv("DB_PASSWORD", ""),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
@@ -112,6 +112,14 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/min",
+        "user": "300/min",
+    },
 }
 
 CORS_ALLOWED_ORIGINS = os.getenv(

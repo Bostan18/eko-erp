@@ -1,13 +1,39 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+
+def api_root(request):
+    base = request.build_absolute_uri("/")[:-1]
+    return JsonResponse({
+        "name": "EKO ERP API",
+        "version": "1.0",
+        "admin": f"{base}/admin/",
+        "auth": {
+            "obtenir_token": f"{base}/api/token/",
+            "rafraichir_token": f"{base}/api/token/refresh/",
+        },
+        "modules": {
+            "core": f"{base}/api/core/",
+            "crm": f"{base}/api/crm/",
+            "projets": f"{base}/api/projets/",
+            "comptabilite": f"{base}/api/comptabilite/",
+            "stocks": f"{base}/api/stocks/",
+            "rh": f"{base}/api/rh/",
+            "reporting": f"{base}/api/reporting/",
+        },
+    }, json_dumps_params={"indent": 2, "ensure_ascii": False})
+
+
 urlpatterns = [
+    path("", api_root, name="api_root"),
     path("admin/", admin.site.urls),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/core/", include("apps.core.urls")),
     path("api/crm/", include("apps.crm.urls")),
     path("api/projets/", include("apps.projets.urls")),
     path("api/comptabilite/", include("apps.comptabilite.urls")),

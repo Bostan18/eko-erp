@@ -15,27 +15,25 @@ def client_crm(db):
 def facture(db, client_crm):
     f = Facture.objects.create(
         client=client_crm,
-        date_emission=timezone.now().date(),
         date_echeance=timezone.now().date() + timedelta(days=30),
-        taux_tva=Decimal("18"),
     )
     LigneFacture.objects.create(
         facture=f, designation="Prestation BTP",
         quantite=Decimal("2"), prix_unitaire=Decimal("50000"),
+        taux_tva="TVA",
     )
-    f.recalculer_totaux()
     return f
 
 
 class TestFacture:
-    def test_montant_ht(self, facture):
-        assert facture.montant_ht == Decimal("100000")
+    def test_total_ht(self, facture):
+        assert facture.total_ht == Decimal("100000")
 
-    def test_montant_tva_18(self, facture):
-        assert facture.montant_tva == Decimal("18000")
+    def test_total_tva_18(self, facture):
+        assert facture.total_tva == Decimal("18000")
 
-    def test_montant_ttc(self, facture):
-        assert facture.montant_ttc == Decimal("118000")
+    def test_total_ttc(self, facture):
+        assert facture.total_ttc == Decimal("118000")
 
     def test_solde_restant_initial(self, facture):
         assert facture.solde_restant == Decimal("118000")
@@ -45,15 +43,15 @@ class TestFacture:
 
 
 class TestPaiement:
-    def test_paiement_partiel_met_a_jour_statut(self, facture):
+    def test_paiement_partiel_met_a_jour_montant(self, facture):
         Paiement.objects.create(
             facture=facture, montant=Decimal("50000"),
             mode="virement", date=timezone.now().date(),
         )
         facture.refresh_from_db()
-        assert facture.statut == "partiellement_payee"
         assert facture.montant_paye == Decimal("50000")
         assert facture.solde_restant == Decimal("68000")
+        assert facture.statut == "brouillon"
 
     def test_paiement_total_marque_payee(self, facture):
         Paiement.objects.create(

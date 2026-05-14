@@ -60,12 +60,11 @@ def kpis(request):
 
     # ── Comptabilité du mois ──────────────────────────────────────────
     factures_mois = Facture.objects.filter(
-        date_emission__month=mois,
-        date_emission__year=annee,
-        is_deleted=False,
-    ).exclude(statut="annulee")
+        created_at__month=mois,
+        created_at__year=annee,
+    ).exclude(statut="annulee").prefetch_related("lignes")
 
-    ca_facture  = float(factures_mois.aggregate(t=Sum("montant_ttc"))["t"] or 0)
+    ca_facture  = float(sum(f.total_ttc for f in factures_mois))
     ca_encaisse = float(factures_mois.aggregate(t=Sum("montant_paye"))["t"] or 0)
 
     charges_mois = float(
@@ -75,7 +74,8 @@ def kpis(request):
     )
 
     factures_en_retard = Facture.objects.filter(
-        statut="en_retard", is_deleted=False
+        date_echeance__lt=today,
+        statut__in=["brouillon", "certifiee"],
     ).count()
 
     return Response({

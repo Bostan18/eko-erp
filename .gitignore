@@ -70,3 +70,8 @@ coverage.xml
 exports/
 *.pdf
 *.xlsx
+
+# ─── Claude Code & docs projet ─────────────────────────────────────
+.claude/
+CLAUDE.md
+ROADMAP.md

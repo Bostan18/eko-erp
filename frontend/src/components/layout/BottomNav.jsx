@@ -1,0 +1,34 @@
+import { useNavigate } from 'react-router-dom'
+import { Icon } from '../icons'
+import { BOTTOM_NAV_IDS, MODULE_BY_ID } from './modules'
+
+export default function BottomNav({ activeModId }) {
+  const navigate = useNavigate()
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#212121] border-t border-black/40 px-2 pb-1 pt-1.5 z-30 md:hidden">
+      <div className="flex items-stretch justify-between">
+        {BOTTOM_NAV_IDS.map((id) => {
+          const m = MODULE_BY_ID[id]
+          if (!m) return null
+          const I = Icon[m.icon]
+          const isActive = activeModId === id
+          return (
+            <button
+              key={id}
+              onClick={() => navigate(m.path)}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-colors ${
+                isActive ? 'text-forest-300' : 'text-gray-500'
+              }`}
+            >
+              <div className={`relative px-3.5 py-1 rounded-full ${isActive ? 'bg-forest-500/15' : ''}`}>
+                <I className="w-[19px] h-[19px]" />
+              </div>
+              <span className="text-[10px] font-display font-medium">{m.short}</span>
+            </button>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}

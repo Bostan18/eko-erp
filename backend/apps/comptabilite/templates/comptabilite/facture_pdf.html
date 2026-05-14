@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 18mm 20mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 9pt; color: #222; }
+
+  /* En-tête */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1A5C38; padding-bottom: 10px; margin-bottom: 14px; }
+  .header-left .company-name { font-size: 16pt; font-weight: bold; color: #1A5C38; }
+  .header-left .company-sub  { font-size: 8pt; color: #666; margin-top: 2px; }
+  .header-left .company-meta { font-size: 7.5pt; color: #888; margin-top: 4px; }
+  .header-right img.logo { max-height: 60px; max-width: 120px; }
+
+  /* Bloc facture + client */
+  .meta-block { display: flex; justify-content: space-between; margin-bottom: 14px; gap: 20px; }
+  .meta-card { flex: 1; background: #F5FAF7; border-radius: 4px; padding: 10px 12px; }
+  .meta-card .label { font-size: 7pt; font-weight: bold; color: #1A5C38; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .meta-card .doc-type { font-size: 13pt; font-weight: bold; color: #1A5C38; }
+  .meta-card .fne-ref  { font-size: 10pt; font-weight: bold; color: #1A5C38; }
+  .meta-card .field    { font-size: 8.5pt; margin-top: 2px; color: #444; }
+  .meta-card .field strong { color: #222; }
+  .badge-certif { display: inline-block; background: #1A5C38; color: white; font-size: 7pt; padding: 2px 6px; border-radius: 3px; margin-top: 4px; }
+  .badge-attente { display: inline-block; background: #F59E0B; color: white; font-size: 7pt; padding: 2px 6px; border-radius: 3px; margin-top: 4px; }
+
+  /* Tableau lignes */
+  table.lignes { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  table.lignes thead th { background: #1A5C38; color: white; padding: 6px 8px; font-size: 7.5pt; font-weight: bold; text-align: left; }
+  table.lignes thead th.r { text-align: right; }
+  table.lignes tbody tr:nth-child(odd)  { background: #F5FAF7; }
+  table.lignes tbody tr:nth-child(even) { background: white; }
+  table.lignes tbody td { padding: 5px 8px; font-size: 8.5pt; border-bottom: 0.5px solid #E5E7EB; }
+  table.lignes tbody td.r { text-align: right; }
+
+  /* Totaux + QR */
+  .bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px; }
+  table.totaux { border-collapse: collapse; min-width: 200px; }
+  table.totaux td { padding: 3px 8px; font-size: 8.5pt; }
+  table.totaux td.lbl { text-align: right; color: #555; }
+  table.totaux td.val { text-align: right; font-weight: bold; }
+  table.totaux tr.ttc td { font-size: 10pt; color: #1A5C38; border-top: 1.5px solid #1A5C38; padding-top: 5px; }
+  table.totaux tr.solde td { color: #B45309; }
+
+  .qr-block { text-align: center; }
+  .qr-block img { width: 80px; height: 80px; }
+  .qr-block .qr-label { font-size: 6.5pt; color: #888; margin-top: 3px; }
+  .qr-pending { width: 80px; height: 80px; border: 1px dashed #ccc; border-radius: 4px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 6pt; color: #aaa; text-align: center; padding: 6px; }
+
+  /* Pied */
+  .footer { margin-top: 16px; padding-top: 8px; border-top: 0.5px solid #ddd; font-size: 7pt; color: #888; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- En-tête entreprise -->
+<div class="header">
+  <div class="header-left">
+    <div class="company-name">{{ config.raison_sociale }}</div>
+    <div class="company-sub">Agriculture · BTP · Location · Espaces verts</div>
+    <div class="company-meta">
+      {% if config.adresse %}{{ config.adresse }} · {% endif %}
+      {% if config.telephone %}Tél : {{ config.telephone }}{% endif %}
+      {% if config.ncc %} · NCC : {{ config.ncc }}{% endif %}
+      {% if config.rccm %} · RCCM : {{ config.rccm }}{% endif %}
+    </div>
+  </div>
+  <div class="header-right">
+    {% if config.logo %}
+      <img class="logo" src="{{ logo_url }}" alt="Logo">
+    {% endif %}
+  </div>
+</div>
+
+<!-- Bloc facture / client -->
+<div class="meta-block">
+  <div class="meta-card">
+    <div class="label">Document</div>
+    <div class="doc-type">
+      {% if facture.type_facture == "avoir" %}AVOIR
+      {% elif facture.type_facture == "proforma" %}PROFORMA
+      {% else %}FACTURE{% endif %}
+    </div>
+    {% if facture.fne_reference %}
+      <div class="fne-ref">Réf. FNE : {{ facture.fne_reference }}</div>
+      <span class="badge-certif">✓ Certifiée FNE</span>
+    {% else %}
+      <span class="badge-attente">⚠ En attente de certification FNE</span>
+    {% endif %}
+    <div class="field">N° local : <strong>{{ facture.numero_local }}</strong></div>
+    <div class="field">Date : <strong>{{ facture.created_at|date:"d/m/Y H:i" }}</strong></div>
+    {% if facture.fne_certifiee_at %}
+      <div class="field">Certifiée le : {{ facture.fne_certifiee_at|date:"d/m/Y H:i" }}</div>
+    {% endif %}
+    <div class="field">Échéance : <strong>{{ facture.date_echeance|default:"—" }}</strong></div>
+    <div class="field">Règlement : {{ facture.get_mode_reglement_display }}</div>
+  </div>
+
+  <div class="meta-card">
+    <div class="label">Client</div>
+    <div class="field" style="font-size:10pt; font-weight:bold;">{{ facture.client.nom }}</div>
+    {% if facture.client.ncc %}<div class="field">NCC : {{ facture.client.ncc }}</div>{% endif %}
+    {% if facture.client.localite %}<div class="field">{{ facture.client.localite }}</div>{% endif %}
+    {% if facture.client.telephone %}<div class="field">Tél : {{ facture.client.telephone }}</div>{% endif %}
+    {% if facture.client.email %}<div class="field">{{ facture.client.email }}</div>{% endif %}
+    {% if facture.projet %}<div class="field" style="margin-top:6px;">Projet : <strong>{{ facture.projet.nom }}</strong></div>{% endif %}
+  </div>
+</div>
+
+<!-- Tableau des lignes -->
+<table class="lignes">
+  <thead>
+    <tr>
+      <th>Désignation</th>
+      <th class="r" style="width:6%">Qté</th>
+      <th class="r" style="width:14%">Prix unit. HT</th>
+      <th class="r" style="width:8%">Remise</th>
+      <th class="r" style="width:8%">TVA</th>
+      <th class="r" style="width:13%">Total HT</th>
+      <th class="r" style="width:13%">Total TTC</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ligne in facture.lignes.all %}
+    <tr>
+      <td>{{ ligne.designation }}</td>
+      <td class="r">{{ ligne.quantite }}</td>
+      <td class="r">{{ ligne.prix_unitaire|floatformat:0 }} F</td>
+      <td class="r">{% if ligne.remise_pct %}{{ ligne.remise_pct }}%{% else %}—{% endif %}</td>
+      <td class="r">{{ ligne.taux_tva }}</td>
+      <td class="r">{{ ligne.total_ht|floatformat:0 }} F</td>
+      <td class="r">{{ ligne.montant_ttc|floatformat:0 }} F</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center; color:#aaa; padding:10px;">Aucune ligne</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Totaux + QR -->
+<div class="bottom">
+  <!-- QR Code -->
+  <div class="qr-block">
+    {% if qr_base64 %}
+      <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code FNE">
+      <div class="qr-label">Vérifier sur DGI CI</div>
+    {% else %}
+      <div class="qr-pending">En attente de<br>certification FNE</div>
+    {% endif %}
+  </div>
+
+  <!-- Totaux -->
+  <table class="totaux">
+    <tr>
+      <td class="lbl">Total HT</td>
+      <td class="val">{{ total_ht|floatformat:0 }} F</td>
+    </tr>
+    <tr>
+      <td class="lbl">Total TVA</td>
+      <td class="val">{{ total_tva|floatformat:0 }} F</td>
+    </tr>
+    <tr class="ttc">
+      <td class="lbl">TOTAL TTC</td>
+      <td class="val">{{ total_ttc|floatformat:0 }} F</td>
+    </tr>
+    {% if facture.montant_paye %}
+    <tr>
+      <td class="lbl">Payé</td>
+      <td class="val">{{ facture.montant_paye|floatformat:0 }} F</td>
+    </tr>
+    <tr class="solde">
+      <td class="lbl">Solde</td>
+      <td class="val">{{ solde_restant|floatformat:0 }} F</td>
+    </tr>
+    {% endif %}
+  </table>
+</div>
+
+<!-- Pied de page légal -->
+<div class="footer">
+  Document émis conformément à l'Arrêté n°003/MPMBPE/DGI du 13 janvier 2022 relatif à la Facture Normalisée Électronique (FNE).
+  Réf. FNE : {{ facture.fne_reference|default:"—" }} · N° série : {{ facture.numero_local }}
+  {% if config.mentions_legales %}<br>{{ config.mentions_legales }}{% endif %}
+</div>
+
+</body>
+</html>

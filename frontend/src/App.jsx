@@ -47,8 +47,8 @@ function PlaceholderPage({ titre }) {
   return (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
-        <p className="font-display text-2xl text-gray-300 font-semibold">{titre}</p>
-        <p className="text-sm text-gray-400 mt-1">Module en cours de développement</p>
+        <p className="font-display text-2xl text-[#A59F9B] font-semibold">{titre}</p>
+        <p className="text-sm text-[#A59F9B] mt-1">Module en cours de développement</p>
       </div>
     </div>
   )

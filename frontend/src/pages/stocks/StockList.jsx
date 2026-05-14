@@ -25,12 +25,9 @@ export default function StockList() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gray-900 text-2xl">Stocks</h1>
-          <p className="font-body text-gray-500 text-sm mt-1">
-            {loading ? '…' : `${articles.length} article${articles.length !== 1 ? 's' : ''}`}
-          </p>
-        </div>
+        <p className="font-body text-[#A59F9B] text-sm">
+          {loading ? '…' : `${articles.length} article${articles.length !== 1 ? 's' : ''}`}
+        </p>
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvel article</button>
       </div>
 
@@ -66,7 +63,7 @@ export default function StockList() {
               className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
                 filtre === f
                   ? f === 'alertes' ? 'bg-red-500 text-white' : 'bg-forest-700 text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-forest-300'
+                  : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
               }`}
             >
               {f === 'tous' ? 'Tous' : f === 'alertes' ? '⚠ Alertes' : ARTICLE_CAT_LABEL[f]}
@@ -78,41 +75,41 @@ export default function StockList() {
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-gray-400 font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
               <tr>
                 {['Code', 'Nom', 'Catégorie', 'Stock', 'Seuil', 'Unité', 'Prix unit.', 'Fournisseur'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#f4ebe0]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-400 font-body">Aucun article trouvé</td>
+                  <td colSpan={8} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucun article trouvé</td>
                 </tr>
               ) : (
                 filtered.map((a) => {
                   const enAlerte = Number(a.stock_actuel) <= Number(a.seuil_minimum)
                   return (
-                    <tr key={a.id} className={`transition-colors ${enAlerte ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}`}>
+                    <tr key={a.id} className={`transition-colors ${enAlerte ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#fbf7f0]'}`}>
                       <td className="px-4 py-3 font-display font-medium text-forest-700">{a.code}</td>
-                      <td className="px-4 py-3 font-body font-medium text-gray-800">{a.nom}</td>
-                      <td className="px-4 py-3 font-body text-gray-500 text-xs">{ARTICLE_CAT_LABEL[a.categorie] ?? a.categorie}</td>
+                      <td className="px-4 py-3 font-body font-medium text-[#1C1817]">{a.nom}</td>
+                      <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{ARTICLE_CAT_LABEL[a.categorie] ?? a.categorie}</td>
                       <td className="px-4 py-3">
-                        <span className={`font-display font-bold ${enAlerte ? 'text-red-600' : 'text-gray-800'}`}>
+                        <span className={`font-display font-bold ${enAlerte ? 'text-red-600' : 'text-[#1C1817]'}`}>
                           {fmt(a.stock_actuel)}
                         </span>
                         {enAlerte && <span className="ml-1 text-red-500" title="Stock sous le seuil minimum">⚠</span>}
                       </td>
-                      <td className="px-4 py-3 font-body text-gray-500">{fmt(a.seuil_minimum)}</td>
-                      <td className="px-4 py-3 font-body text-gray-500">{a.unite}</td>
-                      <td className="px-4 py-3 font-body text-gray-600">{fmt(a.prix_unitaire)} F</td>
-                      <td className="px-4 py-3 font-body text-gray-500">{a.fournisseur || '—'}</td>
+                      <td className="px-4 py-3 font-body text-[#A59F9B]">{fmt(a.seuil_minimum)}</td>
+                      <td className="px-4 py-3 font-body text-[#A59F9B]">{a.unite}</td>
+                      <td className="px-4 py-3 font-body text-[#1C1817]">{fmt(a.prix_unitaire)} F</td>
+                      <td className="px-4 py-3 font-body text-[#A59F9B]">{a.fournisseur || '—'}</td>
                     </tr>
                   )
                 })

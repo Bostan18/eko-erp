@@ -48,12 +48,12 @@ export default function ArticleForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Code *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Code *</label>
           <input className="input" placeholder="ART-001" value={form.code}
             onChange={(e) => set('code', e.target.value.toUpperCase())} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Catégorie *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Catégorie *</label>
           <select className="input" value={form.categorie} onChange={(e) => set('categorie', e.target.value)}>
             <option value="intrant">Intrant agricole</option>
             <option value="materiau">Matériau BTP</option>
@@ -65,14 +65,14 @@ export default function ArticleForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom *</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom *</label>
         <input className="input" placeholder="Ciment Portland 50kg" value={form.nom}
           onChange={(e) => set('nom', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Unité</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Unité</label>
           <select className="input" value={form.unite} onChange={(e) => set('unite', e.target.value)}>
             <option value="u">Unité</option>
             <option value="sac">Sac</option>
@@ -85,7 +85,7 @@ export default function ArticleForm({ onSuccess, onClose }) {
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Prix unitaire (F)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Prix unitaire (F)</label>
           <input type="number" min="0" step="1" className="input" placeholder="0" value={form.prix_unitaire}
             onChange={(e) => set('prix_unitaire', e.target.value)} />
         </div>
@@ -93,19 +93,19 @@ export default function ArticleForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Stock actuel</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Stock actuel</label>
           <input type="number" min="0" step="1" className="input" placeholder="0" value={form.stock_actuel}
             onChange={(e) => set('stock_actuel', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Seuil minimum ⚠</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Seuil minimum ⚠</label>
           <input type="number" min="0" step="1" className="input" placeholder="5" value={form.seuil_minimum}
             onChange={(e) => set('seuil_minimum', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Fournisseur</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Fournisseur</label>
         <input className="input" placeholder="Société ABC" value={form.fournisseur}
           onChange={(e) => set('fournisseur', e.target.value)} />
       </div>

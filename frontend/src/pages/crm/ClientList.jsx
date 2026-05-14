@@ -18,12 +18,9 @@ export default function ClientList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gray-900 text-2xl">CRM</h1>
-          <p className="font-body text-gray-500 text-sm mt-1">
-            {loading ? '…' : `${clients.length} client${clients.length !== 1 ? 's' : ''}`}
-          </p>
-        </div>
+        <p className="font-body text-[#A59F9B] text-sm">
+          {loading ? '…' : `${clients.length} client${clients.length !== 1 ? 's' : ''}`}
+        </p>
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau client</button>
       </div>
 
@@ -38,39 +35,39 @@ export default function ClientList() {
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-gray-400 font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
               <tr>
                 {['Code', 'Nom', 'Type', 'Secteur', 'Statut', 'Téléphone', 'Localité'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#f4ebe0]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-gray-400 font-body">
+                  <td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">
                     Aucun client trouvé
                   </td>
                 </tr>
               ) : (
                 filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={c.id} className="hover:bg-[#fbf7f0] transition-colors">
                     <td className="px-4 py-3 font-display font-medium text-forest-700">{c.code}</td>
-                    <td className="px-4 py-3 font-body font-medium text-gray-800">{c.nom}</td>
+                    <td className="px-4 py-3 font-body font-medium text-[#1C1817]">{c.nom}</td>
                     <td className="px-4 py-3">
                       <span className={CLIENT_TYPE_BADGE[c.type_client] ?? 'badge-gray'}>{c.type_client}</span>
                     </td>
-                    <td className="px-4 py-3 font-body text-gray-500 capitalize">{c.secteur || '—'}</td>
+                    <td className="px-4 py-3 font-body text-[#A59F9B] capitalize">{c.secteur || '—'}</td>
                     <td className="px-4 py-3">
                       <span className={CLIENT_STATUT_BADGE[c.statut] ?? 'badge-gray'}>{c.statut}</span>
                     </td>
-                    <td className="px-4 py-3 font-body text-gray-500">{c.telephone || '—'}</td>
-                    <td className="px-4 py-3 font-body text-gray-500">{c.localite || '—'}</td>
+                    <td className="px-4 py-3 font-body text-[#A59F9B]">{c.telephone || '—'}</td>
+                    <td className="px-4 py-3 font-body text-[#A59F9B]">{c.localite || '—'}</td>
                   </tr>
                 ))
               )}

@@ -47,12 +47,12 @@ export default function ClientForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Code *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Code *</label>
           <input className="input" placeholder="CLI-001" value={form.code}
             onChange={(e) => set('code', e.target.value.toUpperCase())} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Type *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type *</label>
           <select className="input" value={form.type_client} onChange={(e) => set('type_client', e.target.value)}>
             <option value="prospect">Prospect</option>
             <option value="client">Client</option>
@@ -62,14 +62,14 @@ export default function ClientForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom / Raison sociale *</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom / Raison sociale *</label>
         <input className="input" placeholder="BOUAKÉ CONSTRUCTIONS SARL" value={form.nom}
           onChange={(e) => set('nom', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Secteur</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Secteur</label>
           <select className="input" value={form.secteur} onChange={(e) => set('secteur', e.target.value)}>
             <option value="">— Choisir —</option>
             <option value="agriculture">Agriculture</option>
@@ -79,7 +79,7 @@ export default function ClientForm({ onSuccess, onClose }) {
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Statut</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Statut</label>
           <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
             <option value="actif">Actif</option>
             <option value="inactif">Inactif</option>
@@ -90,25 +90,25 @@ export default function ClientForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Téléphone</label>
           <input className="input" placeholder="07 00 00 00 00" value={form.telephone}
             onChange={(e) => set('telephone', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Email</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Email</label>
           <input type="email" className="input" placeholder="contact@societe.ci" value={form.email}
             onChange={(e) => set('email', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Localité</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Localité</label>
         <input className="input" placeholder="Abidjan, Bouaké…" value={form.localite}
           onChange={(e) => set('localite', e.target.value)} />
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Notes</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Notes</label>
         <textarea className="input resize-none" rows={2} placeholder="Informations complémentaires…"
           value={form.notes} onChange={(e) => set('notes', e.target.value)} />
       </div>

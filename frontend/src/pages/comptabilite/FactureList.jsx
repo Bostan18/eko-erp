@@ -20,12 +20,9 @@ export default function FactureList() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gray-900 text-2xl">Factures</h1>
-          <p className="font-body text-gray-500 text-sm mt-1">
-            {loading ? '…' : `${factures.length} facture${factures.length !== 1 ? 's' : ''}`}
-          </p>
-        </div>
+        <p className="font-body text-[#A59F9B] text-sm">
+          {loading ? '…' : `${factures.length} facture${factures.length !== 1 ? 's' : ''}`}
+        </p>
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle facture</button>
       </div>
 
@@ -38,9 +35,9 @@ export default function FactureList() {
           <p className="font-display text-xs text-amber-600 uppercase tracking-wide mb-1">En attente</p>
           <p className="font-display font-bold text-amber-700 text-2xl">{fmt(totalEnAttente)} F</p>
         </div>
-        <div className={`card p-4 ${nbEnRetard > 0 ? 'border-red-200 bg-red-50' : 'border-gray-100'}`}>
-          <p className={`font-display text-xs uppercase tracking-wide mb-1 ${nbEnRetard > 0 ? 'text-red-600' : 'text-gray-500'}`}>En retard</p>
-          <p className={`font-display font-bold text-2xl ${nbEnRetard > 0 ? 'text-red-600' : 'text-gray-400'}`}>{nbEnRetard}</p>
+        <div className={`card p-4 ${nbEnRetard > 0 ? 'border-red-200 bg-red-50' : 'border-[#ece2d3]'}`}>
+          <p className={`font-display text-xs uppercase tracking-wide mb-1 ${nbEnRetard > 0 ? 'text-red-600' : 'text-[#A59F9B]'}`}>En retard</p>
+          <p className={`font-display font-bold text-2xl ${nbEnRetard > 0 ? 'text-red-600' : 'text-[#A59F9B]'}`}>{nbEnRetard}</p>
         </div>
       </div>
 
@@ -59,7 +56,7 @@ export default function FactureList() {
             className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
               filtre === key
                 ? key === 'en_retard' ? 'bg-red-500 text-white' : 'bg-forest-700 text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-forest-300'
+                : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
             }`}
           >
             {label}
@@ -70,37 +67,37 @@ export default function FactureList() {
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-gray-400 font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
               <tr>
                 {['Numéro', 'Client', 'Projet', 'Montant TTC', 'Payé', 'Solde', 'Statut', 'Échéance'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#f4ebe0]">
               {filtrees.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-gray-400 font-body">Aucune facture</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucune facture</td></tr>
               ) : filtrees.map((f) => (
-                <tr key={f.id} className={`transition-colors ${f.statut === 'en_retard' ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}`}>
+                <tr key={f.id} className={`transition-colors ${f.statut === 'en_retard' ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-[#fbf7f0]'}`}>
                   <td className="px-4 py-3">
                     <Link to={`/comptabilite/factures/${f.id}`} className="font-display font-medium text-forest-700 hover:text-forest-900">
                       {f.numero}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-body text-gray-800">{f.client_nom}</td>
-                  <td className="px-4 py-3 font-body text-gray-500 text-xs">{f.projet_nom || '—'}</td>
-                  <td className="px-4 py-3 font-display font-semibold text-gray-800">{fmt(f.montant_ttc)} F</td>
-                  <td className="px-4 py-3 font-body text-gray-600">{fmt(f.montant_paye)} F</td>
-                  <td className={`px-4 py-3 font-display font-semibold ${Number(f.solde_restant) > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
+                  <td className="px-4 py-3 font-body text-[#1C1817]">{f.client_nom}</td>
+                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{f.projet_nom || '—'}</td>
+                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">{fmt(f.montant_ttc)} F</td>
+                  <td className="px-4 py-3 font-body text-[#1C1817]">{fmt(f.montant_paye)} F</td>
+                  <td className={`px-4 py-3 font-display font-semibold ${Number(f.solde_restant) > 0 ? 'text-amber-600' : 'text-[#A59F9B]'}`}>
                     {fmt(f.solde_restant)} F
                   </td>
                   <td className="px-4 py-3">
                     <span className={FACTURE_STATUT_BADGE[f.statut] ?? 'badge-gray'}>{FACTURE_STATUT_LABEL[f.statut] ?? f.statut}</span>
                   </td>
-                  <td className={`px-4 py-3 font-body text-sm ${f.statut === 'en_retard' ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                  <td className={`px-4 py-3 font-body text-sm ${f.statut === 'en_retard' ? 'text-red-600 font-semibold' : 'text-[#A59F9B]'}`}>
                     {f.date_echeance || '—'}
                   </td>
                 </tr>

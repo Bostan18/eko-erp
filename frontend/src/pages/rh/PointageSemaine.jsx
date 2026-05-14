@@ -99,10 +99,7 @@ export default function PointageSemaine() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-gray-900">Pointage semaine</h1>
-        <p className="text-sm text-gray-500 mt-1">Présences des journaliers actifs</p>
-      </div>
+      <p className="font-body text-[#A59F9B] text-sm">Présences des journaliers actifs</p>
 
       {error && (
         <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
@@ -110,7 +107,7 @@ export default function PointageSemaine() {
 
       <div className="flex items-center gap-3">
         <button onClick={semainePrecedente} className="btn-secondary text-sm px-3 py-1.5">← Semaine préc.</button>
-        <span className="font-display text-sm font-medium text-gray-700">
+        <span className="font-display text-sm font-medium text-[#1C1817]">
           Semaine du {new Date(semaine + 'T00:00:00').toLocaleDateString('fr-FR', {
             day: 'numeric', month: 'long', year: 'numeric'
           })}
@@ -119,21 +116,21 @@ export default function PointageSemaine() {
       </div>
 
       {loading ? (
-        <div className="text-gray-400 text-sm">Chargement…</div>
+        <div className="text-[#A59F9B] text-sm">Chargement…</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-2 pr-4 font-display text-xs font-medium text-gray-500 min-w-[160px]">Employé</th>
-                <th className="text-right py-2 pr-4 font-display text-xs font-medium text-gray-500 w-24">Taux/jour</th>
+              <tr className="border-b border-[#ece2d3]">
+                <th className="text-left py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] min-w-[160px]">Employé</th>
+                <th className="text-right py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] w-24">Taux/jour</th>
                 {jours.map((jour, i) => (
-                  <th key={jour} className="text-center py-2 px-2 font-display text-xs font-medium text-gray-500 w-20">
+                  <th key={jour} className="text-center py-2 px-2 font-display text-xs font-medium text-[#A59F9B] w-20">
                     <div>{JOURS_COURTS[i]}</div>
-                    <div className="text-gray-400">{jour.slice(8)}/{jour.slice(5, 7)}</div>
+                    <div className="text-[#A59F9B]">{jour.slice(8)}/{jour.slice(5, 7)}</div>
                   </th>
                 ))}
-                <th className="text-right py-2 pl-4 font-display text-xs font-medium text-gray-500 w-28">Total semaine</th>
+                <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-28">Total semaine</th>
               </tr>
             </thead>
             <tbody>
@@ -147,7 +144,7 @@ export default function PointageSemaine() {
                     ? 'bg-green-50 border-green-200'
                     : present === false
                     ? 'bg-red-50 border-red-200'
-                    : 'bg-white border-gray-200'
+                    : 'bg-white border-[#ece2d3]'
                   return (
                     <td key={jour.date} className="py-1.5 px-1 text-center">
                       <button
@@ -162,12 +159,12 @@ export default function PointageSemaine() {
                 })
 
                 return (
-                  <tr key={ligne.employe_id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={ligne.employe_id} className="border-b border-[#ece2d3] hover:bg-[#fbf7f0]">
                     <td className="py-2 pr-4">
-                      <div className="font-body text-gray-800 text-sm">{ligne.employe_nom}</div>
-                      <div className="text-xs text-gray-400">{ligne.employe_code}</div>
+                      <div className="font-body text-[#1C1817] text-sm">{ligne.employe_nom}</div>
+                      <div className="text-xs text-[#A59F9B]">{ligne.employe_code}</div>
                     </td>
-                    <td className="py-2 pr-4 text-right text-gray-600 text-sm">{fmt(ligne.taux_journalier)} F</td>
+                    <td className="py-2 pr-4 text-right text-[#1C1817] text-sm">{fmt(ligne.taux_journalier)} F</td>
                     {cellsJours}
                     <td className="py-2 pl-4 text-right font-display font-bold text-forest-700 text-sm">
                       {fmt(totalSemaine)} F
@@ -177,7 +174,7 @@ export default function PointageSemaine() {
               })}
               {(!feuille?.lignes || feuille.lignes.length === 0) && (
                 <tr>
-                  <td colSpan={jours.length + 3} className="py-8 text-center text-gray-400 text-sm">
+                  <td colSpan={jours.length + 3} className="py-8 text-center text-[#A59F9B] text-sm">
                     Aucun journalier actif.
                   </td>
                 </tr>

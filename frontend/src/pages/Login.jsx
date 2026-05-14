@@ -43,7 +43,7 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-2xl p-8 shadow-2xl">
-          <h2 className="font-display font-semibold text-gray-800 text-lg mb-6">Connexion</h2>
+          <h2 className="font-display font-semibold text-[#1C1817] text-lg mb-6">Connexion</h2>
 
           {error && (
             <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm font-body">
@@ -53,7 +53,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block font-display text-xs font-medium text-gray-600 mb-1.5">
+              <label className="block font-display text-xs font-medium text-[#1C1817] mb-1.5">
                 Nom d'utilisateur
               </label>
               <input
@@ -67,7 +67,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block font-display text-xs font-medium text-gray-600 mb-1.5">
+              <label className="block font-display text-xs font-medium text-[#1C1817] mb-1.5">
                 Mot de passe
               </label>
               <input

@@ -88,7 +88,7 @@ export default function TacheDetail() {
   function semainePrecedente() { setSemaine((s) => addDays(s, -7)) }
   function semaineSuivante()   { setSemaine((s) => addDays(s, 7)) }
 
-  if (loading) return <div className="p-6 text-gray-500 text-sm">Chargement…</div>
+  if (loading) return <div className="p-6 text-[#A59F9B] text-sm">Chargement…</div>
   if (error && !tableau) return <div className="p-6 text-red-500 text-sm">{error}</div>
 
   const jours = tableau?.lignes[0]?.jours?.map((j) => j.date) ?? []
@@ -96,14 +96,14 @@ export default function TacheDetail() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link to={`/projets/${projetId}`} className="text-gray-400 hover:text-gray-600">
+        <Link to={`/projets/${projetId}`} className="text-[#A59F9B] hover:text-[#1C1817]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </Link>
         <div>
-          <h1 className="font-display text-xl font-bold text-gray-900">{tableau?.tache_nom}</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="font-display text-xl font-bold text-[#1C1817]">{tableau?.tache_nom}</h1>
+          <p className="text-sm text-[#A59F9B]">
             Tarif : {fmt(tableau?.tarif_unitaire)} F / {tableau?.unite_label || 'unité'}
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function TacheDetail() {
 
       <div className="flex items-center gap-3">
         <button onClick={semainePrecedente} className="btn-secondary text-sm px-3 py-1.5">← Semaine préc.</button>
-        <span className="font-display text-sm font-medium text-gray-700">
+        <span className="font-display text-sm font-medium text-[#1C1817]">
           Semaine du {new Date(semaine + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
         </span>
         <button onClick={semaineSuivante} className="btn-secondary text-sm px-3 py-1.5">Semaine suiv. →</button>
@@ -124,25 +124,25 @@ export default function TacheDetail() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-2 pr-4 font-display text-xs font-medium text-gray-500 min-w-[160px]">Employé</th>
-              <th className="text-right py-2 pr-4 font-display text-xs font-medium text-gray-500 w-24">Objectif</th>
+            <tr className="border-b border-[#ece2d3]">
+              <th className="text-left py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] min-w-[160px]">Employé</th>
+              <th className="text-right py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] w-24">Objectif</th>
               {jours.map((jour, i) => (
-                <th key={jour} className="text-center py-2 px-2 font-display text-xs font-medium text-gray-500 w-20">
+                <th key={jour} className="text-center py-2 px-2 font-display text-xs font-medium text-[#A59F9B] w-20">
                   <div>{JOURS_COURTS[i]}</div>
-                  <div className="text-gray-400">{jour.slice(8)}/{jour.slice(5, 7)}</div>
+                  <div className="text-[#A59F9B]">{jour.slice(8)}/{jour.slice(5, 7)}</div>
                 </th>
               ))}
-              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-gray-500 w-24">Total</th>
-              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-gray-500 w-24">Montant</th>
-              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-gray-500 w-20">%</th>
+              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-24">Total</th>
+              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-24">Montant</th>
+              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-20">%</th>
             </tr>
           </thead>
           <tbody>
             {tableau?.lignes.map((ligne) => (
-              <tr key={ligne.affectation_id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-2 pr-4 font-body text-gray-800 text-sm">{ligne.employe_nom}</td>
-                <td className="py-2 pr-4 text-right text-gray-600 text-sm">{fmt(ligne.objectif_individuel)}</td>
+              <tr key={ligne.affectation_id} className="border-b border-[#ece2d3] hover:bg-[#fbf7f0]">
+                <td className="py-2 pr-4 font-body text-[#1C1817] text-sm">{ligne.employe_nom}</td>
+                <td className="py-2 pr-4 text-right text-[#1C1817] text-sm">{fmt(ligne.objectif_individuel)}</td>
                 {ligne.jours.map((jour) => {
                   const cell = draft[`${ligne.affectation_id}_${jour.date}`] || {}
                   return (
@@ -159,15 +159,15 @@ export default function TacheDetail() {
                     </td>
                   )
                 })}
-                <td className="py-2 pl-4 text-right font-medium text-gray-700">{fmt(ligne.total_realise)}</td>
-                <td className="py-2 pl-4 text-right font-medium text-gray-700">{fmt(ligne.total_montant)} F</td>
+                <td className="py-2 pl-4 text-right font-medium text-[#1C1817]">{fmt(ligne.total_realise)}</td>
+                <td className="py-2 pl-4 text-right font-medium text-[#1C1817]">{fmt(ligne.total_montant)} F</td>
                 <td className="py-2 pl-4 text-right">
                   <span className={`text-xs font-display font-medium px-1.5 py-0.5 rounded-full ${
                     ligne.progression_pct >= 100
                       ? 'bg-green-100 text-green-700'
                       : ligne.progression_pct >= 50
                       ? 'bg-amber-100 text-amber-700'
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-[#f4ebe0] text-[#1C1817]'
                   }`}>
                     {ligne.progression_pct}%
                   </span>
@@ -176,7 +176,7 @@ export default function TacheDetail() {
             ))}
             {(!tableau?.lignes || tableau.lignes.length === 0) && (
               <tr>
-                <td colSpan={jours.length + 5} className="py-8 text-center text-gray-400 text-sm">
+                <td colSpan={jours.length + 5} className="py-8 text-center text-[#A59F9B] text-sm">
                   Aucune affectation pour cette tâche.
                 </td>
               </tr>

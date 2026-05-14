@@ -12,9 +12,9 @@ export default function Modal({ titre, onClose, children }) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="font-display font-semibold text-gray-900">{titre}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#ece2d3]">
+          <h2 className="font-display font-semibold text-[#1C1817]">{titre}</h2>
+          <button onClick={onClose} className="text-[#A59F9B] hover:text-[#1C1817] transition-colors">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>

@@ -30,12 +30,9 @@ export default function ChargeList() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gray-900 text-2xl">Charges</h1>
-          <p className="font-body text-gray-500 text-sm mt-1">
-            {loading ? '…' : `${charges.length} charge${charges.length !== 1 ? 's' : ''} · Total : ${fmt(totalGlobal)} F`}
-          </p>
-        </div>
+        <p className="font-body text-[#A59F9B] text-sm">
+          {loading ? '…' : `${charges.length} charge${charges.length !== 1 ? 's' : ''} · Total : ${fmt(totalGlobal)} F`}
+        </p>
         <div className="flex gap-2">
           <button className="btn-secondary" onClick={() => exportCharges(filtre)}>↓ Excel</button>
           <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle charge</button>
@@ -46,7 +43,7 @@ export default function ChargeList() {
         <button
           onClick={() => setFiltre('toutes')}
           className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-            filtre === 'toutes' ? 'bg-forest-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-forest-300'
+            filtre === 'toutes' ? 'bg-forest-700 text-white' : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
           }`}
         >
           Toutes
@@ -56,7 +53,7 @@ export default function ChargeList() {
             key={key}
             onClick={() => setFiltre(key)}
             className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-              filtre === key ? 'bg-forest-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-forest-300'
+              filtre === key ? 'bg-forest-700 text-white' : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
             }`}
           >
             {label}
@@ -74,39 +71,39 @@ export default function ChargeList() {
       <div className="card overflow-hidden">
         {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-gray-400 font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
               <tr>
                 {['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Fournisseur', 'Référence'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#f4ebe0]">
               {filtrees.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400 font-body">Aucune charge</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucune charge</td></tr>
               ) : filtrees.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-body text-gray-700">{c.date}</td>
-                  <td className="px-4 py-3 font-body font-medium text-gray-800">{c.libelle}</td>
+                <tr key={c.id} className="hover:bg-[#fbf7f0] transition-colors">
+                  <td className="px-4 py-3 font-body text-[#1C1817]">{c.date}</td>
+                  <td className="px-4 py-3 font-body font-medium text-[#1C1817]">{c.libelle}</td>
                   <td className="px-4 py-3">
                     <span className={CHARGE_CAT_BADGE[c.categorie] ?? 'badge-gray'}>{CHARGE_CAT_LABEL[c.categorie] ?? c.categorie}</span>
                   </td>
-                  <td className="px-4 py-3 font-display font-semibold text-gray-800">{fmt(c.montant)} F</td>
-                  <td className="px-4 py-3 font-body text-gray-500 text-xs">{c.projet_nom || '—'}</td>
-                  <td className="px-4 py-3 font-body text-gray-500">{c.fournisseur || '—'}</td>
-                  <td className="px-4 py-3 font-body text-gray-400 text-xs">{c.reference || '—'}</td>
+                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">{fmt(c.montant)} F</td>
+                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{c.projet_nom || '—'}</td>
+                  <td className="px-4 py-3 font-body text-[#A59F9B]">{c.fournisseur || '—'}</td>
+                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{c.reference || '—'}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot className="bg-gray-50 border-t-2 border-gray-100">
+            <tfoot className="bg-[#fbf7f0] border-t-2 border-[#ece2d3]">
               <tr>
-                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-gray-600 text-sm">
+                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-[#1C1817] text-sm">
                   Total {filtre !== 'toutes' ? CHARGE_CAT_LABEL[filtre] : 'charges'}
                 </td>
-                <td className="px-4 py-3 font-display font-bold text-gray-800">{fmt(totalFiltre)} F</td>
+                <td className="px-4 py-3 font-display font-bold text-[#1C1817]">{fmt(totalFiltre)} F</td>
                 <td colSpan={3} />
               </tr>
             </tfoot>

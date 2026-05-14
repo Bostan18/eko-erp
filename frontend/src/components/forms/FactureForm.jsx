@@ -86,19 +86,19 @@ export default function FactureForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Numéro *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Numéro *</label>
           <input className="input" placeholder="FAC-001" value={form.numero}
             onChange={(e) => set('numero', e.target.value.toUpperCase())} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">TVA (%)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">TVA (%)</label>
           <input type="number" min="0" max="100" step="0.5" className="input" value={form.taux_tva}
             onChange={(e) => set('taux_tva', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Client *</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Client *</label>
         <select className="input" value={form.client} onChange={(e) => set('client', e.target.value)}>
           <option value="">— Choisir un client —</option>
           {clients.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
@@ -106,7 +106,7 @@ export default function FactureForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Projet (optionnel)</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Projet (optionnel)</label>
         <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
           <option value="">— Sans projet —</option>
           {projets.map((p) => <option key={p.id} value={p.id}>{p.code} — {p.nom}</option>)}
@@ -115,12 +115,12 @@ export default function FactureForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date d'émission *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date d'émission *</label>
           <input type="date" className="input" value={form.date_emission}
             onChange={(e) => set('date_emission', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date d'échéance *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date d'échéance *</label>
           <input type="date" className="input" value={form.date_echeance}
             min={form.date_emission || undefined}
             onChange={(e) => set('date_echeance', e.target.value)} />
@@ -129,13 +129,13 @@ export default function FactureForm({ onSuccess, onClose }) {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="font-display text-xs font-medium text-gray-600">Lignes de facturation *</label>
+          <label className="font-display text-xs font-medium text-[#1C1817]">Lignes de facturation *</label>
           <button type="button" onClick={ajouterLigne}
             className="text-xs font-display font-medium text-forest-700 hover:text-forest-800">
             + Ajouter une ligne
           </button>
         </div>
-        <div className="space-y-2 border border-gray-100 rounded-lg p-3 bg-gray-50">
+        <div className="space-y-2 border border-[#ece2d3] rounded-lg p-3 bg-[#fbf7f0]">
           {lignes.map((ligne, idx) => (
             <div key={idx} className="flex gap-2 items-center">
               <input className="input flex-1 text-sm py-1.5" placeholder="Désignation"
@@ -144,12 +144,12 @@ export default function FactureForm({ onSuccess, onClose }) {
                 value={ligne.quantite} onChange={(e) => setLigne(idx, 'quantite', e.target.value)} />
               <input type="number" min="0" step="1" className="input w-28 text-sm py-1.5" placeholder="Prix unit."
                 value={ligne.prix_unitaire} onChange={(e) => setLigne(idx, 'prix_unitaire', e.target.value)} />
-              <span className="font-display text-sm font-medium text-gray-600 w-24 text-right shrink-0">
+              <span className="font-display text-sm font-medium text-[#1C1817] w-24 text-right shrink-0">
                 {fmt(Number(ligne.quantite) * Number(ligne.prix_unitaire || 0))} F
               </span>
               {lignes.length > 1 && (
                 <button type="button" onClick={() => supprimerLigne(idx)}
-                  className="text-gray-300 hover:text-red-400 transition-colors">
+                  className="text-[#A59F9B] hover:text-red-400 transition-colors">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                     <path d="M18 6 6 18M6 6l12 12" />
                   </svg>
@@ -161,10 +161,10 @@ export default function FactureForm({ onSuccess, onClose }) {
       </div>
 
       <div className="bg-forest-50 rounded-lg p-4 space-y-1.5 text-sm font-body">
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-[#1C1817]">
           <span>Montant HT</span><span className="font-medium">{fmt(montantHT)} F</span>
         </div>
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-[#1C1817]">
           <span>TVA ({form.taux_tva}%)</span><span className="font-medium">{fmt(montantTVA)} F</span>
         </div>
         <div className="flex justify-between text-forest-800 font-display font-bold border-t border-forest-200 pt-1.5 mt-1.5">
@@ -173,7 +173,7 @@ export default function FactureForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Notes</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Notes</label>
         <textarea className="input resize-none" rows={2} value={form.notes}
           onChange={(e) => set('notes', e.target.value)} />
       </div>

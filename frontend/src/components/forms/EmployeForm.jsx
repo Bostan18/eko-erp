@@ -61,12 +61,12 @@ export default function EmployeForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Code *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Code *</label>
           <input className="input" placeholder="EMP-001" value={form.code}
             onChange={(e) => set('code', e.target.value.toUpperCase())} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Type contrat *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type contrat *</label>
           <select className="input" value={form.type_contrat} onChange={(e) => set('type_contrat', e.target.value)}>
             <option value="cdi">CDI Permanent</option>
             <option value="journalier">Journalier</option>
@@ -78,12 +78,12 @@ export default function EmployeForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom *</label>
           <input className="input" placeholder="KONÉ" value={form.nom}
             onChange={(e) => set('nom', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Prénom *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Prénom *</label>
           <input className="input" placeholder="Moussa" value={form.prenom}
             onChange={(e) => set('prenom', e.target.value)} />
         </div>
@@ -91,12 +91,12 @@ export default function EmployeForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Poste</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Poste</label>
           <input className="input" placeholder="Maçon, Planteur…" value={form.poste}
             onChange={(e) => set('poste', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Téléphone</label>
           <input className="input" placeholder="07 00 00 00 00" value={form.telephone}
             onChange={(e) => set('telephone', e.target.value)} />
         </div>
@@ -104,12 +104,12 @@ export default function EmployeForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date d'entrée</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date d'entrée</label>
           <input type="date" className="input" value={form.date_entree}
             onChange={(e) => set('date_entree', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Statut</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Statut</label>
           <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
             <option value="actif">Actif</option>
             <option value="inactif">Inactif</option>
@@ -120,13 +120,13 @@ export default function EmployeForm({ onSuccess, onClose }) {
 
       {isJournalier ? (
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Taux journalier (F)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Taux journalier (F)</label>
           <input type="number" min="0" step="100" className="input" placeholder="5000" value={form.taux_journalier}
             onChange={(e) => set('taux_journalier', e.target.value)} />
         </div>
       ) : (
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Salaire mensuel (F)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Salaire mensuel (F)</label>
           <input type="number" min="0" step="1000" className="input" placeholder="150000" value={form.salaire_mensuel}
             onChange={(e) => set('salaire_mensuel', e.target.value)} />
         </div>

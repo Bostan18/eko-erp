@@ -82,12 +82,9 @@ export default function Pointage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gray-900 text-2xl">Pointage journalier</h1>
-          <p className="font-body text-gray-500 text-sm mt-1">
-            Saisie des présences — journaliers actifs
-          </p>
-        </div>
+        <p className="font-body text-[#A59F9B] text-sm">
+          Saisie des présences — journaliers actifs
+        </p>
         <div className="flex gap-2">
           <button
             className="btn-secondary"
@@ -116,7 +113,7 @@ export default function Pointage() {
       {/* Date + stats */}
       <div className="flex flex-wrap items-center gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-500 mb-1">Date</label>
+          <label className="block font-display text-xs font-medium text-[#A59F9B] mb-1">Date</label>
           <input
             type="date"
             value={date}
@@ -128,7 +125,7 @@ export default function Pointage() {
         <div className="flex gap-3 mt-5">
           <div className="card px-4 py-2 flex items-center gap-2 border-forest-100">
             <span className="font-display font-bold text-forest-700 text-lg">{nbPresents}</span>
-            <span className="font-body text-gray-500 text-sm">présent{nbPresents !== 1 ? 's' : ''} / {rows.length}</span>
+            <span className="font-body text-[#A59F9B] text-sm">présent{nbPresents !== 1 ? 's' : ''} / {rows.length}</span>
           </div>
           <div className="card px-4 py-2 flex items-center gap-2 border-amber-100 bg-amber-50">
             <span className="font-display font-bold text-amber-700 text-lg">{fmt(totalJour)}</span>
@@ -152,37 +149,37 @@ export default function Pointage() {
       {/* Table */}
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-gray-400 font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-gray-400 font-body text-sm">
+          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">
             Aucun journalier actif trouvé.
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
               <tr>
-                <th className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide w-10">
+                <th className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide w-10">
                   <input
                     type="checkbox"
                     checked={rows.every((r) => r.present)}
                     onChange={(e) =>
                       setRows((prev) => prev.map((r) => ({ ...r, present: e.target.checked })))
                     }
-                    className="rounded border-gray-300 text-forest-600 focus:ring-forest-500"
+                    className="rounded border-[#ece2d3] text-forest-600 focus:ring-forest-500"
                   />
                 </th>
                 {['Employé', 'Taux/j', 'Heures', 'Montant', 'Projet', 'Notes'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#f4ebe0]">
               {rows.map((row, idx) => (
                 <tr
                   key={row.employe_id}
-                  className={`transition-colors ${row.present ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 opacity-60'}`}
+                  className={`transition-colors ${row.present ? 'bg-white hover:bg-[#fbf7f0]' : 'bg-[#fbf7f0] opacity-60'}`}
                 >
                   {/* Présent toggle */}
                   <td className="px-4 py-3">
@@ -190,18 +187,18 @@ export default function Pointage() {
                       type="checkbox"
                       checked={row.present}
                       onChange={() => togglePresent(idx)}
-                      className="rounded border-gray-300 text-forest-600 focus:ring-forest-500"
+                      className="rounded border-[#ece2d3] text-forest-600 focus:ring-forest-500"
                     />
                   </td>
 
                   {/* Employé */}
                   <td className="px-4 py-3">
-                    <p className="font-body font-medium text-gray-800">{row.employe_nom}</p>
+                    <p className="font-body font-medium text-[#1C1817]">{row.employe_nom}</p>
                     <p className="font-display text-xs text-forest-600">{row.employe_code}</p>
                   </td>
 
                   {/* Taux */}
-                  <td className="px-4 py-3 font-body text-gray-600">
+                  <td className="px-4 py-3 font-body text-[#1C1817]">
                     {fmt(row.taux_journalier)} F
                   </td>
 
@@ -218,7 +215,7 @@ export default function Pointage() {
                   </td>
 
                   {/* Montant calculé */}
-                  <td className="px-4 py-3 font-display font-semibold text-gray-700">
+                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">
                     {row.present ? `${fmt(row.taux_journalier)} F` : '—'}
                   </td>
 

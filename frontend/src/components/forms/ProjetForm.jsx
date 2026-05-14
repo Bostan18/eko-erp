@@ -61,12 +61,12 @@ export default function ProjetForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Code *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Code *</label>
           <input className="input" placeholder="PRJ-001" value={form.code}
             onChange={(e) => set('code', e.target.value.toUpperCase())} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Type *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type *</label>
           <select className="input" value={form.type_projet} onChange={(e) => set('type_projet', e.target.value)}>
             <option value="btp">BTP</option>
             <option value="agriculture">Agriculture</option>
@@ -78,14 +78,14 @@ export default function ProjetForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom du projet *</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom du projet *</label>
         <input className="input" placeholder="Construction villa Cocody" value={form.nom}
           onChange={(e) => set('nom', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Statut</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Statut</label>
           <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
             <option value="planifie">Planifié</option>
             <option value="en_cours">En cours</option>
@@ -95,7 +95,7 @@ export default function ProjetForm({ onSuccess, onClose }) {
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Client</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Client</label>
           <select className="input" value={form.client} onChange={(e) => set('client', e.target.value)}>
             <option value="">— Sans client —</option>
             {clients.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
@@ -104,19 +104,19 @@ export default function ProjetForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Localisation</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Localisation</label>
         <input className="input" placeholder="Cocody, Abidjan" value={form.localisation}
           onChange={(e) => set('localisation', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date début</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date début</label>
           <input type="date" className="input" value={form.date_debut}
             onChange={(e) => set('date_debut', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date fin prévue</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date fin prévue</label>
           <input type="date" className="input" value={form.date_fin_prevue}
             min={form.date_debut || undefined}
             onChange={(e) => set('date_fin_prevue', e.target.value)} />
@@ -124,13 +124,13 @@ export default function ProjetForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Budget estimé (F)</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Budget estimé (F)</label>
         <input type="number" min="0" step="10000" className="input" placeholder="5000000" value={form.budget_estime}
           onChange={(e) => set('budget_estime', e.target.value)} />
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Description</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Description</label>
         <textarea className="input resize-none" rows={2} placeholder="Détails du projet…"
           value={form.description} onChange={(e) => set('description', e.target.value)} />
       </div>

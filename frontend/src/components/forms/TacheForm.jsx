@@ -61,14 +61,14 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
       )}
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Nom de la tâche *</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom de la tâche *</label>
         <input className="input" placeholder="Coulage fondation" value={form.nom}
           onChange={(e) => set('nom', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Type d'objectif *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type d'objectif *</label>
           <select className="input" value={form.type_objectif} onChange={(e) => set('type_objectif', e.target.value)}>
             {Object.entries(TYPE_OBJECTIF_LABELS).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
@@ -76,7 +76,7 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Unité (libellé)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Unité (libellé)</label>
           <input className="input" placeholder="m², sacs, ml…" value={form.unite_label}
             onChange={(e) => set('unite_label', e.target.value)} />
         </div>
@@ -84,12 +84,12 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Objectif cible *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Objectif cible *</label>
           <input type="number" min="0.01" step="0.01" className="input" placeholder="50"
             value={form.objectif_cible} onChange={(e) => set('objectif_cible', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Tarif unitaire (F)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Tarif unitaire (F)</label>
           <input type="number" min="0" step="1" className="input" placeholder="10000"
             value={form.tarif_unitaire} onChange={(e) => set('tarif_unitaire', e.target.value)} />
         </div>
@@ -97,12 +97,12 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Bonus objectif (%)</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Bonus objectif (%)</label>
           <input type="number" min="0" max="100" step="0.5" className="input" placeholder="0"
             value={form.bonus_objectif_pct} onChange={(e) => set('bonus_objectif_pct', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Statut</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Statut</label>
           <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
             <option value="a_faire">À faire</option>
             <option value="en_cours">En cours</option>
@@ -114,12 +114,12 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date début</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date début</label>
           <input type="date" className="input" value={form.date_debut}
             onChange={(e) => set('date_debut', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date fin prévue</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date fin prévue</label>
           <input type="date" className="input" value={form.date_fin_prevue}
             min={form.date_debut || undefined}
             onChange={(e) => set('date_fin_prevue', e.target.value)} />
@@ -127,7 +127,7 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Description</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Description</label>
         <textarea className="input resize-none" rows={2} placeholder="Détails de la tâche…"
           value={form.description} onChange={(e) => set('description', e.target.value)} />
       </div>

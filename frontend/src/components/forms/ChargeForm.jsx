@@ -51,14 +51,14 @@ export default function ChargeForm({ onSuccess, onClose }) {
       )}
 
       <div>
-        <label className="block font-display text-xs font-medium text-gray-600 mb-1">Libellé *</label>
+        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Libellé *</label>
         <input className="input" placeholder="Achat ciment — 50 sacs" value={form.libelle}
           onChange={(e) => set('libelle', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Catégorie *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Catégorie *</label>
           <select className="input" value={form.categorie} onChange={(e) => set('categorie', e.target.value)}>
             <option value="salaire">Salaires & charges sociales</option>
             <option value="materiel">Matériel & équipement</option>
@@ -70,7 +70,7 @@ export default function ChargeForm({ onSuccess, onClose }) {
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Montant (F) *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Montant (F) *</label>
           <input type="number" min="0" step="1" className="input" placeholder="0" value={form.montant}
             onChange={(e) => set('montant', e.target.value)} />
         </div>
@@ -78,12 +78,12 @@ export default function ChargeForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Date *</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date *</label>
           <input type="date" className="input" value={form.date}
             onChange={(e) => set('date', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Projet lié</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Projet lié</label>
           <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
             <option value="">— Sans projet —</option>
             {projets.map((p) => <option key={p.id} value={p.id}>{p.code} — {p.nom}</option>)}
@@ -93,12 +93,12 @@ export default function ChargeForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Fournisseur</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Fournisseur</label>
           <input className="input" placeholder="Société ABC" value={form.fournisseur}
             onChange={(e) => set('fournisseur', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-gray-600 mb-1">Référence</label>
+          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Référence</label>
           <input className="input" placeholder="N° bon de livraison" value={form.reference}
             onChange={(e) => set('reference', e.target.value)} />
         </div>

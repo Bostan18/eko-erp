@@ -2,9 +2,13 @@ import { useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
 
-const INIT = {
-  code: '', nom: '', type_client: 'prospect', secteur: '',
-  statut: 'actif', telephone: '', email: '', localite: '', notes: '',
+const TYPE_LABEL = { client: 'client', prospect: 'prospect', partenaire: 'partenaire' }
+
+function buildInit(typeDefault) {
+  return {
+    code: '', nom: '', type_client: typeDefault, secteur: '',
+    statut: 'actif', telephone: '', email: '', localite: '', notes: '',
+  }
 }
 
 function validate(form) {
@@ -16,8 +20,8 @@ function validate(form) {
   return null
 }
 
-export default function ClientForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function ClientForm({ onSuccess, onClose, typeDefault = 'prospect' }) {
+  const [form, setForm]     = useState(() => buildInit(typeDefault))
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -116,7 +120,7 @@ export default function ClientForm({ onSuccess, onClose }) {
       <div className="flex gap-3 pt-2">
         <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary flex-1" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le client'}
+          {saving ? 'Enregistrement…' : `Créer le ${TYPE_LABEL[form.type_client] ?? 'client'}`}
         </button>
       </div>
     </form>

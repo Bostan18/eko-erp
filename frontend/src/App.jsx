@@ -12,7 +12,10 @@ const ProjetList      = lazy(() => import('./pages/projets/ProjetList'))
 const ProjetDetail    = lazy(() => import('./pages/projets/ProjetDetail'))
 const TacheDetail     = lazy(() => import('./pages/projets/TacheDetail'))
 const ClientList      = lazy(() => import('./pages/crm/ClientList'))
+const ProspectList    = lazy(() => import('./pages/crm/ProspectList'))
 const StockList       = lazy(() => import('./pages/stocks/StockList'))
+const StockAlertes    = lazy(() => import('./pages/stocks/StockAlertes'))
+const StockMouvements = lazy(() => import('./pages/stocks/StockMouvements'))
 const FactureList     = lazy(() => import('./pages/comptabilite/FactureList'))
 const FactureDetail   = lazy(() => import('./pages/comptabilite/FactureDetail'))
 const ChargeList      = lazy(() => import('./pages/comptabilite/ChargeList'))
@@ -30,11 +33,19 @@ export default function App() {
         <Route path="/rh/:id"                       element={<EmployeDetail />} />
         <Route path="/rh/pointage"                  element={<Pointage />} />
         <Route path="/rh/pointage-semaine"          element={<PointageSemaine />} />
+        <Route path="/rh/paie"                      element={<PlaceholderPage titre="Paie & bulletins" />} />
         <Route path="/projets"                      element={<ProjetList />} />
+        <Route path="/projets/btp"                  element={<ProjetList typeProjet="btp" />} />
+        <Route path="/projets/agriculture"          element={<ProjetList typeProjet="agriculture" />} />
+        <Route path="/projets/pepiniere"            element={<ProjetList typeProjet="pepiniere" />} />
+        <Route path="/projets/locations"            element={<ProjetList typeProjet="location" />} />
         <Route path="/projets/:id"                  element={<ProjetDetail />} />
         <Route path="/projets/:projetId/taches/:tacheId" element={<TacheDetail />} />
         <Route path="/crm"                          element={<ClientList />} />
+        <Route path="/crm/prospects"                element={<ProspectList />} />
         <Route path="/stocks"                       element={<StockList />} />
+        <Route path="/stocks/alertes"               element={<StockAlertes />} />
+        <Route path="/stocks/mouvements"            element={<StockMouvements />} />
         <Route path="/comptabilite/factures"        element={<FactureList />} />
         <Route path="/comptabilite/factures/:id"    element={<FactureDetail />} />
         <Route path="/comptabilite/charges"         element={<ChargeList />} />

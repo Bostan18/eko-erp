@@ -22,7 +22,7 @@ export const MODULES = [
       { id: 'rh/employes',         label: 'Employés',          path: '/rh' },
       { id: 'rh/pointage',         label: 'Pointage journée',  path: '/rh/pointage' },
       { id: 'rh/pointage-semaine', label: 'Pointage semaine',  path: '/rh/pointage-semaine' },
-      { id: 'rh/paie',             label: 'Paie & bulletins',  path: '/rh' },
+      { id: 'rh/paie',             label: 'Paie & bulletins',  path: '/rh/paie' },
     ],
   },
   {
@@ -33,9 +33,10 @@ export const MODULES = [
     group: 'Exploitation',
     path: '/projets',
     children: [
-      { id: 'projets/chantiers', label: 'Chantiers BTP', path: '/projets' },
-      { id: 'projets/agri',      label: 'Agriculture',   path: '/projets' },
-      { id: 'projets/locations', label: 'Locations',     path: '/projets' },
+      { id: 'projets/btp',       label: 'BTP',         path: '/projets/btp' },
+      { id: 'projets/agri',      label: 'Agriculture', path: '/projets/agriculture' },
+      { id: 'projets/pepiniere', label: 'Pépinière',   path: '/projets/pepiniere' },
+      { id: 'projets/locations', label: 'Locations',   path: '/projets/locations' },
     ],
   },
   {
@@ -47,8 +48,8 @@ export const MODULES = [
     path: '/crm',
     children: [
       { id: 'crm/clients',   label: 'Clients',   path: '/crm' },
-      { id: 'crm/devis',     label: 'Devis',     path: '/crm' },
-      { id: 'crm/prospects', label: 'Prospects', path: '/crm' },
+      { id: 'crm/devis',     label: 'Devis',     path: '/comptabilite/devis' },
+      { id: 'crm/prospects', label: 'Prospects', path: '/crm/prospects' },
     ],
   },
   {
@@ -60,8 +61,8 @@ export const MODULES = [
     path: '/stocks',
     children: [
       { id: 'stocks/articles',    label: 'Articles',    path: '/stocks' },
-      { id: 'stocks/mouvements',  label: 'Mouvements',  path: '/stocks' },
-      { id: 'stocks/alertes',     label: 'Alertes',     path: '/stocks' },
+      { id: 'stocks/mouvements',  label: 'Mouvements',  path: '/stocks/mouvements' },
+      { id: 'stocks/alertes',     label: 'Alertes',     path: '/stocks/alertes' },
     ],
   },
   {
@@ -107,9 +108,17 @@ const ROUTE_TO_MODULE = [
   { test: (p) => p === '/' || p === '',                              modId: 'dashboard' },
   { test: (p) => p.startsWith('/rh/pointage-semaine'),               modId: 'rh', childId: 'rh/pointage-semaine' },
   { test: (p) => p.startsWith('/rh/pointage'),                       modId: 'rh', childId: 'rh/pointage' },
+  { test: (p) => p.startsWith('/rh/paie'),                           modId: 'rh', childId: 'rh/paie' },
   { test: (p) => p.startsWith('/rh'),                                modId: 'rh', childId: 'rh/employes' },
+  { test: (p) => p.startsWith('/projets/btp'),                       modId: 'projets', childId: 'projets/btp' },
+  { test: (p) => p.startsWith('/projets/agriculture'),               modId: 'projets', childId: 'projets/agri' },
+  { test: (p) => p.startsWith('/projets/pepiniere'),                 modId: 'projets', childId: 'projets/pepiniere' },
+  { test: (p) => p.startsWith('/projets/locations'),                 modId: 'projets', childId: 'projets/locations' },
   { test: (p) => p.startsWith('/projets'),                           modId: 'projets' },
+  { test: (p) => p.startsWith('/crm/prospects'),                     modId: 'crm', childId: 'crm/prospects' },
   { test: (p) => p.startsWith('/crm'),                               modId: 'crm', childId: 'crm/clients' },
+  { test: (p) => p.startsWith('/stocks/alertes'),                    modId: 'stocks', childId: 'stocks/alertes' },
+  { test: (p) => p.startsWith('/stocks/mouvements'),                 modId: 'stocks', childId: 'stocks/mouvements' },
   { test: (p) => p.startsWith('/stocks'),                            modId: 'stocks', childId: 'stocks/articles' },
   { test: (p) => p.startsWith('/comptabilite/charges'),              modId: 'compta', childId: 'compta/charges' },
   { test: (p) => p.startsWith('/comptabilite/devis'),                modId: 'compta', childId: 'compta/devis' },

@@ -5,7 +5,7 @@ import { useFetchList } from '../../hooks/useFetchList'
 import { CLIENT_TYPE_BADGE, CLIENT_STATUT_BADGE } from '../../utils/constants'
 
 export default function ClientList() {
-  const { items: clients, loading, error, charger } = useFetchList('/crm/clients/', 'Impossible de charger les clients.')
+  const { items: clients, loading, error, charger } = useFetchList('/crm/clients/?type_client=client', 'Impossible de charger les clients.')
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
 
@@ -78,7 +78,7 @@ export default function ClientList() {
 
       {modal && (
         <Modal titre="Nouveau client" onClose={() => setModal(false)}>
-          <ClientForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+          <ClientForm typeDefault="client" onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
       )}
     </div>

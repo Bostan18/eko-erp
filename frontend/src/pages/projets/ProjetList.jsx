@@ -6,15 +6,19 @@ import { useFetchList } from '../../hooks/useFetchList'
 import { PROJET_STATUT_BADGE, PROJET_TYPE_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
 
-export default function ProjetList() {
-  const { items: projets, loading, error, charger } = useFetchList('/projets/projets/', 'Impossible de charger les projets.')
+export default function ProjetList({ typeProjet = null }) {
+  const endpoint = typeProjet ? `/projets/projets/?type_projet=${typeProjet}` : '/projets/projets/'
+  const { items: projets, loading, error, charger } = useFetchList(endpoint, 'Impossible de charger les projets.')
   const [modal, setModal] = useState(false)
+  const typeLabel = typeProjet ? PROJET_TYPE_LABEL[typeProjet] ?? typeProjet : null
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <p className="font-body text-[#A59F9B] text-sm">
-          {loading ? '…' : `${projets.length} projet${projets.length !== 1 ? 's' : ''}`}
+          {loading
+            ? '…'
+            : `${projets.length} projet${projets.length !== 1 ? 's' : ''}${typeLabel ? ` — ${typeLabel}` : ''}`}
         </p>
         <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau projet</button>
       </div>
@@ -38,7 +42,7 @@ export default function ProjetList() {
               {projets.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">
-                    Aucun projet enregistré
+                    {typeLabel ? `Aucun projet ${typeLabel.toLowerCase()}` : 'Aucun projet enregistré'}
                   </td>
                 </tr>
               ) : (

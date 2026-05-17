@@ -3,6 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import api from '../../services/api'
 import { DEVIS_STATUT_BADGE, DEVIS_STATUT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
+import { useConvertirDevis } from '../../hooks/useConvertirDevis'
+import {
+  ConvertirDevisModal,
+  ConvertirDevisToast,
+  IconCheck,
+  IconInvoice,
+} from '../../components/comptabilite/ConvertirDevisDialog'
 
 const STATUTS_SUIVANTS = {
   brouillon: [{ value: 'envoye',  label: 'Marquer envoyé' }],
@@ -22,7 +29,9 @@ export default function DevisDetail() {
   const [devis, setDevis]     = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
-  const [actionLoading, setActionLoading] = useState(null) // 'convertir' | 'statut' | null
+  const [actionLoading, setActionLoading] = useState(null) // 'statut' | null
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [toast, setToast] = useState(null) // { numero_local } | null
 
   function charger() {
     api.get(`/comptabilite/devis/${id}/`)
@@ -31,6 +40,19 @@ export default function DevisDetail() {
   }
 
   useEffect(() => { charger() /* eslint-disable-next-line */ }, [id])
+
+  const { convertir, loading: convertirLoading } = useConvertirDevis({
+    onSuccess: (data) => {
+      setShowConfirm(false)
+      setToast({ numero_local: data.numero_local })
+      setTimeout(() => navigate(data.redirect_url), 1500)
+      setTimeout(() => setToast(null), 4000)
+    },
+    onError: (msg) => {
+      setShowConfirm(false)
+      setError(msg)
+    },
+  })
 
   async function changerStatut(value) {
     setActionLoading('statut')
@@ -45,25 +67,12 @@ export default function DevisDetail() {
     }
   }
 
-  async function convertirEnFacture() {
-    if (!confirm('Convertir ce devis en facture brouillon ?')) return
-    setActionLoading('convertir')
-    setError('')
-    try {
-      const { data: facture } = await api.post(`/comptabilite/devis/${id}/convertir-facture/`)
-      navigate(`/comptabilite/factures/${facture.id}`)
-    } catch (err) {
-      setError(err.response?.data?.detail ?? 'Échec de la conversion.')
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
   if (loading) return <div className="p-12 text-center text-[#A59F9B] font-body">Chargement…</div>
   if (!devis) return <div className="p-12 text-center text-red-500 font-body">Devis introuvable.</div>
 
   const transitions = STATUTS_SUIVANTS[devis.statut] ?? []
-  const peutConvertir = devis.statut === 'accepte'
+  const dejaConverti = !!devis.facture_liee_id
+  const peutConvertir = devis.statut === 'accepte' && !dejaConverti
 
   return (
     <div className="space-y-6">
@@ -85,7 +94,7 @@ export default function DevisDetail() {
           {devis.projet_nom && <p className="font-body text-[#A59F9B] text-sm">{devis.projet_nom}</p>}
           {devis.date_validite && <p className="font-body text-[#A59F9B] text-xs mt-1">Valide jusqu'au {devis.date_validite}</p>}
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {transitions.map((t) => (
             <button
               key={t.value}
@@ -97,18 +106,68 @@ export default function DevisDetail() {
             </button>
           ))}
           {peutConvertir && (
-            <button className="btn-primary" onClick={convertirEnFacture} disabled={actionLoading === 'convertir'}>
-              {actionLoading === 'convertir' ? 'Conversion…' : 'Convertir en facture'}
+            <button
+              type="button"
+              onClick={() => setShowConfirm(true)}
+              disabled={convertirLoading}
+              className={`bg-forest-700 hover:bg-forest-800 text-white font-display font-medium text-[14px] px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                convertirLoading ? 'opacity-60 cursor-wait' : ''
+              }`}
+            >
+              {convertirLoading ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Conversion en cours…
+                </>
+              ) : (
+                <>
+                  <IconInvoice className="w-4 h-4" />
+                  Convertir en facture
+                </>
+              )}
             </button>
+          )}
+          {dejaConverti && (
+            <div className="bg-forest-50 ring-1 ring-forest-200 rounded-xl px-4 py-3 flex items-center gap-3">
+              <IconCheck className="w-5 h-5 text-forest-600 shrink-0" />
+              <span className="font-body text-[13px] text-forest-700">Converti en</span>
+              <Link
+                to={`/comptabilite/factures/${devis.facture_liee_id}`}
+                className="font-mono text-forest-800 font-medium underline hover:no-underline"
+              >
+                {devis.facture_liee_numero}
+              </Link>
+            </div>
+          )}
+          {devis.statut !== 'accepte' && !dejaConverti && (
+            <div
+              className="group relative inline-flex items-center text-[#A59F9B]"
+              title="La conversion est disponible uniquement pour les devis au statut Accepté."
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8h.01M11 12h1v4h1" />
+              </svg>
+            </div>
           )}
         </div>
       </div>
 
       {error && (
-        <div className="card p-4 bg-red-50 ring-red-200">
-          <p className="text-red-700 text-sm font-body">{error}</p>
+        <div className="bg-red-50 ring-1 ring-red-200 rounded-xl px-4 py-3">
+          <p className="text-red-700 text-[13px] font-body">{error}</p>
         </div>
       )}
+
+      {showConfirm && (
+        <ConvertirDevisModal
+          devis={devis}
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={() => convertir(devis.id)}
+        />
+      )}
+
+      {toast && <ConvertirDevisToast numeroLocal={toast.numero_local} visible={!!toast} />}
 
       <div className="grid grid-cols-3 gap-4">
         <Tile label="Total HT" value={`${fmt(devis.total_ht)} F`} />

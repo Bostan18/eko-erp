@@ -166,7 +166,7 @@ class Facture(TimeStampedModel):
 
     # Relations
     client  = models.ForeignKey("crm.Client", on_delete=models.PROTECT, related_name="factures")
-    devis   = models.OneToOneField(Devis, null=True, blank=True, on_delete=models.SET_NULL, related_name="facture")
+    devis   = models.OneToOneField(Devis, null=True, blank=True, on_delete=models.SET_NULL, related_name="facture_liee")
     projet  = models.ForeignKey("projets.Projet", on_delete=models.SET_NULL, null=True, blank=True, related_name="factures")
 
     # Type / statut

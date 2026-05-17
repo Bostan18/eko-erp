@@ -136,6 +136,23 @@ export default function FactureDetail() {
         </div>
       </div>
 
+      {facture.devis_source && (
+        <div className="bg-[#fbf7f0] ring-1 ring-[#ece2d3] rounded-xl px-4 py-2.5 flex items-center gap-2 text-[12.8px] font-body text-[#7a6b54]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px] text-[#A59F9B] shrink-0">
+            <path d="M6 3h9l4 4v14H6z" />
+            <path d="M15 3v4h4" />
+            <path d="M9 12h7M9 16h5" />
+          </svg>
+          <span>Générée depuis le devis</span>
+          <Link
+            to={`/comptabilite/devis/${facture.devis_source.id}`}
+            className="font-medium text-[#5d4f3a] underline hover:no-underline"
+          >
+            {facture.devis_source.numero}
+          </Link>
+        </div>
+      )}
+
       {error && (
         <div className="card p-4 bg-red-50 ring-red-200">
           <p className="text-red-700 text-sm font-body">{error}</p>

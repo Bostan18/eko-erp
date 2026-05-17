@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import DevisForm from '../../components/forms/DevisForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { useConvertirDevis } from '../../hooks/useConvertirDevis'
+import { ConvertirDevisModal, ConvertirDevisToast } from '../../components/comptabilite/ConvertirDevisDialog'
 import { DEVIS_STATUT_BADGE, DEVIS_STATUT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
 
@@ -16,9 +18,27 @@ const FILTRES = [
 ]
 
 export default function DevisList() {
+  const navigate = useNavigate()
   const { items: devis, loading, error, charger } = useFetchList('/comptabilite/devis/', 'Impossible de charger les devis.')
   const [filtre, setFiltre] = useState('toutes')
   const [modal, setModal]   = useState(false)
+  const [confirmDevis, setConfirmDevis] = useState(null)
+  const [toast, setToast] = useState(null)
+  const [conversionError, setConversionError] = useState('')
+
+  const { convertir } = useConvertirDevis({
+    onSuccess: (data) => {
+      setConfirmDevis(null)
+      setToast({ numero_local: data.numero_local })
+      setTimeout(() => navigate(data.redirect_url), 1500)
+      setTimeout(() => setToast(null), 4000)
+    },
+    onError: (msg) => {
+      setConfirmDevis(null)
+      setConversionError(msg)
+      setTimeout(() => setConversionError(''), 5000)
+    },
+  })
 
   const filtres = devis.filter((d) => filtre === 'toutes' || d.statut === filtre)
   const totalAccepte = devis
@@ -72,14 +92,14 @@ export default function DevisList() {
           <table className="w-full text-sm">
             <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
               <tr>
-                {['Numéro', 'Client', 'Projet', 'Total TTC', 'Statut', 'Validité'].map((h) => (
+                {['Numéro', 'Client', 'Projet', 'Total TTC', 'Statut', 'Validité', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f4ebe0]">
               {filtres.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucun devis</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucun devis</td></tr>
               ) : filtres.map((d) => (
                 <tr key={d.id} className="hover:bg-[#fbf7f0] transition-colors">
                   <td className="px-4 py-3">
@@ -96,6 +116,24 @@ export default function DevisList() {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-body text-[#A59F9B] text-sm">{d.date_validite || '—'}</td>
+                  <td className="px-4 py-3">
+                    {d.facture_liee_id ? (
+                      <Link
+                        to={`/comptabilite/factures/${d.facture_liee_id}`}
+                        className="text-[#A59F9B] font-mono text-[11px] hover:text-forest-700 transition-colors"
+                      >
+                        {d.facture_liee_numero} ↗
+                      </Link>
+                    ) : d.statut === 'accepte' ? (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDevis(d)}
+                        className="text-forest-700 font-display text-[12px] font-medium bg-forest-50 hover:bg-forest-100 px-2.5 py-1 rounded-md ring-1 ring-forest-200 transition-colors"
+                      >
+                        → Facture
+                      </button>
+                    ) : null}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -107,6 +145,22 @@ export default function DevisList() {
         <Modal titre="Nouveau devis" onClose={() => setModal(false)}>
           <DevisForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
+      )}
+
+      {confirmDevis && (
+        <ConvertirDevisModal
+          devis={confirmDevis}
+          onCancel={() => setConfirmDevis(null)}
+          onConfirm={() => convertir(confirmDevis.id)}
+        />
+      )}
+
+      {toast && <ConvertirDevisToast numeroLocal={toast.numero_local} visible={!!toast} />}
+
+      {conversionError && (
+        <div className="fixed top-5 right-5 z-50 bg-red-50 ring-1 ring-red-200 rounded-xl px-4 py-3 text-red-700 text-[13px] font-body shadow-xl">
+          {conversionError}
+        </div>
       )}
     </div>
   )

@@ -1,5 +1,7 @@
+from datetime import timedelta
 from decimal import Decimal
 
+from django.db import transaction
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, status
@@ -34,38 +36,55 @@ class DevisViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="convertir-facture")
     def convertir_facture(self, request, pk=None):
-        """Convertit un devis accepté en facture brouillon."""
+        """Convertit un devis accepté en facture brouillon (transaction atomique)."""
         devis = self.get_object()
+
         if devis.statut != "accepte":
             return Response(
-                {"detail": "Seuls les devis acceptés peuvent être convertis."},
+                {"detail": "Seuls les devis acceptés peuvent être convertis en facture."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        facture_existante = Facture.objects.filter(devis=devis).first()
+        if facture_existante is not None:
+            return Response(
+                {"detail": f"Ce devis a déjà été converti. Voir facture {facture_existante.numero_local}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         from apps.core.models import EntrepriseConfig
         config = EntrepriseConfig.get()
 
-        facture = Facture.objects.create(
-            client         = devis.client,
-            devis          = devis,
-            projet         = devis.projet,
-            date_echeance  = timezone.now().date(),
-            mode_reglement = "transfer",
-            template_fne   = config.template_fne_defaut,
-            notes          = devis.notes,
-        )
-
-        for ligne in devis.lignes.all():
-            LigneFacture.objects.create(
-                facture       = facture,
-                designation   = ligne.designation,
-                quantite      = ligne.quantite,
-                prix_unitaire = ligne.prix_unitaire,
-                remise_pct    = ligne.remise_pct,
-                taux_tva      = _TVA_MAP.get(ligne.taux_tva, "TVA"),
+        with transaction.atomic():
+            facture = Facture.objects.create(
+                client         = devis.client,
+                devis          = devis,
+                projet         = devis.projet,
+                statut         = "brouillon",
+                date_echeance  = timezone.now().date() + timedelta(days=30),
+                mode_reglement = "transfer",
+                template_fne   = config.template_fne_defaut,
+                notes          = f"Générée depuis devis {devis.numero}",
             )
 
-        return Response(FactureSerializer(facture).data, status=status.HTTP_201_CREATED)
+            for ligne in devis.lignes.all():
+                LigneFacture.objects.create(
+                    facture       = facture,
+                    designation   = ligne.designation,
+                    quantite      = ligne.quantite,
+                    prix_unitaire = ligne.prix_unitaire,
+                    remise_pct    = ligne.remise_pct,
+                    taux_tva      = _TVA_MAP.get(ligne.taux_tva, "TVA"),
+                )
+
+        return Response(
+            {
+                "facture_id":   facture.id,
+                "numero_local": facture.numero_local,
+                "redirect_url": f"/comptabilite/factures/{facture.id}",
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LigneDevisViewSet(viewsets.ModelViewSet):

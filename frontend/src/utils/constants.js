@@ -109,6 +109,28 @@ export const CHARGE_CAT_BADGE = {
   autre:          'badge-gray',
 }
 
+// ─── Paie ─────────────────────────────────────────────────────────────────────
+export const BULLETIN_STATUT_BADGE = {
+  genere: 'badge-yellow',
+  paye:   'badge-green',
+}
+
+export const BULLETIN_STATUT_LABEL = {
+  genere: 'Généré',
+  paye:   'Payé',
+}
+
+export const MOIS_NOMS = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+]
+
+export const moisLabel = (isoDate) => {
+  if (!isoDate) return ''
+  const [y, m] = isoDate.split('-').map(Number)
+  return `${MOIS_NOMS[m - 1]} ${y}`
+}
+
 // ─── Stocks ───────────────────────────────────────────────────────────────────
 export const ARTICLE_CAT_LABEL = {
   intrant:     'Intrant agricole',

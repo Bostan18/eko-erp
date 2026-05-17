@@ -1,11 +1,14 @@
-from datetime import timedelta
+from datetime import date as date_cls, timedelta
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Employe, PresenceJournaliere
-from .serializers import EmployeSerializer, PresenceJournaliereSerializer
+from .models import Employe, PresenceJournaliere, BulletinPaie, MissionMoo
+from .serializers import (
+    EmployeSerializer, PresenceJournaliereSerializer,
+    BulletinPaieSerializer, MissionMooSerializer,
+)
 from .exports import paie_excel
 
 
@@ -160,6 +163,47 @@ class PresenceJournaliereViewSet(viewsets.ModelViewSet):
 
         return Response(results, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["post"])
+    def marquer_payees(self, request):
+        """Marque un lot de présences comme payées (paye_le = aujourd'hui par défaut)."""
+        ids = request.data.get("ids", [])
+        date_paiement = request.data.get("paye_le") or str(timezone.now().date())
+        if not ids:
+            return Response({"error": "ids requis"}, status=status.HTTP_400_BAD_REQUEST)
+        nb = PresenceJournaliere.objects.filter(id__in=ids).update(paye_le=date_paiement)
+        return Response({"updated": nb, "paye_le": date_paiement})
+
+    @action(detail=False, methods=["get"])
+    def restant_a_payer(self, request):
+        """Récap par employé journalier : total dû, total payé, restant à payer."""
+        presences = PresenceJournaliere.objects.filter(
+            employe__type_contrat="journalier",
+            present=True,
+        ).select_related("employe")
+
+        recap = {}
+        for p in presences:
+            key = p.employe_id
+            if key not in recap:
+                recap[key] = {
+                    "employe_id": p.employe_id,
+                    "employe_code": p.employe.code,
+                    "employe_nom": p.employe.nom_complet,
+                    "total_du": 0.0,
+                    "total_paye": 0.0,
+                    "restant": 0.0,
+                    "jours_non_payes": 0,
+                }
+            montant = float(p.montant_du)
+            recap[key]["total_du"] += montant
+            if p.paye_le:
+                recap[key]["total_paye"] += montant
+            else:
+                recap[key]["restant"] += montant
+                recap[key]["jours_non_payes"] += 1
+
+        return Response(list(recap.values()))
+
     @action(detail=False, methods=["get"])
     def export_paie(self, request):
         """Export Excel de la feuille de paie pour un mois donné."""
@@ -182,3 +226,73 @@ class PresenceJournaliereViewSet(viewsets.ModelViewSet):
         )
         response["Content-Disposition"] = f'attachment; filename="paie_{mois}_{annee}.xlsx"'
         return response
+
+
+class BulletinPaieViewSet(viewsets.ModelViewSet):
+    queryset = BulletinPaie.objects.select_related("employe").all()
+    serializer_class = BulletinPaieSerializer
+    filterset_fields = ["employe", "mois", "statut"]
+    search_fields = ["employe__nom", "employe__prenom", "employe__code"]
+
+    @action(detail=False, methods=["post"])
+    def generer(self, request):
+        """Génère les bulletins du mois pour tous les CDI actifs. Idempotent : ne recrée pas
+        si le bulletin (employe, mois) existe déjà.
+
+        Body: { "mois": "2026-05" } ou { "mois": "2026-05-01" }
+        """
+        mois_str = request.data.get("mois")
+        if not mois_str:
+            return Response({"error": "mois requis (format YYYY-MM ou YYYY-MM-DD)"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            if len(mois_str) == 7:  # YYYY-MM
+                mois_str = f"{mois_str}-01"
+            mois = date_cls.fromisoformat(mois_str)
+            mois = mois.replace(day=1)
+        except ValueError:
+            return Response({"error": "Format mois invalide"}, status=status.HTTP_400_BAD_REQUEST)
+
+        cdi_actifs = Employe.objects.filter(
+            type_contrat="cdi", statut="actif", is_deleted=False
+        )
+
+        crees = []
+        ignores = []
+        for emp in cdi_actifs:
+            brut = emp.salaire_mensuel or 0
+            obj, created = BulletinPaie.objects.get_or_create(
+                employe=emp, mois=mois,
+                defaults={"brut": brut, "net": brut, "statut": "genere"},
+            )
+            (crees if created else ignores).append(obj.id)
+
+        return Response({
+            "mois": str(mois),
+            "crees": len(crees),
+            "ignores_existants": len(ignores),
+        })
+
+    @action(detail=True, methods=["post"])
+    def marquer_paye(self, request, pk=None):
+        """Marque un bulletin comme payé (paye_le = aujourd'hui par défaut)."""
+        bulletin = self.get_object()
+        bulletin.statut = "paye"
+        bulletin.paye_le = request.data.get("paye_le") or timezone.now().date()
+        bulletin.save()
+        return Response(BulletinPaieSerializer(bulletin).data)
+
+
+class MissionMooViewSet(viewsets.ModelViewSet):
+    queryset = MissionMoo.objects.select_related("employe", "projet").all()
+    serializer_class = MissionMooSerializer
+    filterset_fields = ["employe", "projet"]
+    search_fields = ["employe__nom", "employe__prenom", "description"]
+
+    @action(detail=True, methods=["post"])
+    def marquer_payee(self, request, pk=None):
+        """Marque une mission MOO comme payée."""
+        mission = self.get_object()
+        mission.paye_le = request.data.get("paye_le") or timezone.now().date()
+        mission.save()
+        return Response(MissionMooSerializer(mission).data)

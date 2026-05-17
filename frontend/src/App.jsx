@@ -8,6 +8,10 @@ const EmployeList     = lazy(() => import('./pages/rh/EmployeList'))
 const EmployeDetail   = lazy(() => import('./pages/rh/EmployeDetail'))
 const Pointage        = lazy(() => import('./pages/rh/Pointage'))
 const PointageSemaine = lazy(() => import('./pages/rh/PointageSemaine'))
+const BulletinList    = lazy(() => import('./pages/rh/BulletinList'))
+const BulletinDetail  = lazy(() => import('./pages/rh/BulletinDetail'))
+const PaiementsJournaliers = lazy(() => import('./pages/rh/PaiementsJournaliers'))
+const MissionsMoo     = lazy(() => import('./pages/rh/MissionsMoo'))
 const ProjetList      = lazy(() => import('./pages/projets/ProjetList'))
 const ProjetDetail    = lazy(() => import('./pages/projets/ProjetDetail'))
 const TacheDetail     = lazy(() => import('./pages/projets/TacheDetail'))
@@ -33,7 +37,11 @@ export default function App() {
         <Route path="/rh/:id"                       element={<EmployeDetail />} />
         <Route path="/rh/pointage"                  element={<Pointage />} />
         <Route path="/rh/pointage-semaine"          element={<PointageSemaine />} />
-        <Route path="/rh/paie"                      element={<PlaceholderPage titre="Paie & bulletins" />} />
+        <Route path="/rh/paie/bulletins"            element={<BulletinList />} />
+        <Route path="/rh/paie/bulletins/:id"        element={<BulletinDetail />} />
+        <Route path="/rh/paie/journaliers"          element={<PaiementsJournaliers />} />
+        <Route path="/rh/paie/missions"             element={<MissionsMoo />} />
+        <Route path="/rh/paie"                      element={<Navigate to="/rh/paie/bulletins" replace />} />
         <Route path="/projets"                      element={<ProjetList />} />
         <Route path="/projets/btp"                  element={<ProjetList typeProjet="btp" />} />
         <Route path="/projets/agriculture"          element={<ProjetList typeProjet="agriculture" />} />

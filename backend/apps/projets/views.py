@@ -1,4 +1,7 @@
+from datetime import date, timedelta
+
 from django.db import transaction
+from django.db.models import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,6 +9,7 @@ from .models import Projet, IntervenantProjet, TacheProjet, AffectationTache, Re
 from .serializers import (
     ProjetSerializer, IntervenantProjetSerializer,
     TacheProjetSerializer, AffectationTacheSerializer, RealisationTacheSerializer,
+    ProjetGanttSerializer,
 )
 
 
@@ -14,6 +18,63 @@ class ProjetViewSet(viewsets.ModelViewSet):
     serializer_class = ProjetSerializer
     filterset_fields = ["type_projet", "statut", "client"]
     search_fields = ["code", "nom", "localisation"]
+
+    @action(detail=False, methods=["get"])
+    def gantt(self, request):
+        """Vue Gantt agrégée — projets + tâches sur une période donnée."""
+        today = date.today()
+
+        # ── Période ───────────────────────────────────────────────────────────
+        debut_str = request.query_params.get("date_debut")
+        fin_str = request.query_params.get("date_fin")
+        try:
+            debut = date.fromisoformat(debut_str) if debut_str else today
+            fin = date.fromisoformat(fin_str) if fin_str else today + timedelta(days=90)
+        except ValueError:
+            return Response(
+                {"detail": "Dates invalides (format attendu : YYYY-MM-DD)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if fin < debut:
+            return Response(
+                {"detail": "date_fin doit être >= date_debut."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # ── Filtrage ──────────────────────────────────────────────────────────
+        statuts_param = request.query_params.get("statut")
+        if statuts_param:
+            statuts = [s.strip() for s in statuts_param.split(",") if s.strip()]
+        else:
+            statuts = ["planifie", "en_cours", "suspendu", "termine"]  # tout sauf annule
+
+        # 1 seule requête SQL + prefetch des tâches non supprimées
+        taches_qs = TacheProjet.objects.filter(is_deleted=False).prefetch_related(
+            "affectations__realisations"
+        )
+        projets = (
+            Projet.objects.filter(is_deleted=False, statut__in=statuts)
+            .select_related("client", "chef_projet")
+            .prefetch_related(Prefetch("taches", queryset=taches_qs))
+            # Chevauchement avec la période : (date_debut <= fin) ET (date_fin >= debut)
+            .filter(date_debut__lte=fin)
+            .filter(date_fin_prevue__gte=debut)
+        )
+
+        chef_id = request.query_params.get("chef_chantier")
+        if chef_id:
+            projets = projets.filter(chef_projet_id=chef_id)
+
+        projets = projets.order_by("date_debut", "code")
+
+        return Response({
+            "periode": {
+                "debut": debut.isoformat(),
+                "fin": fin.isoformat(),
+                "jours": (fin - debut).days + 1,
+            },
+            "projets": ProjetGanttSerializer(projets, many=True).data,
+        })
 
 
 class IntervenantProjetViewSet(viewsets.ModelViewSet):

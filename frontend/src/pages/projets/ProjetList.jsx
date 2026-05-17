@@ -14,13 +14,26 @@ export default function ProjetList({ typeProjet = null }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <p className="font-body text-[#A59F9B] text-sm">
           {loading
             ? '…'
             : `${projets.length} projet${projets.length !== 1 ? 's' : ''}${typeLabel ? ` — ${typeLabel}` : ''}`}
         </p>
-        <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau projet</button>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-lg bg-white border border-[#ece2d3] p-0.5">
+            <span className="px-3 py-1.5 rounded-md text-xs font-display font-medium bg-forest-700 text-white">
+              Vue liste
+            </span>
+            <Link
+              to="/projets/planning"
+              className="px-3 py-1.5 rounded-md text-xs font-display font-medium text-[#A59F9B] hover:text-[#1C1817]"
+            >
+              Vue Gantt
+            </Link>
+          </div>
+          <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau projet</button>
+        </div>
       </div>
 
       <div className="card overflow-hidden">

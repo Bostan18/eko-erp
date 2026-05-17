@@ -35,10 +35,11 @@ export const MODULES = [
     group: 'Exploitation',
     path: '/projets',
     children: [
-      { id: 'projets/btp',       label: 'BTP',         path: '/projets/btp' },
-      { id: 'projets/agri',      label: 'Agriculture', path: '/projets/agriculture' },
-      { id: 'projets/pepiniere', label: 'Pépinière',   path: '/projets/pepiniere' },
-      { id: 'projets/locations', label: 'Locations',   path: '/projets/locations' },
+      { id: 'projets/planning',  label: 'Planning Gantt', path: '/projets/planning' },
+      { id: 'projets/btp',       label: 'BTP',            path: '/projets/btp' },
+      { id: 'projets/agri',      label: 'Agriculture',    path: '/projets/agriculture' },
+      { id: 'projets/pepiniere', label: 'Pépinière',      path: '/projets/pepiniere' },
+      { id: 'projets/locations', label: 'Locations',      path: '/projets/locations' },
     ],
   },
   {
@@ -114,6 +115,7 @@ const ROUTE_TO_MODULE = [
   { test: (p) => p.startsWith('/rh/paie/journaliers'),               modId: 'rh', childId: 'rh/paie/journaliers' },
   { test: (p) => p.startsWith('/rh/paie/missions'),                  modId: 'rh', childId: 'rh/paie/missions' },
   { test: (p) => p.startsWith('/rh'),                                modId: 'rh', childId: 'rh/employes' },
+  { test: (p) => p.startsWith('/projets/planning'),                  modId: 'projets', childId: 'projets/planning' },
   { test: (p) => p.startsWith('/projets/btp'),                       modId: 'projets', childId: 'projets/btp' },
   { test: (p) => p.startsWith('/projets/agriculture'),               modId: 'projets', childId: 'projets/agri' },
   { test: (p) => p.startsWith('/projets/pepiniere'),                 modId: 'projets', childId: 'projets/pepiniere' },

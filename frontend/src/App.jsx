@@ -16,6 +16,7 @@ const Reporting       = lazy(() => import('./pages/Reporting'))
 const ProjetList      = lazy(() => import('./pages/projets/ProjetList'))
 const ProjetDetail    = lazy(() => import('./pages/projets/ProjetDetail'))
 const TacheDetail     = lazy(() => import('./pages/projets/TacheDetail'))
+const PlanningGantt   = lazy(() => import('./pages/projets/PlanningGantt'))
 const ClientList      = lazy(() => import('./pages/crm/ClientList'))
 const ProspectList    = lazy(() => import('./pages/crm/ProspectList'))
 const StockList       = lazy(() => import('./pages/stocks/StockList'))
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/rh/paie/missions"             element={<MissionsMoo />} />
         <Route path="/rh/paie"                      element={<Navigate to="/rh/paie/bulletins" replace />} />
         <Route path="/projets"                      element={<ProjetList />} />
+        <Route path="/projets/planning"             element={<PlanningGantt />} />
         <Route path="/projets/btp"                  element={<ProjetList typeProjet="btp" />} />
         <Route path="/projets/agriculture"          element={<ProjetList typeProjet="agriculture" />} />
         <Route path="/projets/pepiniere"            element={<ProjetList typeProjet="pepiniere" />} />

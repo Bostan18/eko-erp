@@ -73,7 +73,7 @@ export const MODULES = [
     path: '/comptabilite/factures',
     children: [
       { id: 'compta/factures',  label: 'Factures',  path: '/comptabilite/factures' },
-      { id: 'compta/paiements', label: 'Paiements', path: '/comptabilite/factures' },
+      { id: 'compta/devis',     label: 'Devis',     path: '/comptabilite/devis' },
       { id: 'compta/charges',   label: 'Charges',   path: '/comptabilite/charges' },
     ],
   },
@@ -84,6 +84,17 @@ export const MODULES = [
     icon: 'Reporting',
     group: 'Pilotage',
     path: '/reporting',
+  },
+  {
+    id: 'parametres',
+    label: 'Paramètres',
+    short: 'Config',
+    icon: 'Settings',
+    group: 'Configuration',
+    path: '/parametres/entreprise',
+    children: [
+      { id: 'parametres/entreprise', label: 'Entreprise', path: '/parametres/entreprise' },
+    ],
   },
 ]
 
@@ -101,8 +112,10 @@ const ROUTE_TO_MODULE = [
   { test: (p) => p.startsWith('/crm'),                               modId: 'crm', childId: 'crm/clients' },
   { test: (p) => p.startsWith('/stocks'),                            modId: 'stocks', childId: 'stocks/articles' },
   { test: (p) => p.startsWith('/comptabilite/charges'),              modId: 'compta', childId: 'compta/charges' },
+  { test: (p) => p.startsWith('/comptabilite/devis'),                modId: 'compta', childId: 'compta/devis' },
   { test: (p) => p.startsWith('/comptabilite'),                      modId: 'compta', childId: 'compta/factures' },
   { test: (p) => p.startsWith('/reporting'),                         modId: 'reporting' },
+  { test: (p) => p.startsWith('/parametres'),                        modId: 'parametres', childId: 'parametres/entreprise' },
 ]
 
 export function matchActive(pathname) {

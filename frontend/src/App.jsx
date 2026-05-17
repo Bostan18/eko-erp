@@ -16,6 +16,9 @@ const StockList       = lazy(() => import('./pages/stocks/StockList'))
 const FactureList     = lazy(() => import('./pages/comptabilite/FactureList'))
 const FactureDetail   = lazy(() => import('./pages/comptabilite/FactureDetail'))
 const ChargeList      = lazy(() => import('./pages/comptabilite/ChargeList'))
+const DevisList       = lazy(() => import('./pages/comptabilite/DevisList'))
+const DevisDetail     = lazy(() => import('./pages/comptabilite/DevisDetail'))
+const ParametresEntreprise = lazy(() => import('./pages/parametres/ParametresEntreprise'))
 
 export default function App() {
   return (
@@ -35,7 +38,11 @@ export default function App() {
         <Route path="/comptabilite/factures"        element={<FactureList />} />
         <Route path="/comptabilite/factures/:id"    element={<FactureDetail />} />
         <Route path="/comptabilite/charges"         element={<ChargeList />} />
+        <Route path="/comptabilite/devis"           element={<DevisList />} />
+        <Route path="/comptabilite/devis/:id"       element={<DevisDetail />} />
         <Route path="/reporting"                    element={<PlaceholderPage titre="Reporting" />} />
+        <Route path="/parametres/entreprise"        element={<ParametresEntreprise />} />
+        <Route path="/parametres"                   element={<Navigate to="/parametres/entreprise" replace />} />
         <Route path="/comptabilite"                 element={<Navigate to="/comptabilite/factures" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

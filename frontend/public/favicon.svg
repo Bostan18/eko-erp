@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Disque vert mousse (forest/earth-tech teal) -->
+  <rect width="512" height="512" fill="#F4EFE6"/>
+  <circle cx="256" cy="256" r="200" fill="#1D9E75"/>
+  <!-- Accent terracotta (feuille stylisée) -->
+  <path d="M 200 290 Q 256 180 340 220 Q 320 320 230 340 Q 200 330 200 290 Z"
+        fill="#D85A30" opacity="0.92"/>
+  <!-- Lettre E -->
+  <g fill="#FFFFFF" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+     font-size="170" font-weight="800" text-anchor="middle">
+    <text x="256" y="320">E</text>
+  </g>
+</svg>

@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Projet, IntervenantProjet, TacheProjet, AffectationTache, RealisationTache
+from .models import (
+    Projet, IntervenantProjet, TacheProjet, AffectationTache, RealisationTache,
+    PhotoChantier,
+)
 
 
 class IntervenantInline(admin.TabularInline):
@@ -66,3 +69,13 @@ class RealisationTacheAdmin(admin.ModelAdmin):
     list_filter = ["date"]
     search_fields = ["affectation__employe__nom", "affectation__tache__nom"]
     readonly_fields = ["montant_calcule"]
+
+
+@admin.register(PhotoChantier)
+class PhotoChantierAdmin(admin.ModelAdmin):
+    list_display = ["projet", "type_photo", "prise_le", "prise_par", "latitude", "longitude"]
+    list_filter = ["type_photo", "prise_le"]
+    search_fields = ["projet__code", "projet__nom", "legende"]
+    autocomplete_fields = ["projet", "prise_par"]
+    readonly_fields = ["thumbnail"]
+    date_hierarchy = "prise_le"

@@ -1,16 +1,37 @@
 from datetime import date, timedelta
+from io import BytesIO
 
+from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
-from .models import Projet, IntervenantProjet, TacheProjet, AffectationTache, RealisationTache
+from .models import (
+    Projet, IntervenantProjet, TacheProjet, AffectationTache, RealisationTache,
+    PhotoChantier,
+)
 from .serializers import (
     ProjetSerializer, IntervenantProjetSerializer,
     TacheProjetSerializer, AffectationTacheSerializer, RealisationTacheSerializer,
-    ProjetGanttSerializer,
+    ProjetGanttSerializer, PhotoChantierSerializer,
 )
+
+
+THUMBNAIL_MAX = (320, 320)
+
+
+def _generer_thumbnail(image_field):
+    """Génère un JPEG miniature 320×320 à partir d'une ImageField. Retourne un ContentFile."""
+    from PIL import Image
+
+    with Image.open(image_field) as img:
+        img = img.convert("RGB")
+        img.thumbnail(THUMBNAIL_MAX)
+        buf = BytesIO()
+        img.save(buf, format="JPEG", quality=80)
+    return ContentFile(buf.getvalue())
 
 
 class ProjetViewSet(viewsets.ModelViewSet):
@@ -75,6 +96,47 @@ class ProjetViewSet(viewsets.ModelViewSet):
             },
             "projets": ProjetGanttSerializer(projets, many=True).data,
         })
+
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="photos",
+        parser_classes=[MultiPartParser, FormParser, JSONParser],
+    )
+    def photos(self, request, pk=None):
+        """Liste ou ajout d'une photo géolocalisée sur un projet."""
+        projet = self.get_object()
+
+        if request.method == "GET":
+            qs = projet.photos.filter(is_deleted=False)
+            type_photo = request.query_params.get("type_photo")
+            if type_photo:
+                qs = qs.filter(type_photo=type_photo)
+            since = request.query_params.get("since")
+            if since:
+                try:
+                    qs = qs.filter(prise_le__date__gte=date.fromisoformat(since))
+                except ValueError:
+                    return Response({"detail": "Paramètre 'since' invalide."}, status=400)
+            ser = PhotoChantierSerializer(qs, many=True, context={"request": request})
+            return Response(ser.data)
+
+        # POST — création photo
+        data = request.data.copy()
+        data["projet"] = projet.id
+        ser = PhotoChantierSerializer(data=data, context={"request": request})
+        ser.is_valid(raise_exception=True)
+        photo = ser.save(prise_par=request.user)
+
+        # Thumbnail générée à partir de l'image source
+        try:
+            thumb = _generer_thumbnail(photo.image)
+            photo.thumbnail.save(f"thumb_{photo.image.name.split('/')[-1]}", thumb, save=True)
+        except Exception:  # noqa: BLE001 — l'absence de thumb n'est pas bloquante
+            pass
+
+        out = PhotoChantierSerializer(photo, context={"request": request}).data
+        return Response(out, status=status.HTTP_201_CREATED)
 
 
 class IntervenantProjetViewSet(viewsets.ModelViewSet):

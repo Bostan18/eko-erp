@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Icon } from '../icons'
 import { MODULE_BY_ID } from './modules'
+import SyncStatus from '../offline/SyncStatus'
 
 export default function Header({ activeModId, activeChildId }) {
   const searchRef = useRef(null)
@@ -53,6 +54,8 @@ export default function Header({ activeModId, activeChildId }) {
             ⌘K
           </span>
         </div>
+
+        <SyncStatus />
 
         <button
           title="Notifications"

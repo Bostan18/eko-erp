@@ -2,7 +2,10 @@ from datetime import date
 
 from rest_framework import serializers
 
-from .models import Projet, IntervenantProjet, TacheProjet, AffectationTache, RealisationTache
+from .models import (
+    Projet, IntervenantProjet, TacheProjet, AffectationTache, RealisationTache,
+    PhotoChantier,
+)
 
 
 # ── Couleurs par type de projet (Sprint 4 — vue Gantt) ────────────────────────
@@ -150,3 +153,33 @@ class ProjetGanttSerializer(serializers.ModelSerializer):
                 if self.get_progression_pct(obj) < attendue - 10:
                     return True
         return False
+
+
+# ── Photo de chantier (Sprint PWA) ───────────────────────────────────────────
+
+class PhotoChantierSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+    prise_par_username = serializers.CharField(source="prise_par.username", read_only=True)
+
+    class Meta:
+        model = PhotoChantier
+        fields = [
+            "id", "projet", "image", "image_url", "thumbnail_url",
+            "latitude", "longitude", "prise_le", "legende",
+            "type_photo", "prise_par", "prise_par_username",
+            "created_at",
+        ]
+        read_only_fields = ["id", "image_url", "thumbnail_url", "prise_par", "created_at"]
+
+    def _abs_url(self, field):
+        if not field:
+            return None
+        request = self.context.get("request")
+        return request.build_absolute_uri(field.url) if request else field.url
+
+    def get_image_url(self, obj):
+        return self._abs_url(obj.image)
+
+    def get_thumbnail_url(self, obj):
+        return self._abs_url(obj.thumbnail) or self._abs_url(obj.image)

@@ -4,6 +4,9 @@ import MainLayout from './components/layout/MainLayout'
 import Login from './pages/Login'
 
 const Dashboard       = lazy(() => import('./pages/Dashboard'))
+const MobileHome      = lazy(() => import('./pages/MobileHome'))
+const PhotoCapture    = lazy(() => import('./pages/projets/PhotoCapture'))
+const PointageMobile  = lazy(() => import('./pages/rh/PointageMobile'))
 const EmployeList     = lazy(() => import('./pages/rh/EmployeList'))
 const EmployeDetail   = lazy(() => import('./pages/rh/EmployeDetail'))
 const Pointage        = lazy(() => import('./pages/rh/Pointage'))
@@ -34,7 +37,10 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route element={<MainLayout />}>
-        <Route path="/"                             element={<Dashboard />} />
+        <Route path="/"                             element={<HomeOrMobile />} />
+        <Route path="/mobile"                       element={<MobileHome />} />
+        <Route path="/projets/:id/photos/nouvelle"  element={<PhotoCapture />} />
+        <Route path="/rh/pointage-mobile"           element={<PointageMobile />} />
         <Route path="/rh"                           element={<EmployeList />} />
         <Route path="/rh/:id"                       element={<EmployeDetail />} />
         <Route path="/rh/pointage"                  element={<Pointage />} />
@@ -81,4 +87,12 @@ function PlaceholderPage({ titre }) {
       </div>
     </div>
   )
+}
+
+/** Sur écran < 768 px → redirige / vers /mobile (MobileHome). */
+function HomeOrMobile() {
+  if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+    return <Navigate to="/mobile" replace />
+  }
+  return <Dashboard />
 }

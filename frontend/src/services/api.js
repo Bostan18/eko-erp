@@ -15,7 +15,45 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config
-    if (error.response?.status === 401 && !original._retry) {
+
+    // ── Hors-ligne : tenter de bufferiser les écritures whitelistées ───────
+    if (error.code === 'ERR_NETWORK' || !error.response) {
+      const isWrite = ['post', 'put', 'patch'].includes((original?.method || '').toLowerCase())
+      if (isWrite && original) {
+        const offline = await import('../offline/syncManager')
+        const endpoint = (original.url || '').replace(/^\/api/, '')
+        if (offline.endpointAutoriseOffline(endpoint)) {
+          let payload = original.data
+          if (payload instanceof FormData) {
+            const entries = []
+            for (const [k, v] of payload.entries()) {
+              if (v instanceof Blob) entries.push([k, { blob: v, name: v.name ?? 'file' }])
+              else entries.push([k, v])
+            }
+            payload = { __formData: true, entries }
+          } else if (typeof payload === 'string') {
+            try { payload = JSON.parse(payload) } catch { /* keep string */ }
+          }
+          const queued = await offline.queueOp({
+            type: endpoint,
+            endpoint,
+            method: original.method?.toUpperCase() ?? 'POST',
+            payload,
+          })
+          // Réponse synthétique pour ne pas casser les callers
+          return Promise.resolve({
+            status: 202,
+            statusText: 'Queued offline',
+            data: { offline: true, queued: true, id: queued.id },
+            headers: {},
+            config: original,
+          })
+        }
+      }
+    }
+
+    // ── 401 : refresh + replay ────────────────────────────────────────────
+    if (error.response?.status === 401 && original && !original._retry) {
       original._retry = true
       const refresh = localStorage.getItem('refresh_token')
       if (refresh) {
@@ -25,7 +63,7 @@ api.interceptors.response.use(
           original.headers.Authorization = `Bearer ${data.access}`
           return api(original)
         } catch {
-          // refresh also failed — fall through to logout
+          // refresh failed
         }
       }
       localStorage.removeItem('access_token')

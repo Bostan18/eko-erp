@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import Sum
 from apps.core.models import SoftDeleteModel, TimeStampedModel
@@ -157,3 +158,35 @@ class RealisationTache(TimeStampedModel):
     def save(self, *args, **kwargs):
         self.montant_calcule = self.quantite_realisee * self.affectation.tache.tarif_unitaire
         super().save(*args, **kwargs)
+
+
+# ── Photos de chantier géolocalisées (Sprint PWA mobile terrain) ──────────────
+
+class PhotoChantier(SoftDeleteModel):
+    TYPE_CHOICES = [
+        ("avant",    "Avant chantier"),
+        ("apres",    "Après chantier"),
+        ("incident", "Incident"),
+        ("autre",    "Autre"),
+    ]
+
+    projet      = models.ForeignKey(Projet, on_delete=models.CASCADE, related_name="photos")
+    image       = models.ImageField(upload_to="chantiers/%Y/%m/")
+    thumbnail   = models.ImageField(upload_to="chantiers/%Y/%m/thumb/", blank=True, null=True)
+    latitude    = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude   = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    prise_le    = models.DateTimeField()
+    legende     = models.CharField(max_length=200, blank=True)
+    prise_par   = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="photos_chantier",
+    )
+    type_photo  = models.CharField(max_length=15, choices=TYPE_CHOICES, default="autre")
+
+    class Meta:
+        verbose_name = "Photo chantier"
+        ordering = ["-prise_le"]
+
+    def __str__(self):
+        return f"{self.projet.code} · {self.type_photo} · {self.prise_le:%Y-%m-%d %H:%M}"

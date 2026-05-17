@@ -5,6 +5,8 @@ import Header from './Header'
 import BottomNav from './BottomNav'
 import { matchActive } from './modules'
 import useAuthStore from '../../store/authStore'
+import OfflineBanner from '../offline/OfflineBanner'
+import InstallPrompt from '../offline/InstallPrompt'
 
 const COLLAPSED_KEY = 'eko.sidebar.collapsed'
 
@@ -25,6 +27,24 @@ export default function MainLayout() {
     localStorage.setItem(COLLAPSED_KEY, collapsed ? '1' : '0')
   }, [collapsed])
 
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+    // Auto-sync au passage online + prefetch initial des données de référence
+    Promise.all([
+      import('../../offline/syncManager'),
+      import('../../offline/networkStatus'),
+    ]).then(([offline, net]) => {
+      if (cancelled) return
+      offline.prefetchReferenceData()
+      const handler = () => offline.syncAll().catch(() => {})
+      window.addEventListener('online', handler)
+      if (net.isOnline()) offline.syncAll().catch(() => {})
+      return () => window.removeEventListener('online', handler)
+    })
+    return () => { cancelled = true }
+  }, [token])
+
   if (!token) return <Navigate to="/login" replace />
 
   const { modId, childId } = matchActive(location.pathname)
@@ -41,6 +61,7 @@ export default function MainLayout() {
       </div>
 
       <main className="flex-1 flex flex-col min-w-0 bg-[#faf6ee]">
+        <OfflineBanner />
         <div className="hidden md:block">
           <Header activeModId={modId} activeChildId={childId} />
         </div>
@@ -53,6 +74,7 @@ export default function MainLayout() {
       </main>
 
       <BottomNav activeModId={modId} />
+      <InstallPrompt />
     </div>
   )
 }

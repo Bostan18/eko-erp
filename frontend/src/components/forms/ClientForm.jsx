@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
+import { FormSection, FormRow, Field } from '../ui/Modal'
 
-const TYPE_LABEL = { client: 'client', prospect: 'prospect', partenaire: 'partenaire' }
-
-function buildInit(typeDefault) {
-  return {
-    code: '', nom: '', type_client: typeDefault, secteur: '',
-    statut: 'actif', telephone: '', email: '', localite: '', notes: '',
-  }
+const INIT = {
+  code: '', nom: '', type_client: 'prospect', secteur: '',
+  statut: 'actif', telephone: '', email: '', localite: '', notes: '',
 }
 
 function validate(form) {
@@ -20,8 +17,8 @@ function validate(form) {
   return null
 }
 
-export default function ClientForm({ onSuccess, onClose, typeDefault = 'prospect' }) {
-  const [form, setForm]     = useState(() => buildInit(typeDefault))
+export default function ClientForm({ onSuccess, onClose }) {
+  const [form, setForm]     = useState(INIT)
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -44,83 +41,82 @@ export default function ClientForm({ onSuccess, onClose, typeDefault = 'prospect
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
-      )}
+    <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      <div className="flex-1">
+        {error && (
+          <div className="alert-red mb-5">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+            {error}
+          </div>
+        )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Code *</label>
-          <input className="input" placeholder="CLI-001" value={form.code}
-            onChange={(e) => set('code', e.target.value.toUpperCase())} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type *</label>
-          <select className="input" value={form.type_client} onChange={(e) => set('type_client', e.target.value)}>
-            <option value="prospect">Prospect</option>
-            <option value="client">Client</option>
-            <option value="partenaire">Partenaire</option>
-          </select>
-        </div>
+        <FormSection titre="Identification">
+          <FormRow cols={2}>
+            <Field label="Code" required hint="Format : CLI-001">
+              <input className="input" placeholder="CLI-001" value={form.code}
+                onChange={(e) => set('code', e.target.value.toUpperCase())} />
+            </Field>
+            <Field label="Type" required>
+              <select className="input" value={form.type_client} onChange={(e) => set('type_client', e.target.value)}>
+                <option value="prospect">Prospect</option>
+                <option value="client">Client</option>
+                <option value="partenaire">Partenaire</option>
+              </select>
+            </Field>
+          </FormRow>
+          <Field label="Nom / Raison sociale" required>
+            <input className="input" placeholder="BOUAKÉ CONSTRUCTIONS SARL" value={form.nom}
+              onChange={(e) => set('nom', e.target.value)} />
+          </Field>
+        </FormSection>
+
+        <FormSection titre="Classification">
+          <FormRow cols={2}>
+            <Field label="Secteur">
+              <select className="input" value={form.secteur} onChange={(e) => set('secteur', e.target.value)}>
+                <option value="">— Choisir —</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="btp">BTP</option>
+                <option value="collectivite">Collectivité</option>
+                <option value="prive">Privé</option>
+              </select>
+            </Field>
+            <Field label="Statut">
+              <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
+                <option value="actif">Actif</option>
+                <option value="inactif">Inactif</option>
+                <option value="negociation">En négociation</option>
+              </select>
+            </Field>
+          </FormRow>
+        </FormSection>
+
+        <FormSection titre="Contact">
+          <FormRow cols={2}>
+            <Field label="Téléphone">
+              <input className="input" placeholder="07 00 00 00 00" value={form.telephone}
+                onChange={(e) => set('telephone', e.target.value)} />
+            </Field>
+            <Field label="Email">
+              <input type="email" className="input" placeholder="contact@societe.ci" value={form.email}
+                onChange={(e) => set('email', e.target.value)} />
+            </Field>
+          </FormRow>
+          <Field label="Localité">
+            <input className="input" placeholder="Abidjan, Bouaké…" value={form.localite}
+              onChange={(e) => set('localite', e.target.value)} />
+          </Field>
+          <Field label="Notes" hint="Informations internes, contexte commercial, etc.">
+            <textarea className="input resize-none" rows={2} placeholder="Informations complémentaires…"
+              value={form.notes} onChange={(e) => set('notes', e.target.value)} />
+          </Field>
+        </FormSection>
       </div>
 
-      <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom / Raison sociale *</label>
-        <input className="input" placeholder="BOUAKÉ CONSTRUCTIONS SARL" value={form.nom}
-          onChange={(e) => set('nom', e.target.value)} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Secteur</label>
-          <select className="input" value={form.secteur} onChange={(e) => set('secteur', e.target.value)}>
-            <option value="">— Choisir —</option>
-            <option value="agriculture">Agriculture</option>
-            <option value="btp">BTP</option>
-            <option value="collectivite">Collectivité</option>
-            <option value="prive">Privé</option>
-          </select>
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Statut</label>
-          <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
-            <option value="actif">Actif</option>
-            <option value="inactif">Inactif</option>
-            <option value="negociation">En négociation</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Téléphone</label>
-          <input className="input" placeholder="07 00 00 00 00" value={form.telephone}
-            onChange={(e) => set('telephone', e.target.value)} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Email</label>
-          <input type="email" className="input" placeholder="contact@societe.ci" value={form.email}
-            onChange={(e) => set('email', e.target.value)} />
-        </div>
-      </div>
-
-      <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Localité</label>
-        <input className="input" placeholder="Abidjan, Bouaké…" value={form.localite}
-          onChange={(e) => set('localite', e.target.value)} />
-      </div>
-
-      <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Notes</label>
-        <textarea className="input resize-none" rows={2} placeholder="Informations complémentaires…"
-          value={form.notes} onChange={(e) => set('notes', e.target.value)} />
-      </div>
-
-      <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
-        <button type="submit" className="btn-primary flex-1" disabled={saving}>
-          {saving ? 'Enregistrement…' : `Créer le ${TYPE_LABEL[form.type_client] ?? 'client'}`}
+      <div className="flex gap-2 justify-end pt-4 border-t border-sand-200 -mx-6 px-6 -mb-5 pb-5 mt-2 bg-sand-50/40">
+        <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
+          {saving ? 'Enregistrement…' : 'Créer le client'}
         </button>
       </div>
     </form>

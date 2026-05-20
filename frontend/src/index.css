@@ -3,48 +3,140 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
-
+  * { box-sizing: border-box; }
   body {
-    @apply font-body bg-[#fbf7f0] text-[#1C1817] antialiased;
+    @apply font-body bg-sand-100 text-ink antialiased;
   }
-
-  h1, h2, h3, h4 {
-    @apply font-display;
-  }
+  h1, h2, h3, h4 { @apply font-display tracking-tight; }
+  /* Scrollbar plus discrète */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #dcd6c5; border-radius: 3px; }
 }
 
 @layer components {
+  /* ─── Buttons ───────────────────────────────────────── */
   .btn-primary {
-    @apply bg-forest-700 text-white px-4 py-2 rounded-lg font-display font-medium text-sm
-           hover:bg-forest-800 transition-colors duration-150 focus:outline-none focus:ring-2
-           focus:ring-forest-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-1.5 bg-forest-700 text-white px-3.5 py-2 rounded-lg
+           font-display font-medium text-[13px] hover:bg-forest-800 transition-colors
+           focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2
+           focus:ring-offset-sand-100 disabled:opacity-50 disabled:cursor-not-allowed;
   }
-
   .btn-secondary {
-    @apply bg-white text-[#1C1817] ring-1 ring-[#ece2d3] px-4 py-2 rounded-lg font-display font-medium text-sm
-           hover:bg-[#fbf7f0] transition-colors duration-150;
+    @apply inline-flex items-center gap-1.5 bg-white text-ink border border-sand-200 px-3.5 py-2
+           rounded-lg font-display font-medium text-[13px] hover:bg-sand-50 transition-colors;
   }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sand-700 px-3 py-2 rounded-lg
+           font-display font-medium text-[13px] hover:bg-sand-100 transition-colors;
+  }
+  .btn-danger {
+    @apply inline-flex items-center gap-1.5 bg-red-600 text-white px-3.5 py-2 rounded-lg
+           font-display font-medium text-[13px] hover:bg-red-700 transition-colors;
+  }
+  .btn-sm { @apply px-2.5 py-1 text-[12px]; }
 
+  /* ─── Cards ─────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl ring-1 ring-[#ece2d3];
+    @apply bg-white rounded-xl border border-sand-200 shadow-card;
   }
+  .card-head {
+    @apply flex items-center justify-between px-5 py-3.5 border-b border-sand-200;
+  }
+  .card-title { @apply font-display font-semibold text-sm text-ink; }
 
+  /* ─── Inputs ────────────────────────────────────────── */
   .input {
-    @apply w-full px-3 py-2 bg-white ring-1 ring-[#ece2d3] rounded-lg text-sm font-body text-[#1C1817]
-           focus:outline-none focus:ring-2 focus:ring-forest-500
-           placeholder:text-[#A59F9B] transition-all duration-150;
+    @apply w-full px-3 py-2 bg-white border border-sand-200 rounded-lg text-[13px] font-body
+           text-ink placeholder-sand-400 transition-all
+           focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-500/15;
+  }
+  .input-sm { @apply py-1.5 text-[12.5px]; }
+
+  /* ─── Page head ─────────────────────────────────────── */
+  .page-eyebrow {
+    @apply font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500;
+  }
+  .page-title {
+    @apply font-display font-bold text-ink text-[26px] leading-none tracking-tight;
+  }
+  .page-sub {
+    @apply font-body text-sand-600 text-[13px];
   }
 
+  /* ─── Badges (forme pilule sobre, voir Badge.jsx) ─── */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-display font-medium;
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border
+           font-display font-medium text-[11px] leading-tight whitespace-nowrap;
+  }
+  .badge-green  { @apply badge bg-forest-50 text-forest-700 border-forest-100; }
+  .badge-gold   { @apply badge bg-gold-50   text-gold-700   border-gold-200; }
+  .badge-red    { @apply badge bg-red-50    text-red-700    border-red-100; }
+  .badge-blue   { @apply badge bg-blue-50   text-blue-700   border-blue-100; }
+  .badge-gray   { @apply badge bg-sand-100  text-sand-700   border-sand-200; }
+  .badge-ink    { @apply badge bg-ink       text-sand-100   border-ink; }
+
+  /* ─── Tableaux denses ─────────────────────────────── */
+  .table-eko { @apply w-full text-[13px]; }
+  .table-eko thead { @apply bg-sand-50; }
+  .table-eko th {
+    @apply text-left font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500
+           font-medium px-4 py-2.5 border-b border-sand-200;
+  }
+  .table-eko tbody td {
+    @apply px-4 py-3 border-b border-sand-100 align-middle;
+  }
+  .table-eko tbody tr:last-child td { @apply border-b-0; }
+  .table-eko tbody tr { @apply transition-colors hover:bg-sand-50; }
+  .table-eko .mono-cell { @apply font-mono text-[11.5px] text-sand-700; }
+  .table-eko .num { @apply font-display font-semibold text-right text-ink; }
+
+  /* ─── Tabs ──────────────────────────────────────────── */
+  .tab {
+    @apply px-4 py-2.5 text-[13px] font-display font-medium text-sand-500
+           border-b-2 border-transparent cursor-pointer transition-colors -mb-px hover:text-ink;
+  }
+  .tab.active { @apply text-forest-700 border-forest-500; }
+
+  /* ─── Alert banner ─────────────────────────────────── */
+  .alert-gold {
+    @apply bg-gold-50 border border-gold-200 rounded-lg px-4 py-2.5 text-[12.5px] text-gold-700
+           flex items-center gap-2;
+  }
+  .alert-red {
+    @apply bg-red-50 border border-red-100 rounded-lg px-4 py-2.5 text-[12.5px] text-red-700
+           flex items-center gap-2;
   }
 
-  .badge-green  { @apply badge bg-forest-50 text-forest-700; }
-  .badge-yellow { @apply badge bg-amber-50  text-amber-700; }
-  .badge-red    { @apply badge bg-red-50    text-red-700; }
-  .badge-gray   { @apply badge bg-[#f4ebe0] text-[#A59F9B]; }
-  .badge-blue   { @apply badge bg-blue-50   text-blue-700; }
+  /* ─── KPI ─────────────────────────────────────────── */
+  .kpi {
+    @apply relative bg-white rounded-xl border border-sand-200 p-5 overflow-hidden;
+  }
+  .kpi-label {
+    @apply font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500;
+  }
+  .kpi-value {
+    @apply font-display font-bold text-[26px] leading-none tracking-tight text-ink mt-2;
+  }
+  .kpi-unit { @apply text-[13px] font-normal text-sand-500 ml-1; }
+  .kpi-sub { @apply text-[11.5px] mt-2; }
+  .kpi-icon { @apply absolute right-4 top-4 text-sand-200 pointer-events-none; }
+
+  /* ─── Sidebar items ─────────────────────────────── */
+  .nav-eyebrow {
+    @apply font-mono text-[10px] uppercase tracking-[0.14em] text-forest-500/70 px-5 pt-3 pb-1.5;
+  }
+  .nav-item {
+    @apply flex items-center gap-2.5 px-5 py-2 text-[13px] font-display font-medium
+           text-forest-200 border-l-[3px] border-transparent transition-colors
+           hover:bg-forest-900/60 hover:text-white;
+  }
+  .nav-item.active {
+    @apply bg-forest-900 text-white border-forest-500;
+  }
+  .nav-count {
+    @apply text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-forest-800 text-forest-100;
+  }
+  .nav-count-gold { @apply bg-gold-400 text-forest-950; }
+  .nav-count-red  { @apply bg-red-500  text-white; }
 }

@@ -1,21 +1,16 @@
 import { useEffect, useState, useCallback } from 'react'
 import api from '../../services/api'
+import { fmt } from '../../utils/format'
 
-function today() {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function fmt(n) {
-  return Number(n).toLocaleString('fr-FR')
-}
+function today() { return new Date().toISOString().slice(0, 10) }
 
 export default function Pointage() {
-  const [date, setDate]           = useState(today())
-  const [rows, setRows]           = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [saving, setSaving]       = useState(false)
-  const [saved, setSaved]         = useState(false)
-  const [error, setError]         = useState('')
+  const [date, setDate]       = useState(today())
+  const [rows, setRows]       = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+  const [saved, setSaved]     = useState(false)
+  const [error, setError]     = useState('')
 
   const charger = useCallback((d) => {
     setLoading(true)
@@ -23,13 +18,11 @@ export default function Pointage() {
     setSaved(false)
     api.get(`/rh/presences/feuille_journee/?date=${d}`)
       .then(({ data }) => {
-        setRows(
-          data.presences.map((p) => ({
-            ...p,
-            present: p.present ?? true,
-            heures_travaillees: p.heures_travaillees ?? '8.0',
-          }))
-        )
+        setRows(data.presences.map((p) => ({
+          ...p,
+          present: p.present ?? true,
+          heures_travaillees: p.heures_travaillees ?? '8.0',
+        })))
       })
       .catch(() => setError('Impossible de charger la feuille de pointage.'))
       .finally(() => setLoading(false))
@@ -38,15 +31,10 @@ export default function Pointage() {
   useEffect(() => { charger(date) }, [date, charger])
 
   function togglePresent(idx) {
-    setRows((prev) =>
-      prev.map((r, i) => i === idx ? { ...r, present: !r.present } : r)
-    )
+    setRows((prev) => prev.map((r, i) => i === idx ? { ...r, present: !r.present } : r))
   }
-
   function updateField(idx, field, value) {
-    setRows((prev) =>
-      prev.map((r, i) => i === idx ? { ...r, [field]: value } : r)
-    )
+    setRows((prev) => prev.map((r, i) => i === idx ? { ...r, [field]: value } : r))
   }
 
   async function sauvegarder() {
@@ -72,19 +60,17 @@ export default function Pointage() {
     }
   }
 
-  const totalJour = rows
-    .filter((r) => r.present)
-    .reduce((s, r) => s + Number(r.taux_journalier || 0), 0)
-
+  const totalJour = rows.filter((r) => r.present).reduce((s, r) => s + Number(r.taux_journalier || 0), 0)
   const nbPresents = rows.filter((r) => r.present).length
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <p className="font-body text-[#A59F9B] text-sm">
-          Saisie des présences — journaliers actifs
-        </p>
+      <div className="flex items-end justify-between gap-6">
+        <div>
+          <p className="page-eyebrow mb-1.5">RH / Pointage</p>
+          <h1 className="page-title">Pointage journalier</h1>
+          <p className="page-sub mt-1.5">Saisie des présences — journaliers actifs</p>
+        </div>
         <div className="flex gap-2">
           <button
             className="btn-secondary"
@@ -97,164 +83,120 @@ export default function Pointage() {
                   URL.revokeObjectURL(href)
                 })
             }}
-          >
-            ↓ Feuille de paie
-          </button>
+          >⬇ Feuille de paie</button>
           <button
             onClick={sauvegarder}
             disabled={saving || loading || rows.length === 0}
-            className="btn-primary min-w-[140px]"
+            className="btn-primary min-w-[150px] justify-center"
           >
             {saving ? 'Enregistrement…' : 'Enregistrer tout'}
           </button>
         </div>
       </div>
 
-      {/* Date + stats */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#A59F9B] mb-1">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="input w-44"
-          />
-        </div>
+      {/* Date + stats compactes */}
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1">
+          <span className="text-[12px] font-display font-medium text-ink">Date</span>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input w-44" />
+        </label>
 
-        <div className="flex gap-3 mt-5">
-          <div className="card px-4 py-2 flex items-center gap-2 border-forest-100">
-            <span className="font-display font-bold text-forest-700 text-lg">{nbPresents}</span>
-            <span className="font-body text-[#A59F9B] text-sm">présent{nbPresents !== 1 ? 's' : ''} / {rows.length}</span>
+        <div className="ml-auto flex gap-3">
+          <div className="kpi !p-3 !pr-5 flex items-center gap-3 min-w-0">
+            <p className="font-display font-bold text-forest-700 text-xl leading-none">{nbPresents}</p>
+            <p className="text-[12px] text-sand-600">
+              présent{nbPresents !== 1 ? 's' : ''}
+              <span className="text-sand-400"> / {rows.length}</span>
+            </p>
           </div>
-          <div className="card px-4 py-2 flex items-center gap-2 border-amber-100 bg-amber-50">
-            <span className="font-display font-bold text-amber-700 text-lg">{fmt(totalJour)}</span>
-            <span className="font-body text-amber-600 text-sm">F à payer</span>
+          <div className="kpi !p-3 !pr-5 flex items-center gap-3 min-w-0">
+            <p className="font-display font-bold text-gold-700 text-xl leading-none">{fmt(totalJour)}</p>
+            <p className="text-[12px] text-sand-600">F à payer</p>
           </div>
         </div>
       </div>
 
-      {/* Feedback */}
-      {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm font-body">
-          {error}
-        </div>
-      )}
+      {error && <div className="alert-red"><span className="w-1.5 h-1.5 bg-red-500 rounded-full" />{error}</div>}
       {saved && !error && (
-        <div className="px-4 py-3 bg-forest-50 border border-forest-100 rounded-lg text-forest-700 text-sm font-body">
+        <div className="alert-gold !bg-forest-50 !border-forest-200 !text-forest-700">
+          <span className="w-1.5 h-1.5 bg-forest-500 rounded-full" />
           Pointage enregistré avec succès.
         </div>
       )}
 
-      {/* Table */}
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">
-            Aucun journalier actif trouvé.
-          </div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Aucun journalier actif trouvé.</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
+          <table className="table-eko">
+            <thead>
               <tr>
-                <th className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide w-10">
+                <th className="w-10">
                   <input
                     type="checkbox"
                     checked={rows.every((r) => r.present)}
-                    onChange={(e) =>
-                      setRows((prev) => prev.map((r) => ({ ...r, present: e.target.checked })))
-                    }
-                    className="rounded border-[#ece2d3] text-forest-600 focus:ring-forest-500"
+                    onChange={(e) => setRows((prev) => prev.map((r) => ({ ...r, present: e.target.checked })))}
+                    className="rounded border-sand-300 text-forest-600 focus:ring-forest-500"
                   />
                 </th>
-                {['Employé', 'Taux/j', 'Heures', 'Montant', 'Projet', 'Notes'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
-                    {h}
-                  </th>
-                ))}
+                {['Employé', 'Taux/j', 'Heures', 'Montant', 'Projet', 'Notes'].map(h => <th key={h}>{h}</th>)}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {rows.map((row, idx) => (
-                <tr
-                  key={row.employe_id}
-                  className={`transition-colors ${row.present ? 'bg-white hover:bg-[#fbf7f0]' : 'bg-[#fbf7f0] opacity-60'}`}
-                >
-                  {/* Présent toggle */}
-                  <td className="px-4 py-3">
+                <tr key={row.employe_id} className={row.present ? '' : 'opacity-50 bg-sand-50/60'}>
+                  <td>
                     <input
                       type="checkbox"
                       checked={row.present}
                       onChange={() => togglePresent(idx)}
-                      className="rounded border-[#ece2d3] text-forest-600 focus:ring-forest-500"
+                      className="rounded border-sand-300 text-forest-600 focus:ring-forest-500"
                     />
                   </td>
-
-                  {/* Employé */}
-                  <td className="px-4 py-3">
-                    <p className="font-body font-medium text-[#1C1817]">{row.employe_nom}</p>
-                    <p className="font-display text-xs text-forest-600">{row.employe_code}</p>
+                  <td>
+                    <p className="font-display font-medium text-ink">{row.employe_nom}</p>
+                    <p className="mono-cell text-forest-700">{row.employe_code}</p>
                   </td>
-
-                  {/* Taux */}
-                  <td className="px-4 py-3 font-body text-[#1C1817]">
-                    {fmt(row.taux_journalier)} F
-                  </td>
-
-                  {/* Heures */}
-                  <td className="px-4 py-3 w-24">
+                  <td className="mono-cell">{fmt(row.taux_journalier)} F</td>
+                  <td className="w-24">
                     <input
-                      type="number"
-                      min="0" max="24" step="0.5"
+                      type="number" min="0" max="24" step="0.5"
                       value={row.heures_travaillees}
                       onChange={(e) => updateField(idx, 'heures_travaillees', e.target.value)}
                       disabled={!row.present}
-                      className="input py-1 text-center w-20 disabled:opacity-40"
+                      className="input input-sm text-center w-20 disabled:opacity-40"
                     />
                   </td>
-
-                  {/* Montant calculé */}
-                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">
-                    {row.present ? `${fmt(row.taux_journalier)} F` : '—'}
-                  </td>
-
-                  {/* Projet */}
-                  <td className="px-4 py-3 w-32">
+                  <td className="num">{row.present ? `${fmt(row.taux_journalier)} F` : '—'}</td>
+                  <td className="w-32">
                     <input
-                      type="text"
-                      placeholder="PRJ-001"
-                      value={row.projet_ref}
+                      type="text" placeholder="PRJ-001"
+                      value={row.projet_ref ?? ''}
                       onChange={(e) => updateField(idx, 'projet_ref', e.target.value)}
                       disabled={!row.present}
-                      className="input py-1 text-xs w-28 disabled:opacity-40"
+                      className="input input-sm text-[12px] w-28 disabled:opacity-40"
                     />
                   </td>
-
-                  {/* Notes */}
-                  <td className="px-4 py-3">
+                  <td>
                     <input
-                      type="text"
-                      placeholder="Notes…"
-                      value={row.notes}
+                      type="text" placeholder="Notes…"
+                      value={row.notes ?? ''}
                       onChange={(e) => updateField(idx, 'notes', e.target.value)}
                       disabled={!row.present}
-                      className="input py-1 text-xs w-36 disabled:opacity-40"
+                      className="input input-sm text-[12px] w-36 disabled:opacity-40"
                     />
                   </td>
                 </tr>
               ))}
             </tbody>
-
-            {/* Footer totaux */}
-            <tfoot className="bg-forest-50 border-t-2 border-forest-100">
+            <tfoot className="bg-forest-50 border-t-2 border-forest-200">
               <tr>
-                <td colSpan={4} className="px-4 py-3 font-display font-semibold text-forest-800 text-sm">
+                <td colSpan={4} className="px-4 py-3 font-display font-semibold text-forest-800 text-[13px]">
                   Total journée — {nbPresents} présent{nbPresents !== 1 ? 's' : ''}
                 </td>
-                <td className="px-4 py-3 font-display font-bold text-forest-800">
-                  {fmt(totalJour)} F
-                </td>
+                <td className="px-4 py-3 num text-forest-800 text-[14px]">{fmt(totalJour)} F</td>
                 <td colSpan={2} />
               </tr>
             </tfoot>

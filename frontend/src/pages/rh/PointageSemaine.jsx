@@ -18,12 +18,12 @@ function addDays(dateStr, n) {
 const JOURS_COURTS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 export default function PointageSemaine() {
-  const [semaine, setSemaine]   = useState(() => getMonday())
-  const [feuille, setFeuille]   = useState(null)
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState('')
-  const [draft, setDraft]       = useState({})
+  const [semaine, setSemaine] = useState(() => getMonday())
+  const [feuille, setFeuille] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+  const [error, setError]     = useState('')
+  const [draft, setDraft]     = useState({})
 
   const charger = useCallback(() => {
     setLoading(true)
@@ -50,13 +50,6 @@ export default function PointageSemaine() {
 
   useEffect(() => { charger() }, [charger])
 
-  function setCell(empId, date, field, value) {
-    setDraft((prev) => ({
-      ...prev,
-      [`${empId}_${date}`]: { ...(prev[`${empId}_${date}`] || {}), [field]: value },
-    }))
-  }
-
   function togglePresence(empId, date) {
     const key = `${empId}_${date}`
     setDraft((prev) => {
@@ -72,14 +65,12 @@ export default function PointageSemaine() {
     setError('')
     const lignes = feuille.lignes.map((ligne) => ({
       employe_id: ligne.employe_id,
-      jours: ligne.jours
-        .map((jour) => {
-          const cell = draft[`${ligne.employe_id}_${jour.date}`] || {}
-          return cell.present !== null && cell.present !== undefined
-            ? { date: jour.date, ...cell }
-            : null
-        })
-        .filter(Boolean),
+      jours: ligne.jours.map((jour) => {
+        const cell = draft[`${ligne.employe_id}_${jour.date}`] || {}
+        return cell.present !== null && cell.present !== undefined
+          ? { date: jour.date, ...cell }
+          : null
+      }).filter(Boolean),
     })).filter((l) => l.jours.length > 0)
 
     try {
@@ -96,100 +87,100 @@ export default function PointageSemaine() {
   function semaineSuivante()   { setSemaine((s) => addDays(s, 7)) }
 
   const jours = feuille?.jours ?? []
+  const dateLabel = new Date(semaine + 'T00:00:00').toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
 
   return (
     <div className="space-y-6">
-      <p className="font-body text-[#A59F9B] text-sm">Présences des journaliers actifs</p>
+      <div className="flex items-end justify-between gap-6">
+        <div>
+          <p className="page-eyebrow mb-1.5">RH / Pointage</p>
+          <h1 className="page-title">Pointage semaine</h1>
+          <p className="page-sub mt-1.5">Présences des journaliers actifs — saisie hebdomadaire</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={charger} className="btn-secondary" disabled={saving || loading}>Actualiser</button>
+          <button onClick={sauvegarder} className="btn-primary min-w-[140px] justify-center" disabled={saving || loading}>
+            {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+          </button>
+        </div>
+      </div>
 
-      {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
-      )}
+      {error && <div className="alert-red"><span className="w-1.5 h-1.5 bg-red-500 rounded-full" />{error}</div>}
 
       <div className="flex items-center gap-3">
-        <button onClick={semainePrecedente} className="btn-secondary text-sm px-3 py-1.5">← Semaine préc.</button>
-        <span className="font-display text-sm font-medium text-[#1C1817]">
-          Semaine du {new Date(semaine + 'T00:00:00').toLocaleDateString('fr-FR', {
-            day: 'numeric', month: 'long', year: 'numeric'
-          })}
-        </span>
-        <button onClick={semaineSuivante} className="btn-secondary text-sm px-3 py-1.5">Semaine suiv. →</button>
+        <button onClick={semainePrecedente} className="btn-secondary btn-sm">← Préc.</button>
+        <span className="font-display font-semibold text-ink text-sm">Semaine du {dateLabel}</span>
+        <button onClick={semaineSuivante} className="btn-secondary btn-sm">Suiv. →</button>
       </div>
 
       {loading ? (
-        <div className="text-[#A59F9B] text-sm">Chargement…</div>
+        <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#ece2d3]">
-                <th className="text-left py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] min-w-[160px]">Employé</th>
-                <th className="text-right py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] w-24">Taux/jour</th>
-                {jours.map((jour, i) => (
-                  <th key={jour} className="text-center py-2 px-2 font-display text-xs font-medium text-[#A59F9B] w-20">
-                    <div>{JOURS_COURTS[i]}</div>
-                    <div className="text-[#A59F9B]">{jour.slice(8)}/{jour.slice(5, 7)}</div>
-                  </th>
-                ))}
-                <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-28">Total semaine</th>
-              </tr>
-            </thead>
-            <tbody>
-              {feuille?.lignes.map((ligne) => {
-                let totalSemaine = 0
-                const cellsJours = ligne.jours.map((jour) => {
-                  const cell = draft[`${ligne.employe_id}_${jour.date}`] || {}
-                  const present = cell.present
-                  if (present === true) totalSemaine += Number(ligne.taux_journalier)
-                  const bg = present === true
-                    ? 'bg-green-50 border-green-200'
-                    : present === false
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-white border-[#ece2d3]'
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="table-eko">
+              <thead>
+                <tr>
+                  <th className="min-w-[180px]">Employé</th>
+                  <th className="text-right w-28">Taux/jour</th>
+                  {jours.map((jour, i) => (
+                    <th key={jour} className="!text-center w-20">
+                      <div>{JOURS_COURTS[i]}</div>
+                      <div className="text-sand-400 normal-case tracking-normal mt-0.5">{jour.slice(8)}/{jour.slice(5, 7)}</div>
+                    </th>
+                  ))}
+                  <th className="text-right w-32">Total semaine</th>
+                </tr>
+              </thead>
+              <tbody>
+                {feuille?.lignes.map((ligne) => {
+                  let totalSemaine = 0
                   return (
-                    <td key={jour.date} className="py-1.5 px-1 text-center">
-                      <button
-                        type="button"
-                        onClick={() => togglePresence(ligne.employe_id, jour.date)}
-                        className={`w-full h-8 rounded border text-xs font-medium transition-colors ${bg} hover:opacity-80`}
-                      >
-                        {present === true ? '✓' : present === false ? '✗' : '—'}
-                      </button>
-                    </td>
+                    <tr key={ligne.employe_id}>
+                      <td>
+                        <p className="font-display font-medium text-ink">{ligne.employe_nom}</p>
+                        <p className="mono-cell text-forest-700">{ligne.employe_code}</p>
+                      </td>
+                      <td className="num text-sand-600">{fmt(ligne.taux_journalier)} F</td>
+                      {ligne.jours.map((jour) => {
+                        const cell = draft[`${ligne.employe_id}_${jour.date}`] || {}
+                        const present = cell.present
+                        if (present === true) totalSemaine += Number(ligne.taux_journalier)
+                        const cls =
+                          present === true
+                            ? 'bg-forest-50 border-forest-200 text-forest-700'
+                            : present === false
+                            ? 'bg-red-50 border-red-200 text-red-700'
+                            : 'bg-white border-sand-200 text-sand-400'
+                        const symbol = present === true ? '✓' : present === false ? '✗' : '—'
+                        return (
+                          <td key={jour.date} className="!px-1 !py-1.5">
+                            <button
+                              type="button"
+                              onClick={() => togglePresence(ligne.employe_id, jour.date)}
+                              className={`w-full h-8 rounded-md border text-[13px] font-display font-semibold transition-colors ${cls} hover:opacity-90`}
+                            >{symbol}</button>
+                          </td>
+                        )
+                      })}
+                      <td className="num text-forest-700">{fmt(totalSemaine)} F</td>
+                    </tr>
                   )
-                })
-
-                return (
-                  <tr key={ligne.employe_id} className="border-b border-[#ece2d3] hover:bg-[#fbf7f0]">
-                    <td className="py-2 pr-4">
-                      <div className="font-body text-[#1C1817] text-sm">{ligne.employe_nom}</div>
-                      <div className="text-xs text-[#A59F9B]">{ligne.employe_code}</div>
-                    </td>
-                    <td className="py-2 pr-4 text-right text-[#1C1817] text-sm">{fmt(ligne.taux_journalier)} F</td>
-                    {cellsJours}
-                    <td className="py-2 pl-4 text-right font-display font-bold text-forest-700 text-sm">
-                      {fmt(totalSemaine)} F
+                })}
+                {(!feuille?.lignes || feuille.lignes.length === 0) && (
+                  <tr>
+                    <td colSpan={jours.length + 3} className="px-4 py-10 text-center text-sand-500 font-body">
+                      Aucun journalier actif.
                     </td>
                   </tr>
-                )
-              })}
-              {(!feuille?.lignes || feuille.lignes.length === 0) && (
-                <tr>
-                  <td colSpan={jours.length + 3} className="py-8 text-center text-[#A59F9B] text-sm">
-                    Aucun journalier actif.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
-
-      <div className="flex justify-end gap-3">
-        <button onClick={charger} className="btn-secondary" disabled={saving || loading}>Actualiser</button>
-        <button onClick={sauvegarder} className="btn-primary" disabled={saving || loading}>
-          {saving ? 'Sauvegarde…' : 'Sauvegarder'}
-        </button>
-      </div>
     </div>
   )
 }

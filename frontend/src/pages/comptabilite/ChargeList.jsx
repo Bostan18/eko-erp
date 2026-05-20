@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import Badge from '../../components/ui/Badge'
 import ChargeForm from '../../components/forms/ChargeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { CHARGE_CAT_LABEL, CHARGE_CAT_BADGE } from '../../utils/constants'
@@ -18,8 +19,20 @@ function exportCharges(filtre) {
     .catch(() => alert('Échec du téléchargement.'))
 }
 
+// Conversion classes legacy `badge-yellow` etc. vers tons Badge
+function badgeToTone(cls) {
+  if (!cls) return 'gray'
+  if (cls.includes('green'))  return 'green'
+  if (cls.includes('yellow')) return 'gold'
+  if (cls.includes('red'))    return 'red'
+  if (cls.includes('blue'))   return 'blue'
+  return 'gray'
+}
+
 export default function ChargeList() {
-  const { items: charges, loading, error, charger } = useFetchList('/comptabilite/charges/', 'Impossible de charger les charges.')
+  const { items: charges, loading, error, charger } = useFetchList(
+    '/comptabilite/charges/', 'Impossible de charger les charges.'
+  )
   const [filtre, setFiltre] = useState('toutes')
   const [modal, setModal]   = useState(false)
 
@@ -29,81 +42,87 @@ export default function ChargeList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <p className="font-body text-[#A59F9B] text-sm">
-          {loading ? '…' : `${charges.length} charge${charges.length !== 1 ? 's' : ''} · Total : ${fmt(totalGlobal)} F`}
-        </p>
+      <div className="flex items-end justify-between gap-6">
+        <div>
+          <p className="page-eyebrow mb-1.5">Finance / Comptabilité</p>
+          <h1 className="page-title">Charges</h1>
+          <p className="page-sub mt-1.5">
+            {loading ? '…' : `${charges.length} ligne${charges.length !== 1 ? 's' : ''} · Total : ${fmt(totalGlobal)} F`}
+          </p>
+        </div>
         <div className="flex gap-2">
-          <button className="btn-secondary" onClick={() => exportCharges(filtre)}>↓ Excel</button>
-          <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle charge</button>
-        </div>
-      </div>
-
-      <div className="flex gap-1 flex-wrap">
-        <button
-          onClick={() => setFiltre('toutes')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-            filtre === 'toutes' ? 'bg-forest-700 text-white' : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
-          }`}
-        >
-          Toutes
-        </button>
-        {Object.entries(CHARGE_CAT_LABEL).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setFiltre(key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-              filtre === key ? 'bg-forest-700 text-white' : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
-            }`}
-          >
-            {label}
+          <button className="btn-secondary" onClick={() => exportCharges(filtre)}>⬇ Excel</button>
+          <button className="btn-primary" onClick={() => setModal(true)}>
+            <IconPlus className="w-3.5 h-3.5" /> Nouvelle charge
           </button>
-        ))}
+        </div>
       </div>
 
-      {filtre !== 'toutes' && (
-        <div className="card p-4 bg-amber-50 border-amber-100 flex items-center justify-between">
-          <span className="font-display text-sm text-amber-700">Total {CHARGE_CAT_LABEL[filtre]}</span>
-          <span className="font-display font-bold text-amber-800 text-lg">{fmt(totalFiltre)} F</span>
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex gap-1 flex-wrap">
+          <button
+            onClick={() => setFiltre('toutes')}
+            className={
+              'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
+              (filtre === 'toutes'
+                ? 'bg-forest-700 text-white'
+                : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
+            }
+          >Toutes</button>
+          {Object.entries(CHARGE_CAT_LABEL).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setFiltre(key)}
+              className={
+                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
+                (filtre === key
+                  ? 'bg-forest-700 text-white'
+                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
+              }
+            >{label}</button>
+          ))}
         </div>
-      )}
+
+        {filtre !== 'toutes' && (
+          <div className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-gold-50 border border-gold-200 rounded-lg">
+            <span className="text-[12px] text-gold-700">
+              Total <strong className="font-display font-semibold">{CHARGE_CAT_LABEL[filtre]}</strong> :
+            </span>
+            <span className="font-display font-bold text-gold-700 text-sm">{fmt(totalFiltre)} F</span>
+          </div>
+        )}
+      </div>
 
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
-              <tr>
-                {['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Fournisseur', 'Référence'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
-                ))}
-              </tr>
+          <table className="table-eko">
+            <thead>
+              <tr>{['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Fournisseur', 'Référence'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {filtrees.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucune charge</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucune charge</td></tr>
               ) : filtrees.map((c) => (
-                <tr key={c.id} className="hover:bg-[#fbf7f0] transition-colors">
-                  <td className="px-4 py-3 font-body text-[#1C1817]">{c.date}</td>
-                  <td className="px-4 py-3 font-body font-medium text-[#1C1817]">{c.libelle}</td>
-                  <td className="px-4 py-3">
-                    <span className={CHARGE_CAT_BADGE[c.categorie] ?? 'badge-gray'}>{CHARGE_CAT_LABEL[c.categorie] ?? c.categorie}</span>
-                  </td>
-                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">{fmt(c.montant)} F</td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{c.projet_nom || '—'}</td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B]">{c.fournisseur || '—'}</td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{c.reference || '—'}</td>
+                <tr key={c.id}>
+                  <td className="mono-cell">{c.date}</td>
+                  <td className="font-display font-medium text-ink">{c.libelle}</td>
+                  <td><Badge tone={badgeToTone(CHARGE_CAT_BADGE[c.categorie])}>{CHARGE_CAT_LABEL[c.categorie] ?? c.categorie}</Badge></td>
+                  <td className="num">{fmt(c.montant)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                  <td className="text-sand-600 text-[12px]">{c.projet_nom || '—'}</td>
+                  <td className="text-sand-600">{c.fournisseur || '—'}</td>
+                  <td className="mono-cell text-sand-500">{c.reference || '—'}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot className="bg-[#fbf7f0] border-t-2 border-[#ece2d3]">
+            <tfoot className="bg-sand-50 border-t-2 border-sand-200">
               <tr>
-                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-[#1C1817] text-sm">
+                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-sand-700 text-[13px]">
                   Total {filtre !== 'toutes' ? CHARGE_CAT_LABEL[filtre] : 'charges'}
                 </td>
-                <td className="px-4 py-3 font-display font-bold text-[#1C1817]">{fmt(totalFiltre)} F</td>
+                <td className="px-4 py-3 num text-[14px]">{fmt(totalFiltre)} F</td>
                 <td colSpan={3} />
               </tr>
             </tfoot>
@@ -112,10 +131,18 @@ export default function ChargeList() {
       </div>
 
       {modal && (
-        <Modal titre="Nouvelle charge" onClose={() => setModal(false)}>
+        <Modal titre="Nouvelle charge" sousTitre="Catégorie, montant, projet et fournisseur." onClose={() => setModal(false)}>
           <ChargeForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
         </Modal>
       )}
     </div>
+  )
+}
+
+function IconPlus({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   )
 }

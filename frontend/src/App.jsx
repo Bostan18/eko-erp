@@ -27,6 +27,7 @@ const FactureDetail   = lazy(() => import('./pages/comptabilite/FactureDetail'))
 const ChargeList      = lazy(() => import('./pages/comptabilite/ChargeList'))
 const DevisList       = lazy(() => import('./pages/comptabilite/DevisList'))
 const DevisDetail     = lazy(() => import('./pages/comptabilite/DevisDetail'))
+const DocumentList    = lazy(() => import('./pages/documents/DocumentList'))
 const ParametresEntreprise = lazy(() => import('./pages/parametres/ParametresEntreprise'))
 
 export default function App() {
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="/comptabilite/charges"         element={<ChargeList />} />
         <Route path="/comptabilite/devis"           element={<DevisList />} />
         <Route path="/comptabilite/devis/:id"       element={<DevisDetail />} />
+        <Route path="/documents"                    element={<DocumentList />} />
         <Route path="/reporting"                    element={<Reporting />} />
         <Route path="/parametres/entreprise"        element={<ParametresEntreprise />} />
         <Route path="/parametres"                   element={<Navigate to="/parametres/entreprise" replace />} />

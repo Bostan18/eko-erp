@@ -9,7 +9,6 @@ function getMonday(dateStr) {
   const diff = d.getDate() - day + (day === 0 ? -6 : 1)
   return new Date(d.setDate(diff)).toISOString().slice(0, 10)
 }
-
 function addDays(dateStr, n) {
   const d = new Date(dateStr)
   d.setDate(d.getDate() + n)
@@ -20,12 +19,12 @@ const JOURS_COURTS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 export default function TacheDetail() {
   const { projetId, tacheId } = useParams()
-  const [tableau, setTableau]   = useState(null)
-  const [semaine, setSemaine]   = useState(() => getMonday())
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState('')
-  const [draft, setDraft]       = useState({})
+  const [tableau, setTableau] = useState(null)
+  const [semaine, setSemaine] = useState(() => getMonday())
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+  const [error, setError]     = useState('')
+  const [draft, setDraft]     = useState({})
 
   const charger = useCallback(() => {
     setLoading(true)
@@ -78,7 +77,7 @@ export default function TacheDetail() {
     try {
       await api.post('/projets/realisations/saisie_multiple/', { lignes })
       charger()
-    } catch (err) {
+    } catch {
       setError('Erreur lors de la sauvegarde.')
     } finally {
       setSaving(false)
@@ -88,108 +87,111 @@ export default function TacheDetail() {
   function semainePrecedente() { setSemaine((s) => addDays(s, -7)) }
   function semaineSuivante()   { setSemaine((s) => addDays(s, 7)) }
 
-  if (loading) return <div className="p-6 text-[#A59F9B] text-sm">Chargement…</div>
-  if (error && !tableau) return <div className="p-6 text-red-500 text-sm">{error}</div>
+  if (loading) return <div className="p-12 text-center text-sand-500 font-body">Chargement…</div>
+  if (error && !tableau) return <div className="alert-red">{error}</div>
 
   const jours = tableau?.lignes[0]?.jours?.map((j) => j.date) ?? []
+  const dateLabel = new Date(semaine + 'T00:00:00').toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Link to={`/projets/${projetId}`} className="text-[#A59F9B] hover:text-[#1C1817]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </Link>
+      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500">
+        <Link to="/projets" className="hover:text-forest-700">Projets</Link>
+        <span className="text-sand-300">/</span>
+        <Link to={`/projets/${projetId}`} className="hover:text-forest-700">Projet</Link>
+        <span className="text-sand-300">/</span>
+        <span className="text-ink">Pointage tâche</span>
+      </div>
+
+      <div className="flex items-end justify-between gap-6">
         <div>
-          <h1 className="font-display text-xl font-bold text-[#1C1817]">{tableau?.tache_nom}</h1>
-          <p className="text-sm text-[#A59F9B]">
+          <p className="page-eyebrow mb-1.5">Pointage tâche</p>
+          <h1 className="page-title">{tableau?.tache_nom}</h1>
+          <p className="page-sub mt-1.5">
             Tarif : {fmt(tableau?.tarif_unitaire)} F / {tableau?.unite_label || 'unité'}
           </p>
         </div>
+        <div className="flex gap-2">
+          <button onClick={charger} className="btn-secondary" disabled={saving}>Actualiser</button>
+          <button onClick={sauvegarder} className="btn-primary min-w-[170px] justify-center" disabled={saving}>
+            {saving ? 'Sauvegarde…' : 'Sauvegarder le pointage'}
+          </button>
+        </div>
       </div>
 
-      {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
-      )}
+      {error && <div className="alert-red"><span className="w-1.5 h-1.5 bg-red-500 rounded-full" />{error}</div>}
 
       <div className="flex items-center gap-3">
-        <button onClick={semainePrecedente} className="btn-secondary text-sm px-3 py-1.5">← Semaine préc.</button>
-        <span className="font-display text-sm font-medium text-[#1C1817]">
-          Semaine du {new Date(semaine + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-        </span>
-        <button onClick={semaineSuivante} className="btn-secondary text-sm px-3 py-1.5">Semaine suiv. →</button>
+        <button onClick={semainePrecedente} className="btn-secondary btn-sm">← Préc.</button>
+        <span className="font-display font-semibold text-ink text-sm">Semaine du {dateLabel}</span>
+        <button onClick={semaineSuivante} className="btn-secondary btn-sm">Suiv. →</button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[#ece2d3]">
-              <th className="text-left py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] min-w-[160px]">Employé</th>
-              <th className="text-right py-2 pr-4 font-display text-xs font-medium text-[#A59F9B] w-24">Objectif</th>
-              {jours.map((jour, i) => (
-                <th key={jour} className="text-center py-2 px-2 font-display text-xs font-medium text-[#A59F9B] w-20">
-                  <div>{JOURS_COURTS[i]}</div>
-                  <div className="text-[#A59F9B]">{jour.slice(8)}/{jour.slice(5, 7)}</div>
-                </th>
-              ))}
-              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-24">Total</th>
-              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-24">Montant</th>
-              <th className="text-right py-2 pl-4 font-display text-xs font-medium text-[#A59F9B] w-20">%</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableau?.lignes.map((ligne) => (
-              <tr key={ligne.affectation_id} className="border-b border-[#ece2d3] hover:bg-[#fbf7f0]">
-                <td className="py-2 pr-4 font-body text-[#1C1817] text-sm">{ligne.employe_nom}</td>
-                <td className="py-2 pr-4 text-right text-[#1C1817] text-sm">{fmt(ligne.objectif_individuel)}</td>
-                {ligne.jours.map((jour) => {
-                  const cell = draft[`${ligne.affectation_id}_${jour.date}`] || {}
-                  return (
-                    <td key={jour.date} className="py-1.5 px-1">
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="input text-center text-sm py-1 px-1.5 w-full"
-                        placeholder="—"
-                        value={cell.quantite ?? ''}
-                        onChange={(e) => setCell(ligne.affectation_id, jour.date, 'quantite', e.target.value)}
-                      />
-                    </td>
-                  )
-                })}
-                <td className="py-2 pl-4 text-right font-medium text-[#1C1817]">{fmt(ligne.total_realise)}</td>
-                <td className="py-2 pl-4 text-right font-medium text-[#1C1817]">{fmt(ligne.total_montant)} F</td>
-                <td className="py-2 pl-4 text-right">
-                  <span className={`text-xs font-display font-medium px-1.5 py-0.5 rounded-full ${
-                    ligne.progression_pct >= 100
-                      ? 'bg-green-100 text-green-700'
-                      : ligne.progression_pct >= 50
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-[#f4ebe0] text-[#1C1817]'
-                  }`}>
-                    {ligne.progression_pct}%
-                  </span>
-                </td>
-              </tr>
-            ))}
-            {(!tableau?.lignes || tableau.lignes.length === 0) && (
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table-eko">
+            <thead>
               <tr>
-                <td colSpan={jours.length + 5} className="py-8 text-center text-[#A59F9B] text-sm">
-                  Aucune affectation pour cette tâche.
-                </td>
+                <th className="min-w-[180px]">Employé</th>
+                <th className="text-right w-24">Objectif</th>
+                {jours.map((jour, i) => (
+                  <th key={jour} className="!text-center w-20">
+                    <div>{JOURS_COURTS[i]}</div>
+                    <div className="text-sand-400 normal-case tracking-normal mt-0.5">
+                      {jour.slice(8)}/{jour.slice(5, 7)}
+                    </div>
+                  </th>
+                ))}
+                <th className="text-right w-24">Total</th>
+                <th className="text-right w-28">Montant</th>
+                <th className="text-right w-20">%</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-end gap-3">
-        <button onClick={charger} className="btn-secondary" disabled={saving}>Actualiser</button>
-        <button onClick={sauvegarder} className="btn-primary" disabled={saving}>
-          {saving ? 'Sauvegarde…' : 'Sauvegarder le pointage'}
-        </button>
+            </thead>
+            <tbody>
+              {tableau?.lignes.map((ligne) => (
+                <tr key={ligne.affectation_id}>
+                  <td className="font-display font-medium text-ink">{ligne.employe_nom}</td>
+                  <td className="num text-sand-600">{fmt(ligne.objectif_individuel)}</td>
+                  {ligne.jours.map((jour) => {
+                    const cell = draft[`${ligne.affectation_id}_${jour.date}`] || {}
+                    return (
+                      <td key={jour.date} className="!px-1 !py-1.5">
+                        <input
+                          type="number" min="0" step="0.01"
+                          className="input input-sm text-center w-full"
+                          placeholder="—"
+                          value={cell.quantite ?? ''}
+                          onChange={(e) => setCell(ligne.affectation_id, jour.date, 'quantite', e.target.value)}
+                        />
+                      </td>
+                    )
+                  })}
+                  <td className="num">{fmt(ligne.total_realise)}</td>
+                  <td className="num">{fmt(ligne.total_montant)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                  <td>
+                    <span className={
+                      'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-display font-medium border ' +
+                      (ligne.progression_pct >= 100
+                        ? 'bg-forest-50 text-forest-700 border-forest-100'
+                        : ligne.progression_pct >= 50
+                          ? 'bg-gold-50 text-gold-700 border-gold-200'
+                          : 'bg-sand-100 text-sand-700 border-sand-200')
+                    }>{ligne.progression_pct}%</span>
+                  </td>
+                </tr>
+              ))}
+              {(!tableau?.lignes || tableau.lignes.length === 0) && (
+                <tr>
+                  <td colSpan={jours.length + 5} className="px-4 py-10 text-center text-sand-500 font-body">
+                    Aucune affectation pour cette tâche.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: eko_erp
       POSTGRES_USER: eko_user
-      POSTGRES_PASSWORD: eko_password
+      POSTGRES_PASSWORD: admineko2026
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

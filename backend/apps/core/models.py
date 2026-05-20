@@ -75,3 +75,61 @@ class EntrepriseConfig(models.Model):
 
     def __str__(self):
         return self.raison_sociale or "Configuration entreprise"
+
+
+class Document(SoftDeleteModel):
+    """Pièces justificatives métier (permis, médicales, assurances, etc.)."""
+
+    TYPE_CHOICES = [
+        ("permis",        "Permis"),
+        ("medical",       "Visite médicale"),
+        ("assurance",     "Assurance"),
+        ("certification", "Certification"),
+        ("env_permit",    "Autorisation environnementale"),
+        ("cnps",          "CNPS / DGI"),
+        ("contrat",       "Contrat"),
+        ("autre",         "Autre"),
+    ]
+    ENTITE_CHOICES = [
+        ("site",       "Chantier / Site"),
+        ("employe",    "Employé"),
+        ("engin",      "Engin / Véhicule"),
+        ("projet",     "Projet"),
+        ("client",     "Client"),
+        ("entreprise", "Entreprise"),
+    ]
+
+    id_doc          = models.CharField(max_length=20, unique=True, blank=True)
+    titre           = models.CharField(max_length=200)
+    type_doc        = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    entite_type     = models.CharField(max_length=20, choices=ENTITE_CHOICES, blank=True)
+    entite_id       = models.CharField(max_length=40, blank=True)
+    date_emission   = models.DateField(null=True, blank=True)
+    date_expiration = models.DateField(null=True, blank=True)
+    fichier_url     = models.URLField(blank=True)
+    notes           = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-date_expiration", "-id"]
+
+    def save(self, *args, **kwargs):
+        if not self.id_doc:
+            last = Document.objects.order_by("-id").first()
+            n = (last.id + 1) if last else 1
+            self.id_doc = f"DOC-{n:03d}"
+        super().save(*args, **kwargs)
+
+    @property
+    def statut(self):
+        from datetime import date
+        if not self.date_expiration:
+            return "valid"
+        days = (self.date_expiration - date.today()).days
+        if days < 0:
+            return "expired"
+        if days < 30:
+            return "expiring"
+        return "valid"
+
+    def __str__(self):
+        return f"{self.id_doc} — {self.titre}"

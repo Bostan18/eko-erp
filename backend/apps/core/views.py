@@ -1,8 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .models import EntrepriseConfig
-from .serializers import EntrepriseConfigSerializer
+from rest_framework import status, viewsets, filters
+from .models import EntrepriseConfig, Document
+from .serializers import EntrepriseConfigSerializer, DocumentSerializer
+
+
+class DocumentViewSet(viewsets.ModelViewSet):
+    queryset = Document.objects.filter(is_deleted=False)
+    serializer_class = DocumentSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["id_doc", "titre", "entite_id", "notes"]
 
 
 class EntrepriseConfigView(APIView):

@@ -36,7 +36,7 @@ export default function Login() {
       <div className="w-full max-w-sm relative">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-forest-500 rounded-2xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-forest-500 rounded-xl mb-4 shadow-lg">
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-white">
               <path d="M12 2C8 2 4 5 4 9c0 5 8 13 8 13s8-8 8-13c0-4-4-7-8-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
             </svg>
@@ -50,7 +50,7 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl p-7 shadow-2xl">
+        <div className="bg-white rounded-xl p-7 shadow-2xl">
           <div className="mb-5">
             <h2 className="font-display font-semibold text-ink text-lg">Connexion</h2>
             <p className="text-[12px] text-sand-500 mt-0.5">Identifiez-vous pour accéder à votre espace.</p>

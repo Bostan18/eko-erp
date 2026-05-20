@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
-import Badge, { StatusBadge } from '../../components/ui/Badge'
+import { StatusBadge } from '../../components/ui/Badge'
+import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import FactureForm from '../../components/forms/FactureForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { FACTURE_STATUT_LABEL } from '../../utils/constants'
@@ -25,7 +26,8 @@ export default function FactureList() {
           f.client_nom?.toLowerCase().includes(search.toLowerCase())
     )
 
-  const totalEncaisse  = factures
+  const totalFacture  = factures.reduce((s, f) => s + Number(f.montant_ttc), 0)
+  const totalEncaisse = factures
     .filter((f) => f.statut === 'payee')
     .reduce((s, f) => s + Number(f.montant_ttc), 0)
   const totalEnAttente = factures
@@ -33,27 +35,26 @@ export default function FactureList() {
     .reduce((s, f) => s + Number(f.solde_restant ?? 0), 0)
   const nbEnRetard = factures.filter((f) => f.statut === 'en_retard').length
 
-  const FILTRES = [
-    { key: 'toutes',              label: 'Toutes' },
+  // Filtre de statut secondaire (select dans le th-row)
+  const STATUTS = [
+    { key: 'toutes',              label: 'Tous les statuts' },
     { key: 'brouillon',           label: 'Brouillons' },
     { key: 'envoyee',             label: 'Envoyées' },
-    { key: 'partiellement_payee', label: 'Partiellement' },
+    { key: 'partiellement_payee', label: 'Partiellement payées' },
     { key: 'payee',               label: 'Payées' },
-    { key: 'en_retard',           label: 'En retard', danger: true },
+    { key: 'en_retard',           label: 'En retard' },
   ]
 
   return (
-    <div className="space-y-6">
-      {/* ─── Head ──────────────────────────────────────── */}
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Finance / Comptabilité</p>
-          <h1 className="page-title">Factures</h1>
-          <p className="page-sub mt-1.5">
-            {loading
-              ? '…'
-              : `${factures.length} facture${factures.length !== 1 ? 's' : ''} · Ventes & FNE`}
-          </p>
+          <div className="sec-title">Facturation &amp; FNE</div>
+          <div className="sec-sub">
+            Factures ventes · Certification FNE ·{' '}
+            {loading ? '…' : `${factures.length} facture${factures.length !== 1 ? 's' : ''}`}
+          </div>
         </div>
         <div className="flex gap-2">
           <button className="btn-secondary">⬇ Exporter</button>
@@ -63,64 +64,74 @@ export default function FactureList() {
         </div>
       </div>
 
-      {/* ─── KPI bandeau ───────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* ─── Alerte ─────────────────────────────────────── */}
+      {nbEnRetard > 0 && (
+        <div className="alert-gold">
+          <span className="w-1.5 h-1.5 bg-gold-500 rounded-full" />
+          <strong className="font-display font-semibold">
+            {nbEnRetard} facture{nbEnRetard > 1 ? 's' : ''} en retard
+          </strong>
+          <span className="text-gold-600">· relance recommandée</span>
+        </div>
+      )}
+
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
         <div className="kpi">
+          <div className="kpi-icon text-2xl">🧾</div>
+          <p className="kpi-label">Total facturé</p>
+          <p className="kpi-value">{fmt(totalFacture)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">{factures.length} facture{factures.length !== 1 ? 's' : ''} · cumul</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💰</div>
           <p className="kpi-label">Encaissé</p>
-          <p className="kpi-value text-forest-700">
-            {fmt(totalEncaisse)} <span className="kpi-unit">FCFA</span>
-          </p>
-          <p className="kpi-sub text-sand-500">Factures payées (cumul)</p>
+          <p className="kpi-value text-forest-700">{fmt(totalEncaisse)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Factures payées</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">⏳</div>
           <p className="kpi-label">En attente</p>
-          <p className="kpi-value text-gold-600">
-            {fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span>
-          </p>
-          <p className="kpi-sub text-sand-500">Soldes envoyés non réglés</p>
+          <p className="kpi-value text-gold-600">{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Soldes envoyés non réglés</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">⚠</div>
           <p className="kpi-label">En retard</p>
-          <p className={`kpi-value ${nbEnRetard > 0 ? 'text-red-600' : 'text-sand-400'}`}>
-            {nbEnRetard}
-          </p>
-          <p className="kpi-sub text-sand-500">
-            {nbEnRetard > 0 ? 'Action requise' : 'Tout est à jour'}
-          </p>
+          <p className={`kpi-value ${nbEnRetard > 0 ? 'text-red-600' : 'text-sand-400'}`}>{nbEnRetard}</p>
+          <p className="kpi-sub">{nbEnRetard > 0 ? 'Action requise' : 'Tout est à jour'}</p>
         </div>
       </div>
 
-      {/* ─── Filtres + search ──────────────────────────── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 flex-wrap">
-          {FILTRES.map(({ key, label, danger }) => (
-            <button
-              key={key}
-              onClick={() => setFiltre(key)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
-                (filtre === key
-                  ? danger
-                    ? 'bg-red-500 text-white'
-                    : 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <input
-          type="text"
-          className="input input-sm max-w-xs ml-auto"
-          placeholder="Rechercher numéro ou client…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* ─── Table ──────────────────────────────────────── */}
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
+        <ModuleTabs items={COMPTA_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Factures ventes ·{' '}
+            <span className="text-sand-500 font-normal">{filtrees.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              {STATUTS.map((s) => (
+                <option key={s.key} value={s.key}>{s.label}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher numéro ou client…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

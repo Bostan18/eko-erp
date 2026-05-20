@@ -2,6 +2,7 @@ import { useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
+import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import ChargeForm from '../../components/forms/ChargeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { CHARGE_CAT_LABEL, CHARGE_CAT_BADGE } from '../../utils/constants'
@@ -40,15 +41,20 @@ export default function ChargeList() {
   const totalFiltre = filtrees.reduce((s, c) => s + Number(c.montant), 0)
   const totalGlobal = charges.reduce((s, c) => s + Number(c.montant), 0)
 
+  const moyenne = charges.length ? Math.round(totalGlobal / charges.length) : 0
+  const plusGrosse = charges.length ? Math.max(...charges.map((c) => Number(c.montant))) : 0
+  const nbCategories = Object.keys(CHARGE_CAT_LABEL).length
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Finance / Comptabilité</p>
-          <h1 className="page-title">Charges</h1>
-          <p className="page-sub mt-1.5">
-            {loading ? '…' : `${charges.length} ligne${charges.length !== 1 ? 's' : ''} · Total : ${fmt(totalGlobal)} F`}
-          </p>
+          <div className="sec-title">Charges</div>
+          <div className="sec-sub">
+            Dépenses & charges d'exploitation ·{' '}
+            {loading ? '…' : `${charges.length} ligne${charges.length !== 1 ? 's' : ''}`}
+          </div>
         </div>
         <div className="flex gap-2">
           <button className="btn-secondary" onClick={() => exportCharges(filtre)}>⬇ Excel</button>
@@ -58,42 +64,55 @@ export default function ChargeList() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 flex-wrap">
-          <button
-            onClick={() => setFiltre('toutes')}
-            className={
-              'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
-              (filtre === 'toutes'
-                ? 'bg-forest-700 text-white'
-                : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-            }
-          >Toutes</button>
-          {Object.entries(CHARGE_CAT_LABEL).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setFiltre(key)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
-                (filtre === key
-                  ? 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >{label}</button>
-          ))}
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💸</div>
+          <p className="kpi-label">Total charges</p>
+          <p className="kpi-value">{fmt(totalGlobal)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">{charges.length} ligne{charges.length !== 1 ? 's' : ''} · cumul</p>
         </div>
-
-        {filtre !== 'toutes' && (
-          <div className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-gold-50 border border-gold-200 rounded-lg">
-            <span className="text-[12px] text-gold-700">
-              Total <strong className="font-display font-semibold">{CHARGE_CAT_LABEL[filtre]}</strong> :
-            </span>
-            <span className="font-display font-bold text-gold-700 text-sm">{fmt(totalFiltre)} F</span>
-          </div>
-        )}
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">📊</div>
+          <p className="kpi-label">Charge moyenne</p>
+          <p className="kpi-value">{fmt(moyenne)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Par ligne</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">📈</div>
+          <p className="kpi-label">Plus grosse charge</p>
+          <p className="kpi-value text-gold-600">{fmt(plusGrosse)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Montant maximal</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">🗂</div>
+          <p className="kpi-label">Catégories</p>
+          <p className="kpi-value">{nbCategories}</p>
+          <p className="kpi-sub">Types de charge</p>
+        </div>
       </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
+        <ModuleTabs items={COMPTA_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Charges ·{' '}
+            <span className="text-sand-500 font-normal">{filtrees.length}</span>
+          </div>
+          <select
+            className="input input-sm w-auto"
+            value={filtre}
+            onChange={(e) => setFiltre(e.target.value)}
+          >
+            <option value="toutes">Toutes les catégories</option>
+            {Object.entries(CHARGE_CAT_LABEL).map(([key, label]) => (
+              <option key={key} value={key}>{label}</option>
+            ))}
+          </select>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

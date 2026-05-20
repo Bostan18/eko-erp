@@ -1,37 +1,49 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
+import { StatusBadge } from '../components/ui/Badge'
+import { FACTURE_STATUT_LABEL } from '../utils/constants'
 import { fmt, MOIS_FR } from '../utils/format'
 
+const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+const TYPE_FR = { btp: 'BTP', agriculture: 'Agriculture', pepiniere: 'Pépinière', location: 'Location', espaces_verts: 'Espaces verts', autre: 'Autre' }
+const PF_TONES = ['pf-g', 'pf-gold', 'pf-r', 'bg-blue-500', 'bg-forest-400']
+
 export default function Dashboard() {
-  const [kpis, setKpis]       = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [kpis, setKpis]         = useState(null)
+  const [factures, setFactures] = useState([])
+  const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    api.get('/reporting/kpis/')
-      .then(({ data }) => setKpis(data))
+    Promise.all([
+      api.get('/reporting/kpis/'),
+      api.get('/comptabilite/factures/').catch(() => ({ data: [] })),
+    ])
+      .then(([{ data: k }, { data: f }]) => {
+        setKpis(k)
+        setFactures((f.results ?? f).slice(0, 5))
+      })
       .finally(() => setLoading(false))
   }, [])
 
   const moisLabel = kpis ? `${MOIS_FR[kpis.finance.mois]} ${kpis.finance.annee}` : '…'
 
   return (
-    <div className="space-y-6">
-      {/* ─── Page head ───────────────────────────────────── */}
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">{moisLabel} · Période en cours</p>
-          <h1 className="page-title">Tableau de bord</h1>
-          <p className="page-sub mt-1.5">
-            Vue d'ensemble — EKO SARL · Agriculture · BTP · Location · Espaces verts
-          </p>
+          <div className="sec-title">Tableau de bord</div>
+          <div className="sec-sub">
+            {moisLabel} · Vue d'ensemble — Agriculture · BTP · Location · Espaces verts
+          </div>
         </div>
         <Link to="/comptabilite/factures" className="btn-primary">
           <IconPlus className="w-3.5 h-3.5" /> Nouvelle facture
         </Link>
       </div>
 
-      {/* ─── Alerte FNE / docs (visible si compteurs > 0) ─── */}
+      {/* ─── Alerte opérationnelle (compteurs réels) ─────── */}
       {!loading && (kpis?.finance.factures_en_retard > 0 || kpis?.stocks.alertes > 0) && (
         <div className="alert-gold">
           <span className="w-1.5 h-1.5 bg-gold-500 rounded-full" />
@@ -50,7 +62,7 @@ export default function Dashboard() {
       )}
 
       {/* ─── KPI grid ────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="kpi-grid">
         <KpiCard
           to="/rh"
           label="Employés actifs"
@@ -102,31 +114,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ─── Accès rapide ────────────────────────────────── */}
-      <div>
-        <p className="page-eyebrow mb-3">Accès rapide</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { label: 'RH & Paie',    desc: 'Employés, pointage, salaires', path: '/rh' },
-            { label: 'Projets',      desc: 'Chantiers BTP, plantations',   path: '/projets' },
-            { label: 'CRM',          desc: 'Clients, prospects, devis',    path: '/crm' },
-            { label: 'Stocks',       desc: 'Inventaire, alertes',          path: '/stocks' },
-          ].map(({ label, desc, path }) => (
-            <Link
-              key={path}
-              to={path}
-              className="card p-5 hover:border-forest-300 hover:shadow-md transition-all group block"
-            >
-              <p className="font-display font-semibold text-ink text-sm group-hover:text-forest-700 transition-colors">
-                {label}
-              </p>
-              <p className="font-body text-[12px] text-sand-500 mt-1">{desc}</p>
-              <p className="font-mono text-[10px] text-sand-400 mt-3 group-hover:text-forest-500 transition-colors">
-                {path} →
-              </p>
-            </Link>
-          ))}
+      {/* ─── Graphiques (gabarit maquette : two-col) ─────── */}
+      <div className="two-col">
+        <TendanceCard serie={kpis?.finance.serie_mensuelle ?? []} loading={loading} />
+        <RepartitionCard parType={kpis?.projets.par_type ?? []} loading={loading} />
+      </div>
+
+      {/* ─── Dernières factures ──────────────────────────── */}
+      <div className="card overflow-hidden">
+        <div className="th-row">
+          <div className="th-title">Dernières factures ventes</div>
+          <Link to="/comptabilite/factures" className="btn-secondary btn-sm">Voir tout →</Link>
         </div>
+        {loading ? (
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
+        ) : factures.length === 0 ? (
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Aucune facture</div>
+        ) : (
+          <table className="table-eko">
+            <thead>
+              <tr>{['Numéro', 'Client', 'TTC', 'Statut', 'Échéance'].map(h => <th key={h}>{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {factures.map((f) => (
+                <tr key={f.id}>
+                  <td>
+                    <Link to={`/comptabilite/factures/${f.id}`} className="mono-cell text-forest-700 hover:text-forest-900 font-medium">
+                      {f.numero}
+                    </Link>
+                  </td>
+                  <td className="font-display font-medium text-ink">{f.client_nom}</td>
+                  <td className="num">{fmt(f.montant_ttc)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                  <td><StatusBadge status={f.statut} label={FACTURE_STATUT_LABEL[f.statut] ?? f.statut} /></td>
+                  <td className={f.statut === 'en_retard' ? 'text-red-700 font-semibold' : 'text-sand-600'}>{f.date_echeance || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )
@@ -165,10 +190,85 @@ function FinCell({ label, value, tone }) {
   )
 }
 
+/* Tendance CA — barres sur 12 mois (série réelle) */
+function TendanceCard({ serie, loading }) {
+  const maxCa = Math.max(1, ...serie.map((s) => Number(s.ca_facture)))
+  return (
+    <div className="card">
+      <div className="th-row"><div className="th-title">Tendance CA facturé · 12 mois</div></div>
+      <div className="px-[18px] pt-5 pb-3">
+        {loading ? (
+          <div className="h-[110px] flex items-center justify-center text-sand-500 text-sm">Chargement…</div>
+        ) : serie.length === 0 ? (
+          <div className="h-[110px] flex items-center justify-center text-sand-500 text-sm">Pas de données</div>
+        ) : (
+          <>
+            <div className="flex items-end gap-[5px] h-[110px]">
+              {serie.map((s, i) => {
+                const h = (Number(s.ca_facture) / maxCa) * 100
+                const m = Number(s.mois.split('-')[1])
+                return (
+                  <div
+                    key={s.mois}
+                    title={`${MOIS_COURT[m - 1]} : ${fmt(s.ca_facture)} F`}
+                    className={`flex-1 rounded-t-[3px] transition-all ${i === serie.length - 1 ? 'bg-forest-500' : 'bg-forest-100'}`}
+                    style={{ height: `${Math.max(2, h)}%` }}
+                  />
+                )
+              })}
+            </div>
+            <div className="flex justify-between text-[10.5px] text-sand-500 mt-2">
+              <span>{labelMois(serie[0]?.mois)}</span>
+              <span>{labelMois(serie[serie.length - 1]?.mois)}</span>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* Répartition des projets par type (réel) */
+function RepartitionCard({ parType, loading }) {
+  const total = parType.reduce((s, p) => s + Number(p.nb), 0)
+  return (
+    <div className="card">
+      <div className="th-row"><div className="th-title">Projets actifs par type</div></div>
+      <div className="px-[18px] py-4">
+        {loading ? (
+          <div className="h-[110px] flex items-center justify-center text-sand-500 text-sm">Chargement…</div>
+        ) : total === 0 ? (
+          <div className="h-[110px] flex items-center justify-center text-sand-500 text-sm">Aucun projet actif</div>
+        ) : (
+          parType.map((p, i) => {
+            const pct = Math.round((Number(p.nb) / total) * 100)
+            return (
+              <div key={p.type_projet} className="mb-3 last:mb-0">
+                <div className="flex justify-between text-[12px] mb-1">
+                  <span className="font-medium text-ink">{TYPE_FR[p.type_projet] ?? p.type_projet}</span>
+                  <span className="text-sand-500">{p.nb} · {pct}%</span>
+                </div>
+                <div className="progress">
+                  <div className={`progress-fill ${PF_TONES[i % PF_TONES.length]}`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
+
 function projetsSubLabel(parType) {
   if (!parType?.length) return 'Aucun projet actif'
-  const TYPE_FR = { btp: 'BTP', agriculture: 'Agriculture', location: 'Location', espaces_verts: 'Espaces verts', autre: 'Autre' }
   return parType.slice(0, 2).map(({ type_projet, nb }) => `${nb} ${TYPE_FR[type_projet] ?? type_projet}`).join(' · ')
+}
+
+function labelMois(iso) {
+  if (!iso) return ''
+  const [y, m] = iso.split('-').map(Number)
+  return `${MOIS_COURT[m - 1]} ${String(y).slice(2)}`
 }
 
 /* ─── Icons ──────────────────────────────────────────────── */

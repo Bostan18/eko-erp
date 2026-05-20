@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
+import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
 import MouvementStockForm from '../../components/forms/MouvementStockForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
 
 const TYPE_BADGE = {
   entree: 'badge-green',
-  sortie: 'badge-yellow',
+  sortie: 'badge-gold',
 }
 
 const TYPE_LABEL = {
@@ -26,65 +27,96 @@ export default function StockMouvements() {
     filtre === 'tous' ? true : m.type_mouvement === filtre
   )
 
+  const nbEntrees = mouvements.filter((m) => m.type_mouvement === 'entree').length
+  const nbSorties = mouvements.filter((m) => m.type_mouvement === 'sortie').length
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <p className="font-body text-[#A59F9B] text-sm">
-          {loading ? '…' : `${mouvements.length} mouvement${mouvements.length !== 1 ? 's' : ''}`}
-        </p>
-        <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau mouvement</button>
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
+        <div>
+          <div className="sec-title">Mouvements de stock</div>
+          <div className="sec-sub">
+            Entrées & sorties d'articles ·{' '}
+            {loading ? '…' : `${mouvements.length} mouvement${mouvements.length !== 1 ? 's' : ''}`}
+          </div>
+        </div>
+        <button className="btn-primary" onClick={() => setModal(true)}>
+          <IconPlus className="w-3.5 h-3.5" /> Nouveau mouvement
+        </button>
       </div>
 
-      <div className="flex gap-1 flex-wrap">
-        {['tous', 'entree', 'sortie'].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFiltre(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-              filtre === f
-                ? 'bg-forest-700 text-white'
-                : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
-            }`}
-          >
-            {f === 'tous' ? 'Tous' : TYPE_LABEL[f] + 's'}
-          </button>
-        ))}
+      {/* ─── KPI ────────────────────────────────────────── */}
+      <div className="three-col">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">🔄</div>
+          <p className="kpi-label">Total mouvements</p>
+          <p className="kpi-value">{mouvements.length}</p>
+          <p className="kpi-sub">Entrées & sorties</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">📥</div>
+          <p className="kpi-label">Entrées</p>
+          <p className="kpi-value text-forest-700">{nbEntrees}</p>
+          <p className="kpi-sub">Réapprovisionnements</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">📤</div>
+          <p className="kpi-label">Sorties</p>
+          <p className="kpi-value text-gold-600">{nbSorties}</p>
+          <p className="kpi-sub">Consommations</p>
+        </div>
       </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        <ModuleTabs items={STOCKS_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Mouvements ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <select
+            className="input input-sm w-auto"
+            value={filtre}
+            onChange={(e) => setFiltre(e.target.value)}
+          >
+            <option value="tous">Tous les types</option>
+            <option value="entree">Entrées</option>
+            <option value="sortie">Sorties</option>
+          </select>
+        </div>
+
+        {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
+          <table className="table-eko">
+            <thead>
               <tr>
                 {['Date', 'Type', 'Article', 'Quantité', 'Projet', 'Notes'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
-                    {h}
-                  </th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucun mouvement</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-sand-500 font-body">Aucun mouvement</td></tr>
               ) : filtered.map((m) => (
-                <tr key={m.id} className="hover:bg-[#fbf7f0] transition-colors">
-                  <td className="px-4 py-3 font-body text-[#1C1817] tabular-nums">{m.date}</td>
-                  <td className="px-4 py-3">
+                <tr key={m.id}>
+                  <td className="mono-cell">{m.date}</td>
+                  <td>
                     <span className={TYPE_BADGE[m.type_mouvement] ?? 'badge-gray'}>
                       {TYPE_LABEL[m.type_mouvement] ?? m.type_mouvement}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-body font-medium text-[#1C1817]">{m.article_nom}</td>
-                  <td className={`px-4 py-3 font-display font-semibold tabular-nums ${
-                    m.type_mouvement === 'entree' ? 'text-forest-700' : 'text-amber-700'
-                  }`}>
+                  <td className="font-display font-medium text-ink">{m.article_nom}</td>
+                  <td className={`num ${m.type_mouvement === 'entree' ? 'text-forest-700' : 'text-gold-700'}`}>
                     {m.type_mouvement === 'entree' ? '+' : '−'}{fmt(m.quantite)}
                   </td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{m.projet_nom || '—'}</td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{m.notes || '—'}</td>
+                  <td className="text-[12px] text-sand-500">{m.projet_nom || '—'}</td>
+                  <td className="text-[12px] text-sand-500">{m.notes || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -98,5 +130,13 @@ export default function StockMouvements() {
         </Modal>
       )}
     </div>
+  )
+}
+
+function IconPlus({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   )
 }

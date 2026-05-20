@@ -24,7 +24,7 @@ import { parseISO, joursEntreDates, dateFR } from '../../utils/dateHelpers'
 function GanttBarImpl({
   dateDebut, dateFin,
   periodeDebut, pxParJour,
-  couleur = '#888780',
+  couleur = '#928874',
   progression = 0,
   enRetard = false,
   termine = false,
@@ -64,7 +64,7 @@ function GanttBarImpl({
       tabIndex={href ? 0 : undefined}
       onKeyDown={(e) => { if (href && (e.key === 'Enter' || e.key === ' ')) navigate(href) }}
       className={`absolute rounded-md shadow-sm transition-shadow hover:shadow-md ${href ? 'cursor-pointer' : ''} ${
-        enRetard ? 'ring-2 ring-[#E24B4A]' : ''
+        enRetard ? 'ring-2 ring-red-500' : ''
       } ${termine ? 'opacity-60' : ''} ${planifie ? 'opacity-60' : ''}`}
       style={{
         left,

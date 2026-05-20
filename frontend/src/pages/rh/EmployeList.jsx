@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
+import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import EmployeForm from '../../components/forms/EmployeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -30,19 +31,18 @@ export default function EmployeList() {
 
   const nbPermanents  = employes.filter((e) => e.type_contrat === 'permanent').length
   const nbJournaliers = employes.filter((e) => e.type_contrat === 'journalier').length
+  const nbMoo         = employes.filter((e) => e.type_contrat === 'moo').length
 
   return (
-    <div className="space-y-6">
-      {/* ─── Head ──────────────────────────────────────── */}
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Opérations / RH</p>
-          <h1 className="page-title">Employés</h1>
-          <p className="page-sub mt-1.5">
-            {loading
-              ? '…'
-              : `${employes.length} employé${employes.length !== 1 ? 's' : ''} · ${nbPermanents} permanent${nbPermanents !== 1 ? 's' : ''} · ${nbJournaliers} journalier${nbJournaliers !== 1 ? 's' : ''}`}
-          </p>
+          <div className="sec-title">Employés</div>
+          <div className="sec-sub">
+            Permanents, journaliers & MOO ·{' '}
+            {loading ? '…' : `${employes.length} employé${employes.length !== 1 ? 's' : ''}`}
+          </div>
         </div>
         <div className="flex gap-2">
           <button className="btn-secondary">⬇ Exporter</button>
@@ -52,43 +52,64 @@ export default function EmployeList() {
         </div>
       </div>
 
-      {/* ─── Filtres + recherche ─────────────────────────── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1">
-          {[
-            { key: 'tous',       label: 'Tous',        count: employes.length },
-            { key: 'permanent',  label: 'Permanents',  count: nbPermanents },
-            { key: 'journalier', label: 'Journaliers', count: nbJournaliers },
-          ].map(({ key, label, count }) => (
-            <button
-              key={key}
-              onClick={() => setFiltre(key)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors flex items-center gap-1.5 ' +
-                (filtre === key
-                  ? 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >
-              {label}
-              <span className={
-                'font-mono text-[10px] px-1.5 py-0.5 rounded-full ' +
-                (filtre === key ? 'bg-forest-800 text-forest-100' : 'bg-sand-100 text-sand-500')
-              }>{count}</span>
-            </button>
-          ))}
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">👥</div>
+          <p className="kpi-label">Effectif total</p>
+          <p className="kpi-value">{employes.length}</p>
+          <p className="kpi-sub">Tous contrats</p>
         </div>
-        <input
-          type="text"
-          className="input input-sm max-w-xs ml-auto"
-          placeholder="Rechercher par nom ou code…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">👔</div>
+          <p className="kpi-label">Permanents</p>
+          <p className="kpi-value text-forest-700">{nbPermanents}</p>
+          <p className="kpi-sub">CDI / CDD</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">👷</div>
+          <p className="kpi-label">Journaliers</p>
+          <p className="kpi-value text-gold-600">{nbJournaliers}</p>
+          <p className="kpi-sub">Payés à la journée</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">🛠</div>
+          <p className="kpi-label">MOO</p>
+          <p className="kpi-value text-blue-600">{nbMoo}</p>
+          <p className="kpi-sub">Main d'œuvre occasionnelle</p>
+        </div>
       </div>
 
-      {/* ─── Table ──────────────────────────────────────── */}
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
+        <ModuleTabs items={RH_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Liste des employés ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              <option value="tous">Tous les contrats</option>
+              <option value="permanent">Permanents</option>
+              <option value="journalier">Journaliers</option>
+              <option value="moo">MOO</option>
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher par nom ou code…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import api from '../../services/api'
+import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import { fmt } from '../../utils/format'
 
 function getMonday(dateStr) {
@@ -92,12 +93,12 @@ export default function PointageSemaine() {
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">RH / Pointage</p>
-          <h1 className="page-title">Pointage semaine</h1>
-          <p className="page-sub mt-1.5">Présences des journaliers actifs — saisie hebdomadaire</p>
+          <div className="sec-title">Pointage semaine</div>
+          <div className="sec-sub">Présences des journaliers actifs — saisie hebdomadaire</div>
         </div>
         <div className="flex gap-2">
           <button onClick={charger} className="btn-secondary" disabled={saving || loading}>Actualiser</button>
@@ -109,16 +110,21 @@ export default function PointageSemaine() {
 
       {error && <div className="alert-red"><span className="w-1.5 h-1.5 bg-red-500 rounded-full" />{error}</div>}
 
-      <div className="flex items-center gap-3">
-        <button onClick={semainePrecedente} className="btn-secondary btn-sm">← Préc.</button>
-        <span className="font-display font-semibold text-ink text-sm">Semaine du {dateLabel}</span>
-        <button onClick={semaineSuivante} className="btn-secondary btn-sm">Suiv. →</button>
-      </div>
+      {/* ─── Carte : onglets module + th-row + table ────── */}
+      <div className="card overflow-hidden">
+        <ModuleTabs items={RH_TABS} />
 
-      {loading ? (
-        <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
-      ) : (
-        <div className="card overflow-hidden">
+        <div className="th-row">
+          <div className="flex items-center gap-3">
+            <button onClick={semainePrecedente} className="btn-secondary btn-sm">← Préc.</button>
+            <span className="th-title">Semaine du {dateLabel}</span>
+            <button onClick={semaineSuivante} className="btn-secondary btn-sm">Suiv. →</button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="table-eko">
               <thead>
@@ -179,8 +185,8 @@ export default function PointageSemaine() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

@@ -63,15 +63,14 @@ export default function DocumentList() {
     )
 
   return (
-    <div className="space-y-6">
-      {/* ─── Head ──────────────────────────────────────── */}
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Conformité / Gestion documentaire</p>
-          <h1 className="page-title">Documents</h1>
-          <p className="page-sub mt-1.5">
+          <div className="sec-title">Documents</div>
+          <div className="sec-sub">
             Permis · Assurances · Visites médicales · Certifications · Alertes d'expiration
-          </p>
+          </div>
         </div>
         <button className="btn-primary" onClick={() => setModal(true)}>
           <IconPlus className="w-3.5 h-3.5" /> Ajouter document
@@ -97,76 +96,62 @@ export default function DocumentList() {
         </div>
       )}
 
-      {/* ─── KPI ──────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
         <div className="kpi">
+          <div className="kpi-icon text-2xl">📁</div>
           <p className="kpi-label">Documents enregistrés</p>
           <p className="kpi-value">{documents.length}</p>
-          <p className="kpi-sub text-sand-500">Toutes entités confondues</p>
+          <p className="kpi-sub">Toutes entités confondues</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">✅</div>
           <p className="kpi-label">Valides</p>
           <p className="kpi-value text-forest-700">{nbValid}</p>
-          <p className="kpi-sub text-sand-500">Aucune action requise</p>
+          <p className="kpi-sub">Aucune action requise</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">⏰</div>
           <p className="kpi-label">Expire bientôt</p>
-          <p className={'kpi-value ' + (nbExpiring > 0 ? 'text-gold-700' : 'text-sand-400')}>{nbExpiring}</p>
-          <p className="kpi-sub text-sand-500">À renouveler &lt; 30 j</p>
+          <p className={'kpi-value ' + (nbExpiring > 0 ? 'text-gold-600' : 'text-sand-400')}>{nbExpiring}</p>
+          <p className="kpi-sub">À renouveler &lt; 30 j</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">❌</div>
           <p className="kpi-label">Expirés</p>
           <p className={'kpi-value ' + (nbExpired > 0 ? 'text-red-600' : 'text-sand-400')}>{nbExpired}</p>
-          <p className="kpi-sub text-sand-500">{nbExpired > 0 ? 'Action immédiate' : 'Aucun expiré'}</p>
+          <p className="kpi-sub">{nbExpired > 0 ? 'Action immédiate' : 'Aucun expiré'}</p>
         </div>
       </div>
 
-      {/* ─── Filtres + recherche ───────────────────────── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 flex-wrap">
-          {[
-            { key: 'tous',     label: 'Tous',     count: documents.length },
-            { key: 'valid',    label: 'Valides',  count: nbValid },
-            { key: 'expiring', label: 'Expire bientôt', count: nbExpiring, gold: true },
-            { key: 'expired',  label: 'Expirés',  count: nbExpired, danger: true },
-          ].map(({ key, label, count, gold, danger }) => (
-            <button
-              key={key}
-              onClick={() => setFiltre(key)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors flex items-center gap-1.5 ' +
-                (filtre === key
-                  ? danger
-                    ? 'bg-red-500 text-white'
-                    : gold
-                      ? 'bg-gold-400 text-forest-950'
-                      : 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >
-              {label}
-              <span className={
-                'font-mono text-[10px] px-1.5 py-0.5 rounded-full ' +
-                (filtre === key
-                  ? danger ? 'bg-red-700 text-white'
-                  : gold ? 'bg-forest-950 text-gold-100'
-                  : 'bg-forest-800 text-forest-100'
-                  : 'bg-sand-100 text-sand-500')
-              }>{count}</span>
-            </button>
-          ))}
-        </div>
-        <input
-          type="text"
-          className="input input-sm max-w-xs ml-auto"
-          placeholder="Rechercher titre, code ou entité…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* ─── Table ──────────────────────────────────────── */}
+      {/* ─── Carte : th-row (filtre + recherche) + table ── */}
       <div className="card overflow-hidden">
+        <div className="th-row">
+          <div className="th-title">
+            Tous les documents ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              <option value="tous">Tous les statuts</option>
+              <option value="valid">Valides</option>
+              <option value="expiring">Expire bientôt</option>
+              <option value="expired">Expirés</option>
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher titre, code ou entité…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

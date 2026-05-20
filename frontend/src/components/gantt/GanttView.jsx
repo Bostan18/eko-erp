@@ -31,7 +31,7 @@ export default function GanttView({ data, pxParJour = PX_PAR_JOUR_DEF, scrollOnT
 
   if (data.projets.length === 0) {
     return (
-      <div className="card p-12 text-center text-[#A59F9B] font-body">
+      <div className="card p-12 text-center text-sand-500 font-body">
         Aucun projet sur cette période.
       </div>
     )
@@ -65,7 +65,7 @@ export default function GanttView({ data, pxParJour = PX_PAR_JOUR_DEF, scrollOnT
       </div>
 
       {/* Vue mobile (< md) : liste compacte avec mini-barre */}
-      <div className="md:hidden divide-y divide-[#f4ebe0]">
+      <div className="md:hidden divide-y divide-sand-100">
         {data.projets.map((p) => (
           <MobileRow key={p.id} projet={p} />
         ))}
@@ -79,15 +79,15 @@ function MobileRow({ projet }) {
   return (
     <a
       href={`/projets/${projet.id}`}
-      className="block px-4 py-3 hover:bg-[#fbf7f0] transition-colors"
+      className="block px-4 py-3 hover:bg-sand-50 transition-colors"
     >
       <div className="flex items-center justify-between gap-2 mb-1">
-        <p className="font-display text-[14px] font-medium text-[#1C1817] truncate">{projet.nom}</p>
-        <span className="font-mono text-[11px] text-[#A59F9B] shrink-0">{prog}%</span>
+        <p className="font-display text-[14px] font-medium text-ink truncate">{projet.nom}</p>
+        <span className="font-mono text-[11px] text-sand-500 shrink-0">{prog}%</span>
       </div>
-      <p className="font-body text-[12px] text-[#A59F9B] mb-2 truncate">{projet.client_nom || '—'}</p>
+      <p className="font-body text-[12px] text-sand-500 mb-2 truncate">{projet.client_nom || '—'}</p>
       <div
-        className={`h-2 rounded-full overflow-hidden bg-[#f4ebe0] ${projet.est_en_retard ? 'ring-2 ring-[#E24B4A]' : ''}`}
+        className={`h-2 rounded-full overflow-hidden bg-sand-100 ${projet.est_en_retard ? 'ring-2 ring-red-500' : ''}`}
       >
         <div
           className="h-full rounded-full"

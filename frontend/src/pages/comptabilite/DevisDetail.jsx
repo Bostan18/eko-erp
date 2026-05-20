@@ -67,7 +67,7 @@ export default function DevisDetail() {
     }
   }
 
-  if (loading) return <div className="p-12 text-center text-[#A59F9B] font-body">Chargement…</div>
+  if (loading) return <div className="p-12 text-center text-sand-500 font-body">Chargement…</div>
   if (!devis) return <div className="p-12 text-center text-red-500 font-body">Devis introuvable.</div>
 
   const transitions = STATUTS_SUIVANTS[devis.statut] ?? []
@@ -76,23 +76,23 @@ export default function DevisDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sm font-body text-[#A59F9B]">
+      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500">
         <Link to="/comptabilite/devis" className="hover:text-forest-700 transition-colors">Devis</Link>
-        <span>/</span>
-        <span className="text-[#1C1817]">{devis.numero}</span>
+        <span className="text-sand-300">/</span>
+        <span className="text-ink">{devis.numero}</span>
       </div>
 
       <div className="card p-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-3 mb-1 flex-wrap">
-            <h1 className="font-display font-bold text-[#1C1817] text-xl">{devis.numero}</h1>
+            <h1 className="font-display font-bold text-ink text-xl">{devis.numero}</h1>
             <span className={DEVIS_STATUT_BADGE[devis.statut] ?? 'badge-gray'}>
               {DEVIS_STATUT_LABEL[devis.statut] ?? devis.statut}
             </span>
           </div>
-          <p className="font-body text-[#1C1817]">{devis.client_nom}</p>
-          {devis.projet_nom && <p className="font-body text-[#A59F9B] text-sm">{devis.projet_nom}</p>}
-          {devis.date_validite && <p className="font-body text-[#A59F9B] text-xs mt-1">Valide jusqu'au {devis.date_validite}</p>}
+          <p className="font-body text-ink">{devis.client_nom}</p>
+          {devis.projet_nom && <p className="font-body text-sand-500 text-sm">{devis.projet_nom}</p>}
+          {devis.date_validite && <p className="font-body text-sand-500 text-xs mt-1">Valide jusqu'au {devis.date_validite}</p>}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {transitions.map((t) => (
@@ -141,7 +141,7 @@ export default function DevisDetail() {
           )}
           {devis.statut !== 'accepte' && !dejaConverti && (
             <div
-              className="group relative inline-flex items-center text-[#A59F9B]"
+              className="group relative inline-flex items-center text-sand-500"
               title="La conversion est disponible uniquement pour les devis au statut Accepté."
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
@@ -153,11 +153,7 @@ export default function DevisDetail() {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 ring-1 ring-red-200 rounded-xl px-4 py-3">
-          <p className="text-red-700 text-[13px] font-body">{error}</p>
-        </div>
-      )}
+      {error && <p className="alert-red">{error}</p>}
 
       {showConfirm && (
         <ConvertirDevisModal
@@ -176,29 +172,29 @@ export default function DevisDetail() {
       </div>
 
       <div className="card overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#ece2d3]">
-          <p className="font-display font-semibold text-[#1C1817] text-sm">Lignes ({devis.lignes?.length ?? 0})</p>
+        <div className="card-head">
+          <p className="card-title">Lignes ({devis.lignes?.length ?? 0})</p>
         </div>
-        <table className="w-full text-sm">
-          <thead className="bg-[#fbf7f0]">
+        <table className="table-eko">
+          <thead>
             <tr>
               {['Désignation', 'Qté', 'Prix unit.', 'Remise', 'TVA %', 'Total HT', 'TTC'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
+                <th key={h}>{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#f4ebe0]">
+          <tbody>
             {(devis.lignes ?? []).length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-[#A59F9B] font-body text-sm">Aucune ligne</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-sand-500 font-body text-sm">Aucune ligne</td></tr>
             ) : (devis.lignes ?? []).map((l) => (
-              <tr key={l.id} className="hover:bg-[#fbf7f0]">
-                <td className="px-4 py-3 font-body text-[#1C1817]">{l.designation}</td>
-                <td className="px-4 py-3 font-body text-[#A59F9B]">{l.quantite}</td>
-                <td className="px-4 py-3 font-body text-[#1C1817]">{fmt(l.prix_unitaire)} F</td>
-                <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{Number(l.remise_pct) > 0 ? `${l.remise_pct}%` : '—'}</td>
-                <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{l.taux_tva}%</td>
-                <td className="px-4 py-3 font-display text-[#1C1817]">{fmt(l.total_ht)} F</td>
-                <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">{fmt(l.montant_ttc)} F</td>
+              <tr key={l.id}>
+                <td className="font-display font-medium text-ink">{l.designation}</td>
+                <td className="mono-cell">{l.quantite}</td>
+                <td className="num">{fmt(l.prix_unitaire)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                <td className="text-[12px] text-sand-500">{Number(l.remise_pct) > 0 ? `${l.remise_pct}%` : '—'}</td>
+                <td className="text-[12px] text-sand-500">{l.taux_tva}%</td>
+                <td className="num">{fmt(l.total_ht)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                <td className="num">{fmt(l.montant_ttc)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
               </tr>
             ))}
           </tbody>
@@ -207,8 +203,8 @@ export default function DevisDetail() {
 
       {devis.notes && (
         <div className="card p-5">
-          <p className="font-display font-semibold text-[#1C1817] text-sm mb-2">Notes</p>
-          <p className="font-body text-[#1C1817] text-sm whitespace-pre-line">{devis.notes}</p>
+          <p className="font-display font-semibold text-ink text-sm mb-2">Notes</p>
+          <p className="font-body text-ink text-sm whitespace-pre-line">{devis.notes}</p>
         </div>
       )}
     </div>
@@ -217,9 +213,9 @@ export default function DevisDetail() {
 
 function Tile({ label, value, highlight }) {
   return (
-    <div className={`card p-5 ${highlight ? 'bg-forest-50 ring-forest-100' : ''}`}>
-      <p className={`font-display text-xs uppercase tracking-wide mb-1 ${highlight ? 'text-forest-600' : 'text-[#A59F9B]'}`}>{label}</p>
-      <p className={`font-display font-bold text-2xl ${highlight ? 'text-forest-700' : 'text-[#1C1817]'}`}>{value}</p>
+    <div className="kpi">
+      <p className="kpi-label">{label}</p>
+      <p className={`kpi-value ${highlight ? 'text-forest-700' : 'text-ink'}`}>{value}</p>
     </div>
   )
 }

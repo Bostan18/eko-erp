@@ -68,7 +68,7 @@ export default function MissionMooForm({ onSuccess, onClose }) {
       )}
 
       <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Employé MOO *</label>
+        <label className="block font-display text-xs font-medium text-ink mb-1">Employé MOO *</label>
         <select className="input" value={form.employe} onChange={(e) => set('employe', e.target.value)}>
           <option value="">— Choisir un employé MOO —</option>
           {employes.map((e) => (
@@ -76,35 +76,35 @@ export default function MissionMooForm({ onSuccess, onClose }) {
           ))}
         </select>
         {employes.length === 0 && (
-          <p className="text-xs text-[#A59F9B] mt-1 italic">Aucun employé de type MOO enregistré.</p>
+          <p className="text-xs text-sand-500 mt-1 italic">Aucun employé de type MOO enregistré.</p>
         )}
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Description *</label>
+        <label className="block font-display text-xs font-medium text-ink mb-1">Description *</label>
         <input className="input" placeholder="Ex : transport matériaux chantier route Bouaké"
           value={form.description} onChange={(e) => set('description', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date début *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Date début *</label>
           <input className="input" type="date" value={form.date_debut} onChange={(e) => set('date_debut', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date fin *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Date fin *</label>
           <input className="input" type="date" value={form.date_fin} onChange={(e) => set('date_fin', e.target.value)} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Montant forfaitaire (FCFA) *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Montant forfaitaire (FCFA) *</label>
           <input className="input" type="number" step="0.01" min="0" placeholder="0"
             value={form.montant_forfaitaire} onChange={(e) => set('montant_forfaitaire', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Projet (optionnel)</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Projet (optionnel)</label>
           <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
             <option value="">— Aucun —</option>
             {projets.map((p) => (
@@ -115,7 +115,7 @@ export default function MissionMooForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Notes</label>
+        <label className="block font-display text-xs font-medium text-ink mb-1">Notes</label>
         <textarea className="input resize-none" rows={2}
           value={form.notes} onChange={(e) => set('notes', e.target.value)} />
       </div>

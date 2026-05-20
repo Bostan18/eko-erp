@@ -61,12 +61,12 @@ export default function ParametresEntreprise() {
     }
   }
 
-  if (loading) return <div className="p-12 text-center text-[#A59F9B] font-body">Chargement…</div>
+  if (loading) return <div className="p-12 text-center text-sand-500 font-body">Chargement…</div>
   if (!config) return <div className="p-12 text-center text-red-500 font-body">Configuration introuvable.</div>
 
   return (
     <form onSubmit={enregistrer} className="space-y-6 max-w-[1000px]">
-      <p className="font-body text-[#A59F9B] text-sm -mt-2">
+      <p className="font-body text-sand-500 text-sm -mt-2">
         Identité légale, fiscalité, intégration FNE et préférences de facturation.
       </p>
 
@@ -129,7 +129,7 @@ export default function ParametresEntreprise() {
                 onChange={(e) => set('fne_actif', e.target.checked)}
                 className="w-4 h-4 accent-forest-600"
               />
-              <span className="text-sm font-display font-medium text-[#1C1817]">FNE activée</span>
+              <span className="text-sm font-display font-medium text-ink">FNE activée</span>
             </label>
             <button
               type="button"
@@ -199,8 +199,8 @@ function Section({ title, subtitle, right, children }) {
     <div className="card p-5">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="font-display font-semibold text-[#1C1817] text-[16px] leading-[1.4]">{title}</h3>
-          {subtitle && <p className="font-body text-[#A59F9B] text-xs mt-0.5">{subtitle}</p>}
+          <h3 className="font-display font-semibold text-ink text-[16px] leading-[1.4]">{title}</h3>
+          {subtitle && <p className="font-body text-sand-500 text-xs mt-0.5">{subtitle}</p>}
         </div>
         {right}
       </div>
@@ -216,7 +216,7 @@ function Grid({ children }) {
 function Field({ label, full, children }) {
   return (
     <div className={full ? 'md:col-span-2' : ''}>
-      <label className="block font-display text-[12.8px] font-medium text-[#1C1817] mb-1">{label}</label>
+      <label className="block font-display text-[12.8px] font-medium text-ink mb-1">{label}</label>
       {children}
     </div>
   )

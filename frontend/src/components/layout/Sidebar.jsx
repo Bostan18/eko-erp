@@ -95,23 +95,14 @@ export default function Sidebar() {
 
   return (
     <aside className="w-60 min-w-[15rem] h-screen bg-forest-950 text-forest-100 flex flex-col shrink-0">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-forest-900">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-forest-500 rounded-lg flex items-center justify-center shrink-0">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white">
-              <path d="M12 2C8 2 4 5 4 9c0 5 8 13 8 13s8-8 8-13c0-4-4-7-8-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
-            </svg>
-          </div>
-          <div className="leading-tight">
-            <p className="font-display font-bold text-white text-[15px] tracking-tight">
-              EKO <span className="text-forest-400">SARL</span>
-            </p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-forest-500/80 mt-0.5">
-              Système ERP · CI
-            </p>
-          </div>
-        </div>
+      {/* Logo — wordmark maquette : EK<span vert>O</span> */}
+      <div className="px-[18px] py-[18px] border-b border-forest-900">
+        <p className="font-display font-extrabold text-white text-[24px] leading-none tracking-[-0.04em]">
+          EK<span className="text-forest-500">O</span>
+        </p>
+        <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-forest-500/80 mt-[3px]">
+          ERP · Côte d'Ivoire
+        </p>
       </div>
 
       {/* Nav */}

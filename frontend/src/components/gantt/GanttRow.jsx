@@ -22,11 +22,11 @@ function GanttRowImpl({ projet, periodeDebut, pxParJour, largeurNom, largeurTime
     (projet.est_en_retard ? '\n⚠ En retard' : '')
 
   return (
-    <div className="border-b border-[#f4ebe0] hover:bg-[#E1F5EE]/40 transition-colors">
+    <div className="border-b border-sand-100 hover:bg-forest-100/40 transition-colors">
       {/* Ligne projet */}
       <div className="flex" style={{ height: HAUTEUR_LIGNE_PROJET }}>
         <div
-          className="shrink-0 px-3 py-2 border-r border-[#ece2d3] bg-[#fbf7f0] flex items-center gap-2"
+          className="shrink-0 px-3 py-2 border-r border-sand-200 bg-sand-50 flex items-center gap-2"
           style={{ width: largeurNom }}
         >
           {aDesTaches ? (
@@ -34,7 +34,7 @@ function GanttRowImpl({ projet, periodeDebut, pxParJour, largeurNom, largeurTime
               type="button"
               onClick={() => setOuvert((v) => !v)}
               aria-label={ouvert ? 'Replier' : 'Déplier'}
-              className="text-[#A59F9B] hover:text-[#1C1817] transition-colors shrink-0"
+              className="text-sand-500 hover:text-ink transition-colors shrink-0"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 transition-transform ${ouvert ? 'rotate-90' : ''}`}>
                 <path d="M9 6l6 6-6 6" />
@@ -46,12 +46,12 @@ function GanttRowImpl({ projet, periodeDebut, pxParJour, largeurNom, largeurTime
           <div className="min-w-0 flex-1">
             <Link
               to={`/projets/${projet.id}`}
-              className="block font-display text-[13px] font-medium text-[#1C1817] hover:text-forest-700 truncate"
+              className="block font-display text-[13px] font-medium text-ink hover:text-forest-700 truncate"
               title={projet.nom}
             >
               {projet.nom}
             </Link>
-            <p className="font-body text-[11px] text-[#A59F9B] truncate">{projet.client_nom || '—'}</p>
+            <p className="font-body text-[11px] text-sand-500 truncate">{projet.client_nom || '—'}</p>
           </div>
         </div>
         <div className="relative" style={{ width: largeurTimeline, height: HAUTEUR_LIGNE_PROJET }}>
@@ -77,12 +77,12 @@ function GanttRowImpl({ projet, periodeDebut, pxParJour, largeurNom, largeurTime
       {ouvert && projet.taches.map((t) => (
         <div key={t.id} className="flex" style={{ height: HAUTEUR_LIGNE_TACHE }}>
           <div
-            className="shrink-0 pl-10 pr-3 py-1 border-r border-[#ece2d3] bg-[#fbf7f0] flex items-center"
+            className="shrink-0 pl-10 pr-3 py-1 border-r border-sand-200 bg-sand-50 flex items-center"
             style={{ width: largeurNom }}
           >
             <Link
               to={`/projets/${projet.id}/taches/${t.id}`}
-              className="font-body text-[12px] text-[#1C1817] hover:text-forest-700 truncate"
+              className="font-body text-[12px] text-ink hover:text-forest-700 truncate"
               title={t.nom}
             >
               {t.nom}

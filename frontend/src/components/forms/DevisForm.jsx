@@ -84,25 +84,25 @@ export default function DevisForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Client *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Client *</label>
           <select className="input" value={form.client} onChange={(e) => set('client', e.target.value)} required>
             <option value="">— Sélectionner —</option>
             {clients.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Projet (optionnel)</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Projet (optionnel)</label>
           <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
             <option value="">—</option>
             {projets.map((p) => <option key={p.id} value={p.id}>{p.nom}</option>)}
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Validité jusqu'au</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Validité jusqu'au</label>
           <input type="date" className="input" value={form.date_validite} onChange={(e) => set('date_validite', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Remise globale (%)</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Remise globale (%)</label>
           <input type="number" step="0.01" min="0" max="100" className="input"
             value={form.remise_globale_pct} onChange={(e) => set('remise_globale_pct', e.target.value)} />
         </div>
@@ -110,7 +110,7 @@ export default function DevisForm({ onSuccess, onClose }) {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="font-display font-semibold text-[#1C1817] text-sm">Lignes du devis</p>
+          <p className="font-display font-semibold text-ink text-sm">Lignes du devis</p>
           <button type="button" onClick={ajouterLigne} className="btn-secondary text-xs px-2 py-1">+ Ligne</button>
         </div>
         <div className="space-y-2">
@@ -127,32 +127,32 @@ export default function DevisForm({ onSuccess, onClose }) {
               <input type="number" step="0.01" className="input col-span-2" placeholder="TVA %"
                 value={l.taux_tva} onChange={(e) => setLigne(idx, 'taux_tva', e.target.value)} />
               <button type="button" onClick={() => supprimerLigne(idx)}
-                className="col-span-1 text-[#A59F9B] hover:text-red-500 transition-colors text-lg"
+                className="col-span-1 text-sand-500 hover:text-red-500 transition-colors text-lg"
                 title="Supprimer">×</button>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="card p-4 bg-[#fbf7f0]">
+      <div className="card p-4 bg-sand-50">
         <div className="grid grid-cols-3 gap-3 text-sm font-body">
           <div>
-            <p className="text-[#A59F9B] text-xs uppercase tracking-wide">Total HT</p>
-            <p className="font-display font-semibold text-[#1C1817]">{fmt(totalHT)} F</p>
+            <p className="text-sand-500 text-xs uppercase tracking-wide">Total HT</p>
+            <p className="font-display font-semibold text-ink">{fmt(totalHT)} F</p>
           </div>
           <div>
-            <p className="text-[#A59F9B] text-xs uppercase tracking-wide">TVA</p>
-            <p className="font-display font-semibold text-[#1C1817]">{fmt(totals.tva)} F</p>
+            <p className="text-sand-500 text-xs uppercase tracking-wide">TVA</p>
+            <p className="font-display font-semibold text-ink">{fmt(totals.tva)} F</p>
           </div>
           <div>
-            <p className="text-[#A59F9B] text-xs uppercase tracking-wide">Total TTC</p>
+            <p className="text-sand-500 text-xs uppercase tracking-wide">Total TTC</p>
             <p className="font-display font-bold text-forest-700 text-lg">{fmt(totalTTC)} F</p>
           </div>
         </div>
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Notes</label>
+        <label className="block font-display text-xs font-medium text-ink mb-1">Notes</label>
         <textarea className="input min-h-[60px]" value={form.notes} onChange={(e) => set('notes', e.target.value)} />
       </div>
 

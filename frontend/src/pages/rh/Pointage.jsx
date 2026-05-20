@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import api from '../../services/api'
+import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import { fmt } from '../../utils/format'
 
 function today() { return new Date().toISOString().slice(0, 10) }
@@ -64,12 +65,12 @@ export default function Pointage() {
   const nbPresents = rows.filter((r) => r.present).length
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">RH / Pointage</p>
-          <h1 className="page-title">Pointage journalier</h1>
-          <p className="page-sub mt-1.5">Saisie des présences — journaliers actifs</p>
+          <div className="sec-title">Pointage journalier</div>
+          <div className="sec-sub">Saisie des présences — journaliers actifs</div>
         </div>
         <div className="flex gap-2">
           <button
@@ -94,25 +95,25 @@ export default function Pointage() {
         </div>
       </div>
 
-      {/* Date + stats compactes */}
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-[12px] font-display font-medium text-ink">Date</span>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input w-44" />
-        </label>
-
-        <div className="ml-auto flex gap-3">
-          <div className="kpi !p-3 !pr-5 flex items-center gap-3 min-w-0">
-            <p className="font-display font-bold text-forest-700 text-xl leading-none">{nbPresents}</p>
-            <p className="text-[12px] text-sand-600">
-              présent{nbPresents !== 1 ? 's' : ''}
-              <span className="text-sand-400"> / {rows.length}</span>
-            </p>
-          </div>
-          <div className="kpi !p-3 !pr-5 flex items-center gap-3 min-w-0">
-            <p className="font-display font-bold text-gold-700 text-xl leading-none">{fmt(totalJour)}</p>
-            <p className="text-[12px] text-sand-600">F à payer</p>
-          </div>
+      {/* ─── KPI ────────────────────────────────────────── */}
+      <div className="three-col">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">👷</div>
+          <p className="kpi-label">Journaliers</p>
+          <p className="kpi-value">{rows.length}</p>
+          <p className="kpi-sub">Actifs ce jour</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">✅</div>
+          <p className="kpi-label">Présents</p>
+          <p className="kpi-value text-forest-700">{nbPresents} <span className="kpi-unit">/ {rows.length}</span></p>
+          <p className="kpi-sub">Pointés présents</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💰</div>
+          <p className="kpi-label">À payer</p>
+          <p className="kpi-value text-gold-600">{fmt(totalJour)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Total de la journée</p>
         </div>
       </div>
 
@@ -125,6 +126,16 @@ export default function Pointage() {
       )}
 
       <div className="card overflow-hidden">
+        <ModuleTabs items={RH_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">Feuille de pointage</div>
+          <label className="flex items-center gap-2 text-[12px] font-display font-medium text-sand-600">
+            Date
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input input-sm w-auto" />
+          </label>
+        </div>
+
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : rows.length === 0 ? (

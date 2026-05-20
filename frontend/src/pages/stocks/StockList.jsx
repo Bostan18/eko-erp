@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
+import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
 import ArticleForm from '../../components/forms/ArticleForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { ARTICLE_CAT_LABEL } from '../../utils/constants'
@@ -28,14 +29,15 @@ export default function StockList() {
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Opérations / Stocks</p>
-          <h1 className="page-title">Stocks</h1>
-          <p className="page-sub mt-1.5">
-            {loading ? '…' : `${articles.length} article${articles.length !== 1 ? 's' : ''} · Valeur stock : ${fmt(valeurStock)} F`}
-          </p>
+          <div className="sec-title">Stocks</div>
+          <div className="sec-sub">
+            Articles, intrants & matériaux ·{' '}
+            {loading ? '…' : `${articles.length} article${articles.length !== 1 ? 's' : ''}`}
+          </div>
         </div>
         <button className="btn-primary" onClick={() => setModal(true)}>
           <IconPlus className="w-3.5 h-3.5" /> Nouvel article
@@ -56,35 +58,65 @@ export default function StockList() {
         </button>
       )}
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 flex-wrap">
-          {['tous', 'alertes', 'intrant', 'materiau', 'equipement', 'consommable', 'piece'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFiltre(f)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
-                (filtre === f
-                  ? f === 'alertes'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >
-              {f === 'tous' ? 'Tous' : f === 'alertes' ? '⚠ Alertes' : ARTICLE_CAT_LABEL[f]}
-            </button>
-          ))}
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">📦</div>
+          <p className="kpi-label">Articles</p>
+          <p className="kpi-value">{articles.length}</p>
+          <p className="kpi-sub">Références en stock</p>
         </div>
-        <input
-          type="text"
-          className="input input-sm max-w-xs ml-auto"
-          placeholder="Rechercher nom ou code…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💰</div>
+          <p className="kpi-label">Valeur du stock</p>
+          <p className="kpi-value text-forest-700">{fmt(valeurStock)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Valorisation au prix unitaire</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">⚠</div>
+          <p className="kpi-label">Alertes</p>
+          <p className={`kpi-value ${alertes.length > 0 ? 'text-red-600' : 'text-sand-400'}`}>{alertes.length}</p>
+          <p className="kpi-sub">{alertes.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">🗂</div>
+          <p className="kpi-label">Catégories</p>
+          <p className="kpi-value">{Object.keys(ARTICLE_CAT_LABEL).length}</p>
+          <p className="kpi-sub">Types d'article</p>
+        </div>
       </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
+        <ModuleTabs items={STOCKS_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Articles ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              <option value="tous">Toutes les catégories</option>
+              <option value="alertes">⚠ Alertes</option>
+              {Object.entries(ARTICLE_CAT_LABEL).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher nom ou code…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

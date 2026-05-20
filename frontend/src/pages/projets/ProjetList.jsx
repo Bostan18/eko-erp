@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
+import ModuleTabs, { PROJETS_TABS } from '../../components/ui/ModuleTabs'
 import ProjetForm from '../../components/forms/ProjetForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -44,65 +45,79 @@ export default function ProjetList() {
   const budgetTotal = projets.reduce((s, p) => s + Number(p.budget_estime ?? 0), 0)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Opérations / Projets</p>
-          <h1 className="page-title">Projets</h1>
-          <p className="page-sub mt-1.5">
-            {loading ? '…' : `${projets.length} projet${projets.length !== 1 ? 's' : ''} · ${nbEnCours} en cours · ${nbTermines} terminés`}
-          </p>
+          <div className="sec-title">Projets</div>
+          <div className="sec-sub">
+            Chantiers BTP, agricoles & locations ·{' '}
+            {loading ? '…' : `${projets.length} projet${projets.length !== 1 ? 's' : ''}`}
+          </div>
         </div>
         <button className="btn-primary" onClick={() => setModal(true)}>
           <IconPlus className="w-3.5 h-3.5" /> Nouveau projet
         </button>
       </div>
 
-      {/* KPI */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
         <div className="kpi">
-          <p className="kpi-label">En cours</p>
-          <p className="kpi-value">{nbEnCours}</p>
-          <p className="kpi-sub text-sand-500">Projets actifs</p>
+          <div className="kpi-icon text-2xl">🏗</div>
+          <p className="kpi-label">Projets</p>
+          <p className="kpi-value">{projets.length}</p>
+          <p className="kpi-sub">Tous statuts</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">🔄</div>
+          <p className="kpi-label">En cours</p>
+          <p className="kpi-value text-blue-600">{nbEnCours}</p>
+          <p className="kpi-sub">Projets actifs</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">✅</div>
           <p className="kpi-label">Terminés</p>
           <p className="kpi-value text-forest-700">{nbTermines}</p>
-          <p className="kpi-sub text-sand-500">Cumul</p>
+          <p className="kpi-sub">Cumul</p>
         </div>
         <div className="kpi">
+          <div className="kpi-icon text-2xl">💰</div>
           <p className="kpi-label">Budget cumulé</p>
           <p className="kpi-value">{fmt(budgetTotal)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub text-sand-500">Tous projets confondus</p>
+          <p className="kpi-sub">Tous projets confondus</p>
         </div>
       </div>
 
-      {/* Filtres */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 flex-wrap">
-          {[['tous','Tous'], ...Object.entries(TYPE_LABEL)].map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setFiltre(key)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors ' +
-                (filtre === key
-                  ? 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >{label}</button>
-          ))}
-        </div>
-        <input
-          type="text"
-          className="input input-sm max-w-xs ml-auto"
-          placeholder="Rechercher nom ou code…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
+        <ModuleTabs items={PROJETS_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Liste des projets ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              <option value="tous">Tous les types</option>
+              {Object.entries(TYPE_LABEL).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher nom ou code…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

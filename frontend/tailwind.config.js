@@ -53,7 +53,8 @@ export default {
         drawer: '-8px 0 40px rgb(0 0 0 / 0.12)',
       },
       borderRadius: {
-        xl: '12px',
+        lg: '7px',   // boutons, inputs (maquette : 7px)
+        xl: '10px',  // cartes, KPI, drawers (maquette : 10px)
       },
     },
   },

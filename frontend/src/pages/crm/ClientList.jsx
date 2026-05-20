@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
+import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
 import ClientForm from '../../components/forms/ClientForm'
 import { useFetchList } from '../../hooks/useFetchList'
 
@@ -24,57 +25,82 @@ export default function ClientList() {
 
   const nbActifs    = clients.filter((c) => c.statut === 'actif').length
   const nbProspects = clients.filter((c) => c.statut === 'prospect').length
+  const nbInactifs  = clients.filter((c) => c.statut === 'inactif').length
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-6">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Commerce / CRM</p>
-          <h1 className="page-title">Clients</h1>
-          <p className="page-sub mt-1.5">
-            {loading ? '…' : `${clients.length} fiche${clients.length !== 1 ? 's' : ''} · ${nbActifs} actifs · ${nbProspects} prospects`}
-          </p>
+          <div className="sec-title">Clients</div>
+          <div className="sec-sub">
+            Base clients & prospects ·{' '}
+            {loading ? '…' : `${clients.length} fiche${clients.length !== 1 ? 's' : ''}`}
+          </div>
         </div>
         <button className="btn-primary" onClick={() => setModal(true)}>
           <IconPlus className="w-3.5 h-3.5" /> Nouveau client
         </button>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1">
-          {[
-            { key: 'tous',     label: 'Tous',      count: clients.length },
-            { key: 'actif',    label: 'Actifs',    count: nbActifs },
-            { key: 'prospect', label: 'Prospects', count: nbProspects },
-          ].map(({ key, label, count }) => (
-            <button
-              key={key}
-              onClick={() => setFiltre(key)}
-              className={
-                'px-3 py-1.5 rounded-lg text-[12px] font-display font-medium transition-colors flex items-center gap-1.5 ' +
-                (filtre === key
-                  ? 'bg-forest-700 text-white'
-                  : 'bg-white border border-sand-200 text-sand-700 hover:border-forest-300')
-              }
-            >
-              {label}
-              <span className={
-                'font-mono text-[10px] px-1.5 py-0.5 rounded-full ' +
-                (filtre === key ? 'bg-forest-800 text-forest-100' : 'bg-sand-100 text-sand-500')
-              }>{count}</span>
-            </button>
-          ))}
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">🤝</div>
+          <p className="kpi-label">Total fiches</p>
+          <p className="kpi-value">{clients.length}</p>
+          <p className="kpi-sub">Clients & prospects</p>
         </div>
-        <input
-          type="text"
-          className="input input-sm max-w-xs ml-auto"
-          placeholder="Rechercher nom ou code…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">✅</div>
+          <p className="kpi-label">Actifs</p>
+          <p className="kpi-value text-forest-700">{nbActifs}</p>
+          <p className="kpi-sub">Clients en activité</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">🎯</div>
+          <p className="kpi-label">Prospects</p>
+          <p className="kpi-value text-gold-600">{nbProspects}</p>
+          <p className="kpi-sub">À convertir</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💤</div>
+          <p className="kpi-label">Inactifs</p>
+          <p className="kpi-value text-sand-400">{nbInactifs}</p>
+          <p className="kpi-sub">Sans activité récente</p>
+        </div>
       </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
+        <ModuleTabs items={CRM_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Base clients ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              <option value="tous">Tous les statuts</option>
+              <option value="actif">Actifs</option>
+              <option value="prospect">Prospects</option>
+              <option value="inactif">Inactifs</option>
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher nom ou code…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>

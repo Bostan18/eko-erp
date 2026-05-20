@@ -17,41 +17,41 @@
 @layer components {
   /* ─── Buttons ───────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center gap-1.5 bg-forest-700 text-white px-3.5 py-2 rounded-lg
-           font-display font-medium text-[13px] hover:bg-forest-800 transition-colors
-           focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2
+    @apply inline-flex items-center gap-1.5 bg-forest-500 text-white px-3 py-1.5 rounded-lg
+           font-display font-medium text-[12px] hover:bg-forest-600 transition-colors
+           focus:outline-none focus:ring-2 focus:ring-forest-500/30 focus:ring-offset-2
            focus:ring-offset-sand-100 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center gap-1.5 bg-white text-ink border border-sand-200 px-3.5 py-2
-           rounded-lg font-display font-medium text-[13px] hover:bg-sand-50 transition-colors;
+    @apply inline-flex items-center gap-1.5 bg-white text-ink border border-sand-200 px-3 py-1.5
+           rounded-lg font-display font-medium text-[12px] hover:bg-sand-50 transition-colors;
   }
   .btn-ghost {
-    @apply inline-flex items-center gap-1.5 text-sand-700 px-3 py-2 rounded-lg
-           font-display font-medium text-[13px] hover:bg-sand-100 transition-colors;
+    @apply inline-flex items-center gap-1.5 text-sand-700 px-2.5 py-1.5 rounded-lg
+           font-display font-medium text-[12px] hover:bg-sand-100 transition-colors;
   }
   .btn-danger {
-    @apply inline-flex items-center gap-1.5 bg-red-600 text-white px-3.5 py-2 rounded-lg
-           font-display font-medium text-[13px] hover:bg-red-700 transition-colors;
+    @apply inline-flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg
+           font-display font-medium text-[12px] hover:bg-red-700 transition-colors;
   }
-  .btn-sm { @apply px-2.5 py-1 text-[12px]; }
+  .btn-sm { @apply px-2.5 py-1 text-[11px]; }
 
   /* ─── Cards ─────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl border border-sand-200 shadow-card;
+    @apply bg-white rounded-xl border border-sand-200;
   }
   .card-head {
-    @apply flex items-center justify-between px-5 py-3.5 border-b border-sand-200;
+    @apply flex items-center justify-between px-[18px] py-[13px] border-b border-sand-200;
   }
-  .card-title { @apply font-display font-semibold text-sm text-ink; }
+  .card-title { @apply font-display font-semibold text-[13.5px] text-ink; }
 
   /* ─── Inputs ────────────────────────────────────────── */
   .input {
-    @apply w-full px-3 py-2 bg-white border border-sand-200 rounded-lg text-[13px] font-body
-           text-ink placeholder-sand-400 transition-all
-           focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-500/15;
+    @apply w-full px-2.5 py-2 bg-white border border-sand-200 rounded-lg text-[12.5px] font-body
+           text-ink placeholder-sand-400 transition-colors
+           focus:outline-none focus:border-forest-500;
   }
-  .input-sm { @apply py-1.5 text-[12.5px]; }
+  .input-sm { @apply py-1.5 text-[12px]; }
 
   /* ─── Page head ─────────────────────────────────────── */
   .page-eyebrow {
@@ -63,28 +63,41 @@
   .page-sub {
     @apply font-body text-sand-600 text-[13px];
   }
+  /* Section header (sous-titre dans une carte) */
+  .sec-title { @apply font-display font-semibold text-[15px] text-ink; }
+  .sec-sub   { @apply font-body text-[11.5px] text-sand-500 mt-0.5; }
+
+  /* ─── Layout helpers (gabarit maquette) ─────────────── */
+  /* sec-head : titre + sous-titre à gauche, actions à droite */
+  .sec-head  { @apply flex items-start justify-between gap-4; }
+  .kpi-grid  { @apply grid grid-cols-2 lg:grid-cols-4 gap-[14px]; }
+  .two-col   { @apply grid grid-cols-1 lg:grid-cols-2 gap-[14px]; }
+  .three-col { @apply grid grid-cols-1 lg:grid-cols-3 gap-[14px]; }
+  /* th-row : en-tête interne d'une carte (titre + recherche/action) */
+  .th-row    { @apply flex items-center justify-between gap-3 px-[18px] py-[13px] border-b border-sand-200; }
+  .th-title  { @apply font-display font-semibold text-[13.5px] text-ink; }
 
   /* ─── Badges (forme pilule sobre, voir Badge.jsx) ─── */
   .badge {
-    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border
-           font-display font-medium text-[11px] leading-tight whitespace-nowrap;
+    @apply inline-flex items-center gap-1.5 px-2 py-[2.5px] rounded-full
+           font-display font-medium text-[10.5px] leading-tight whitespace-nowrap;
   }
-  .badge-green  { @apply badge bg-forest-50 text-forest-700 border-forest-100; }
-  .badge-gold   { @apply badge bg-gold-50   text-gold-700   border-gold-200; }
-  .badge-red    { @apply badge bg-red-50    text-red-700    border-red-100; }
-  .badge-blue   { @apply badge bg-blue-50   text-blue-700   border-blue-100; }
-  .badge-gray   { @apply badge bg-sand-100  text-sand-700   border-sand-200; }
-  .badge-ink    { @apply badge bg-ink       text-sand-100   border-ink; }
+  .badge-green  { @apply badge bg-forest-50 text-forest-700; }
+  .badge-gold   { @apply badge bg-gold-50   text-gold-700; }
+  .badge-red    { @apply badge bg-red-50    text-red-700; }
+  .badge-blue   { @apply badge bg-blue-50   text-blue-700; }
+  .badge-gray   { @apply badge bg-sand-100  text-sand-700; }
+  .badge-ink    { @apply badge bg-ink       text-sand-100; }
 
   /* ─── Tableaux denses ─────────────────────────────── */
-  .table-eko { @apply w-full text-[13px]; }
+  .table-eko { @apply w-full text-[12.5px]; }
   .table-eko thead { @apply bg-sand-50; }
   .table-eko th {
-    @apply text-left font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500
-           font-medium px-4 py-2.5 border-b border-sand-200;
+    @apply text-left font-mono text-[10.5px] uppercase tracking-[0.07em] text-sand-500
+           font-medium px-[15px] py-[9px] border-b border-sand-200;
   }
   .table-eko tbody td {
-    @apply px-4 py-3 border-b border-sand-100 align-middle;
+    @apply px-[15px] py-2.5 border-b border-sand-100 align-middle;
   }
   .table-eko tbody tr:last-child td { @apply border-b-0; }
   .table-eko tbody tr { @apply transition-colors hover:bg-sand-50; }
@@ -92,50 +105,81 @@
   .table-eko .num { @apply font-display font-semibold text-right text-ink; }
 
   /* ─── Tabs ──────────────────────────────────────────── */
-  .tab {
-    @apply px-4 py-2.5 text-[13px] font-display font-medium text-sand-500
-           border-b-2 border-transparent cursor-pointer transition-colors -mb-px hover:text-ink;
+  .tabs {
+    @apply flex border-b border-sand-200 px-[18px];
   }
-  .tab.active { @apply text-forest-700 border-forest-500; }
+  .tab {
+    @apply px-[15px] py-[11px] text-[12.5px] font-display font-medium text-sand-500
+           border-b-2 border-transparent cursor-pointer transition-colors -mb-px;
+  }
+  .tab:hover:not(.active) { @apply text-ink; }
+  .tab.active { @apply text-forest-500 border-forest-500 font-medium; }
 
   /* ─── Alert banner ─────────────────────────────────── */
   .alert-gold {
-    @apply bg-gold-50 border border-gold-200 rounded-lg px-4 py-2.5 text-[12.5px] text-gold-700
-           flex items-center gap-2;
+    @apply bg-gold-50 border border-gold-200 rounded-lg px-3 py-2 text-[12px] text-gold-700
+           flex items-center gap-1.5;
   }
   .alert-red {
-    @apply bg-red-50 border border-red-100 rounded-lg px-4 py-2.5 text-[12.5px] text-red-700
-           flex items-center gap-2;
+    @apply bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-[12px] text-red-700
+           flex items-center gap-1.5;
   }
 
   /* ─── KPI ─────────────────────────────────────────── */
   .kpi {
-    @apply relative bg-white rounded-xl border border-sand-200 p-5 overflow-hidden;
+    @apply relative bg-white rounded-xl border border-sand-200 px-[18px] py-4 overflow-hidden;
   }
   .kpi-label {
-    @apply font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500;
+    @apply font-mono text-[10.5px] uppercase tracking-[0.1em] text-sand-500 font-medium mb-1.5;
   }
   .kpi-value {
-    @apply font-display font-bold text-[26px] leading-none tracking-tight text-ink mt-2;
+    @apply font-display font-bold text-[22px] leading-none tracking-tight text-ink;
   }
-  .kpi-unit { @apply text-[13px] font-normal text-sand-500 ml-1; }
-  .kpi-sub { @apply text-[11.5px] mt-2; }
-  .kpi-icon { @apply absolute right-4 top-4 text-sand-200 pointer-events-none; }
+  .kpi-unit { @apply text-[12px] font-normal text-sand-500 ml-1; }
+  .kpi-sub  { @apply text-[11px] mt-1.5 text-sand-500 flex items-center gap-1; }
+  .kpi-icon { @apply absolute right-3.5 top-3.5 text-ink opacity-10 pointer-events-none; }
+  .kpi-up   { @apply text-forest-500 font-medium; }
+  .kpi-dn   { @apply text-red-600; }
+
+  /* ─── Progress bar ─────────────────────────────────── */
+  .progress {
+    @apply h-1 bg-sand-200 rounded-sm overflow-hidden;
+  }
+  .progress-fill { @apply h-full rounded-sm transition-all; }
+  .pf-g    { @apply bg-forest-500; }
+  .pf-gold { @apply bg-gold-400; }
+  .pf-r    { @apply bg-red-500; }
+
+  /* ─── Form field group (FormSection / FormRow / Field) ─ */
+  .fld { @apply flex flex-col gap-1; }
+  .fld label {
+    @apply font-display text-[11.5px] font-medium text-ink;
+  }
+  .fld .req  { @apply text-red-500; }
+  .fld .hint { @apply text-[10.5px] text-sand-500; }
+  .fld input, .fld select, .fld textarea {
+    @apply px-2.5 py-2 bg-white border border-sand-200 rounded-lg text-[12.5px] font-body
+           text-ink placeholder-sand-400 transition-colors
+           focus:outline-none focus:border-forest-500;
+  }
+  .fld input[readonly], .fld select[readonly], .fld textarea[readonly] {
+    @apply bg-sand-100 text-sand-500 cursor-default;
+  }
 
   /* ─── Sidebar items ─────────────────────────────── */
   .nav-eyebrow {
-    @apply font-mono text-[10px] uppercase tracking-[0.14em] text-forest-500/70 px-5 pt-3 pb-1.5;
+    @apply font-mono text-[9px] uppercase tracking-[0.16em] text-forest-500/70 px-[15px] pt-3 pb-1.5 font-medium;
   }
   .nav-item {
-    @apply flex items-center gap-2.5 px-5 py-2 text-[13px] font-display font-medium
-           text-forest-200 border-l-[3px] border-transparent transition-colors
+    @apply flex items-center gap-2.5 px-[15px] py-2 text-[12.5px] font-display font-normal
+           text-forest-200 border-l-[2.5px] border-transparent transition-colors
            hover:bg-forest-900/60 hover:text-white;
   }
   .nav-item.active {
     @apply bg-forest-900 text-white border-forest-500;
   }
   .nav-count {
-    @apply text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-forest-800 text-forest-100;
+    @apply text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-forest-800 text-forest-100 font-semibold;
   }
   .nav-count-gold { @apply bg-gold-400 text-forest-950; }
   .nav-count-red  { @apply bg-red-500  text-white; }

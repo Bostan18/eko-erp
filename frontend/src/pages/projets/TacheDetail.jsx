@@ -96,7 +96,7 @@ export default function TacheDetail() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sand-500">
         <Link to="/projets" className="hover:text-forest-700">Projets</Link>
         <span className="text-sand-300">/</span>
@@ -105,13 +105,13 @@ export default function TacheDetail() {
         <span className="text-ink">Pointage tâche</span>
       </div>
 
-      <div className="flex items-end justify-between gap-6">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="page-eyebrow mb-1.5">Pointage tâche</p>
-          <h1 className="page-title">{tableau?.tache_nom}</h1>
-          <p className="page-sub mt-1.5">
-            Tarif : {fmt(tableau?.tarif_unitaire)} F / {tableau?.unite_label || 'unité'}
-          </p>
+          <div className="sec-title">{tableau?.tache_nom}</div>
+          <div className="sec-sub">
+            Pointage à la tâche · Tarif : {fmt(tableau?.tarif_unitaire)} F / {tableau?.unite_label || 'unité'}
+          </div>
         </div>
         <div className="flex gap-2">
           <button onClick={charger} className="btn-secondary" disabled={saving}>Actualiser</button>
@@ -123,13 +123,15 @@ export default function TacheDetail() {
 
       {error && <div className="alert-red"><span className="w-1.5 h-1.5 bg-red-500 rounded-full" />{error}</div>}
 
-      <div className="flex items-center gap-3">
-        <button onClick={semainePrecedente} className="btn-secondary btn-sm">← Préc.</button>
-        <span className="font-display font-semibold text-ink text-sm">Semaine du {dateLabel}</span>
-        <button onClick={semaineSuivante} className="btn-secondary btn-sm">Suiv. →</button>
-      </div>
-
+      {/* ─── Carte : th-row (semaine) + table ───────────── */}
       <div className="card overflow-hidden">
+        <div className="th-row">
+          <div className="flex items-center gap-3">
+            <button onClick={semainePrecedente} className="btn-secondary btn-sm">← Préc.</button>
+            <span className="th-title">Semaine du {dateLabel}</span>
+            <button onClick={semaineSuivante} className="btn-secondary btn-sm">Suiv. →</button>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="table-eko">
             <thead>

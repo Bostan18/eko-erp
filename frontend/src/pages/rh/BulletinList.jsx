@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../../services/api'
+import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import { useFetchList } from '../../hooks/useFetchList'
 import {
-  BULLETIN_STATUT_BADGE, BULLETIN_STATUT_LABEL, MOIS_NOMS, moisLabel,
+  BULLETIN_STATUT_BADGE, BULLETIN_STATUT_LABEL, moisLabel,
 } from '../../utils/constants'
 import { fmt } from '../../utils/format'
 import { apiErrorMessage } from '../../utils/errors'
@@ -52,17 +53,19 @@ export default function BulletinList() {
   const nbPayes = bulletins.filter((b) => b.statut === 'paye').length
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="font-body text-[#A59F9B] text-sm">
-            {loading ? '…' : `${bulletins.length} bulletin${bulletins.length !== 1 ? 's' : ''} — ${moisLabel(moisActif)}`}
-          </p>
-          {feedback && <p className="text-xs text-forest-700 mt-1">{feedback}</p>}
+          <div className="sec-title">Bulletins de paie</div>
+          <div className="sec-sub">
+            Paie mensuelle des permanents · {moisLabel(moisActif)}
+          </div>
+          {feedback && <p className="text-[12px] text-forest-700 mt-1">{feedback}</p>}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <select
-            className="input"
+            className="input input-sm w-auto"
             value={moisActif}
             onChange={(e) => setMoisActif(e.target.value)}
           >
@@ -71,65 +74,88 @@ export default function BulletinList() {
             ))}
           </select>
           <button className="btn-primary" onClick={handleGenerer} disabled={generating}>
-            {generating ? 'Génération…' : `Générer la paie de ${moisLabel(moisActif)}`}
+            {generating ? 'Génération…' : '⚙ Générer la paie'}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="card p-4">
-          <p className="font-display text-xs text-[#A59F9B] uppercase tracking-wide mb-1">Total brut</p>
-          <p className="font-display font-bold text-[#1C1817] text-2xl">{fmt(totalBrut)} F</p>
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">📄</div>
+          <p className="kpi-label">Bulletins</p>
+          <p className="kpi-value">{bulletins.length}</p>
+          <p className="kpi-sub">{moisLabel(moisActif)}</p>
         </div>
-        <div className="card p-4 ring-forest-100 bg-forest-50">
-          <p className="font-display text-xs text-forest-600 uppercase tracking-wide mb-1">Payés</p>
-          <p className="font-display font-bold text-forest-700 text-2xl">{nbPayes} / {bulletins.length}</p>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💳</div>
+          <p className="kpi-label">Masse salariale brute</p>
+          <p className="kpi-value">{fmt(totalBrut)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Cumul du mois</p>
         </div>
-        <div className="card p-4">
-          <p className="font-display text-xs text-[#A59F9B] uppercase tracking-wide mb-1">Total net</p>
-          <p className="font-display font-bold text-[#1C1817] text-2xl">{fmt(totalNet)} F</p>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">💰</div>
+          <p className="kpi-label">Net à payer</p>
+          <p className="kpi-value text-forest-700">{fmt(totalNet)} <span className="kpi-unit">FCFA</span></p>
+          <p className="kpi-sub">Après cotisations</p>
+        </div>
+        <div className="kpi">
+          <div className="kpi-icon text-2xl">✅</div>
+          <p className="kpi-label">Payés</p>
+          <p className="kpi-value text-forest-700">{nbPayes} <span className="kpi-unit">/ {bulletins.length}</span></p>
+          <p className="kpi-sub">Bulletins réglés</p>
         </div>
       </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        <ModuleTabs items={RH_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Bulletins · {moisLabel(moisActif)} ·{' '}
+            <span className="text-sand-500 font-normal">{bulletins.length}</span>
+          </div>
+        </div>
+
+        {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : bulletins.length === 0 ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">
+          <div className="p-12 text-center text-sand-500 font-body text-sm">
             Aucun bulletin pour {moisLabel(moisActif)}. Clique « Générer la paie » pour créer les bulletins des CDI actifs.
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
+          <table className="table-eko">
+            <thead>
               <tr>
                 {['Code', 'Employé', 'Poste', 'Brut', 'Net', 'Statut', 'Payé le', 'Action'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {bulletins.map((b) => (
-                <tr key={b.id} className="hover:bg-[#fbf7f0] transition-colors">
-                  <td className="px-4 py-3 font-display font-medium text-forest-700">{b.employe_code}</td>
-                  <td className="px-4 py-3 font-body font-medium text-[#1C1817]">
+                <tr key={b.id}>
+                  <td className="mono-cell text-forest-700">{b.employe_code}</td>
+                  <td className="font-display font-medium text-ink">
                     <Link to={`/rh/paie/bulletins/${b.id}`} className="hover:text-forest-700 transition-colors">
                       {b.employe_nom}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{b.employe_poste || '—'}</td>
-                  <td className="px-4 py-3 font-body text-[#1C1817] tabular-nums">{fmt(b.brut)} F</td>
-                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817] tabular-nums">{fmt(b.net)} F</td>
-                  <td className="px-4 py-3">
+                  <td className="text-[12px] text-sand-500">{b.employe_poste || '—'}</td>
+                  <td className="num">{fmt(b.brut)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                  <td className="num text-forest-700">{fmt(b.net)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                  <td>
                     <span className={BULLETIN_STATUT_BADGE[b.statut] ?? 'badge-gray'}>
                       {BULLETIN_STATUT_LABEL[b.statut] ?? b.statut}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{b.paye_le || '—'}</td>
-                  <td className="px-4 py-3">
+                  <td className="text-[12px] text-sand-500">{b.paye_le || '—'}</td>
+                  <td>
                     {b.statut !== 'paye' && (
                       <button
-                        className="text-xs font-display text-forest-700 hover:text-forest-900"
+                        className="text-[12px] font-display font-medium text-forest-700 hover:text-forest-900"
                         onClick={() => marquerPaye(b.id)}
                       >
                         Marquer payé

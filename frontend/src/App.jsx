@@ -19,6 +19,8 @@ const TacheDetail     = lazy(() => import('./pages/projets/TacheDetail'))
 const PlanningGantt   = lazy(() => import('./pages/projets/PlanningGantt'))
 const ClientList      = lazy(() => import('./pages/crm/ClientList'))
 const ProspectList    = lazy(() => import('./pages/crm/ProspectList'))
+const Pipeline        = lazy(() => import('./pages/crm/Pipeline'))
+const ContratList     = lazy(() => import('./pages/crm/ContratList'))
 const StockList       = lazy(() => import('./pages/stocks/StockList'))
 const StockAlertes    = lazy(() => import('./pages/stocks/StockAlertes'))
 const StockMouvements = lazy(() => import('./pages/stocks/StockMouvements'))
@@ -61,6 +63,8 @@ export default function App() {
         <Route path="/projets/:projetId/taches/:tacheId" element={<TacheDetail />} />
         <Route path="/crm"                          element={<ClientList />} />
         <Route path="/crm/prospects"                element={<ProspectList />} />
+        <Route path="/crm/pipeline"                 element={<Pipeline />} />
+        <Route path="/crm/contrats"                 element={<ContratList />} />
         <Route path="/stocks"                       element={<StockList />} />
         <Route path="/stocks/alertes"               element={<StockAlertes />} />
         <Route path="/stocks/mouvements"            element={<StockMouvements />} />

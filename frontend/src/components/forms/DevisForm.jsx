@@ -3,7 +3,7 @@ import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
-const LIGNE_INIT = { designation: '', quantite: '1', prix_unitaire: '', remise_pct: '0', taux_tva: '18' }
+const LIGNE_INIT = { designation: '', centre_cout: '', quantite: '1', prix_unitaire: '', remise_pct: '0', taux_tva: '18' }
 
 export default function DevisForm({ onSuccess, onClose }) {
   const [form, setForm] = useState({
@@ -12,12 +12,14 @@ export default function DevisForm({ onSuccess, onClose }) {
   const [lignes, setLignes] = useState([{ ...LIGNE_INIT }])
   const [clients, setClients] = useState([])
   const [projets, setProjets] = useState([])
+  const [centres, setCentres] = useState([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     api.get('/crm/clients/').then(({ data }) => setClients(data.results ?? data))
     api.get('/projets/projets/').then(({ data }) => setProjets(data.results ?? data))
+    api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
   }, [])
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
@@ -62,6 +64,7 @@ export default function DevisForm({ onSuccess, onClose }) {
         lignesValides.map((l) => api.post('/comptabilite/lignes-devis/', {
           devis: devis.id,
           designation: l.designation,
+          centre_cout: l.centre_cout || null,
           quantite: l.quantite,
           prix_unitaire: l.prix_unitaire,
           remise_pct: l.remise_pct || 0,
@@ -116,9 +119,14 @@ export default function DevisForm({ onSuccess, onClose }) {
         <div className="space-y-2">
           {lignes.map((l, idx) => (
             <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-              <input className="input col-span-4" placeholder="Désignation"
+              <input className="input col-span-3" placeholder="Désignation"
                 value={l.designation} onChange={(e) => setLigne(idx, 'designation', e.target.value)} />
-              <input type="number" step="0.001" className="input col-span-2" placeholder="Qté"
+              <select className="input col-span-2 text-[12px]" title="Activité"
+                value={l.centre_cout} onChange={(e) => setLigne(idx, 'centre_cout', e.target.value)}>
+                <option value="">Activité…</option>
+                {centres.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
+              </select>
+              <input type="number" step="0.001" className="input col-span-1" placeholder="Qté"
                 value={l.quantite} onChange={(e) => setLigne(idx, 'quantite', e.target.value)} />
               <input type="number" step="0.01" className="input col-span-2" placeholder="Prix unit."
                 value={l.prix_unitaire} onChange={(e) => setLigne(idx, 'prix_unitaire', e.target.value)} />

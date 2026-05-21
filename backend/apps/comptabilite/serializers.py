@@ -8,14 +8,16 @@ from .models import (
 # ── Devis ─────────────────────────────────────────────────────────────────────
 
 class LigneDevisSerializer(serializers.ModelSerializer):
-    total_ht    = serializers.ReadOnlyField()
-    montant_tva = serializers.ReadOnlyField()
-    montant_ttc = serializers.ReadOnlyField()
+    total_ht            = serializers.ReadOnlyField()
+    montant_tva         = serializers.ReadOnlyField()
+    montant_ttc         = serializers.ReadOnlyField()
+    centre_cout_display = serializers.CharField(source="centre_cout.nom", read_only=True, default="")
 
     class Meta:
         model  = LigneDevis
         fields = [
-            "id", "devis", "designation", "quantite", "prix_unitaire",
+            "id", "devis", "centre_cout", "centre_cout_display",
+            "designation", "quantite", "prix_unitaire",
             "remise_pct", "taux_tva", "total_ht", "montant_tva", "montant_ttc",
             "created_at",
         ]

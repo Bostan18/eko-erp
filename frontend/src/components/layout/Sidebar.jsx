@@ -58,6 +58,8 @@ const NAV = [
         children: [
           { label: 'Clients',   path: '/crm' },
           { label: 'Prospects', path: '/crm/prospects' },
+          { label: 'Pipeline',  path: '/crm/pipeline' },
+          { label: 'Contrats',  path: '/crm/contrats' },
         ],
       },
     ],

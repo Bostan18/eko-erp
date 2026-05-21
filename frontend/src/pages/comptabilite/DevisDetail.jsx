@@ -178,17 +178,18 @@ export default function DevisDetail() {
         <table className="table-eko">
           <thead>
             <tr>
-              {['Désignation', 'Qté', 'Prix unit.', 'Remise', 'TVA %', 'Total HT', 'TTC'].map((h) => (
+              {['Désignation', 'Activité', 'Qté', 'Prix unit.', 'Remise', 'TVA %', 'Total HT', 'TTC'].map((h) => (
                 <th key={h}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {(devis.lignes ?? []).length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-sand-500 font-body text-sm">Aucune ligne</td></tr>
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-sand-500 font-body text-sm">Aucune ligne</td></tr>
             ) : (devis.lignes ?? []).map((l) => (
               <tr key={l.id}>
                 <td className="font-display font-medium text-ink">{l.designation}</td>
+                <td className="text-[12px] text-sand-500">{l.centre_cout_display || '—'}</td>
                 <td className="mono-cell">{l.quantite}</td>
                 <td className="num">{fmt(l.prix_unitaire)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
                 <td className="text-[12px] text-sand-500">{Number(l.remise_pct) > 0 ? `${l.remise_pct}%` : '—'}</td>

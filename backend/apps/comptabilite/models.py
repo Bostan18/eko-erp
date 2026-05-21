@@ -100,6 +100,9 @@ class Devis(TimeStampedModel):
 
 class LigneDevis(TimeStampedModel):
     devis         = models.ForeignKey(Devis, on_delete=models.CASCADE, related_name="lignes")
+    centre_cout   = models.ForeignKey("core.CentreCout", null=True, blank=True,
+                      on_delete=models.SET_NULL, related_name="lignes_devis",
+                      help_text="Activité de la ligne — devis combinés multi-activités")
     designation   = models.CharField(max_length=300)
     quantite      = models.DecimalField(max_digits=10, decimal_places=3, default=Decimal("1"))
     prix_unitaire = models.DecimalField(max_digits=12, decimal_places=2)

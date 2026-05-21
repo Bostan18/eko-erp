@@ -60,6 +60,9 @@ export const STOCKS_TABS = [
 export const CRM_TABS = [
   { label: 'Clients',   to: '/crm', end: true },
   { label: 'Prospects', to: '/crm/prospects' },
+  { label: 'Devis',     to: '/comptabilite/devis' },
+  { label: 'Pipeline',  to: '/crm/pipeline' },
+  { label: 'Contrats',  to: '/crm/contrats' },
 ]
 
 export const PROJETS_TABS = [

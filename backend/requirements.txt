@@ -22,6 +22,7 @@ reportlab==4.5.0
 qrcode[pil]==8.0
 requests==2.32.3
 weasyprint==62.3
+pydyf==0.10.0  # épinglé : pydyf 0.11+ casse WeasyPrint 62.x (Stream.transform)
 
 # Dev
 django-debug-toolbar==4.4.2

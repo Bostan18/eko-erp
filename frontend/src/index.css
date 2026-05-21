@@ -124,6 +124,10 @@
     @apply bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-[12px] text-red-700
            flex items-center gap-1.5;
   }
+  .alert-green {
+    @apply bg-forest-50 border border-forest-100 rounded-lg px-3 py-2 text-[12px] text-forest-700
+           flex items-center gap-1.5;
+  }
 
   /* ─── KPI ─────────────────────────────────────────── */
   .kpi {

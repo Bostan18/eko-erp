@@ -20,6 +20,7 @@ export default function FactureForm({ onSuccess, onClose }) {
   const [form, setForm]       = useState({
     numero: '', client: '', projet: '', taux_tva: '18',
     date_emission: today(), date_echeance: '', notes: '',
+    mode_reglement: 'cash', template_fne: 'B2B', centre_cout: '',
   })
   const [lignes, setLignes]   = useState([{ ...LIGNE_INIT }])
   const [clients, setClients] = useState([])
@@ -39,6 +40,7 @@ export default function FactureForm({ onSuccess, onClose }) {
   function ajouterLigne() { setLignes((prev) => [...prev, { ...LIGNE_INIT }]) }
   function supprimerLigne(idx) { setLignes((prev) => prev.filter((_, i) => i !== idx)) }
 
+  const clientSelectionne = clients.find((c) => String(c.id) === String(form.client))
   const montantHT  = lignes.reduce((s, l) => s + (Number(l.quantite) * Number(l.prix_unitaire || 0)), 0)
   const montantTVA = montantHT * Number(form.taux_tva) / 100
   const montantTTC = montantHT + montantTVA
@@ -124,6 +126,45 @@ export default function FactureForm({ onSuccess, onClose }) {
                 onChange={(e) => set('date_echeance', e.target.value)} />
             </Field>
           </FormRow>
+        </FormSection>
+
+        <FormSection titre="Facturation FNE">
+          <FormRow cols={2}>
+            <Field label="Type de facturation" hint="B2B/B2G : NCC client requis">
+              <select className="input" value={form.template_fne} onChange={(e) => set('template_fne', e.target.value)}>
+                <option value="B2B">B2B — Entreprise</option>
+                <option value="B2C">B2C — Particulier</option>
+                <option value="B2G">B2G — Administration</option>
+                <option value="B2F">B2F — International</option>
+              </select>
+            </Field>
+            <Field label="Mode de règlement">
+              <select className="input" value={form.mode_reglement} onChange={(e) => set('mode_reglement', e.target.value)}>
+                <option value="cash">Espèces</option>
+                <option value="card">Carte</option>
+                <option value="check">Chèque</option>
+                <option value="mobile-money">Mobile Money</option>
+                <option value="transfer">Virement</option>
+                <option value="deferred">Différé</option>
+              </select>
+            </Field>
+          </FormRow>
+          <Field label="Centre de coût" hint="Ventilation analytique (optionnel)">
+            <select className="input" value={form.centre_cout} onChange={(e) => set('centre_cout', e.target.value)}>
+              <option value="">— Aucun —</option>
+              <option value="btp">BTP</option>
+              <option value="pepiniere">Pépinière</option>
+              <option value="location">Location</option>
+              <option value="plantation">Plantation</option>
+            </select>
+          </Field>
+          {clientSelectionne && ['B2B', 'B2G'].includes(form.template_fne) && (
+            <p className={`text-[11.5px] mt-1 ${clientSelectionne.ncc ? 'text-forest-700' : 'text-gold-700'}`}>
+              {clientSelectionne.ncc
+                ? `NCC client : ${clientSelectionne.ncc}`
+                : '⚠ Ce client n’a pas de NCC — requis pour la certification FNE B2B/B2G.'}
+            </p>
+          )}
         </FormSection>
 
         {/* Lignes de facturation — pattern « line table » de la maquette */}

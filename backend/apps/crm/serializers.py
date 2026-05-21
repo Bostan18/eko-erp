@@ -6,7 +6,7 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = [
-            "id", "code", "nom", "type_client", "secteur", "statut",
+            "id", "code", "nom", "ncc", "type_client", "secteur", "statut",
             "telephone", "email", "localite", "notes", "date_premier_contact",
             "created_at", "updated_at",
         ]

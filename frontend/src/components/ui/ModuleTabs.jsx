@@ -29,7 +29,9 @@ export default function ModuleTabs({ items }) {
    que l'onglet ne reste pas actif sur les routes sœurs. */
 export const COMPTA_TABS = [
   { label: 'Factures', to: '/comptabilite/factures' },
+  { label: 'Avoirs',   to: '/comptabilite/avoirs' },
   { label: 'Devis',    to: '/comptabilite/devis' },
+  { label: 'Stickers', to: '/comptabilite/stickers' },
   { label: 'Charges',  to: '/comptabilite/charges' },
 ]
 

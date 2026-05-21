@@ -4,7 +4,7 @@ import { apiErrorMessage } from '../../utils/errors'
 import { FormSection, FormRow, Field } from '../ui/Modal'
 
 const INIT = {
-  code: '', nom: '', type_client: 'prospect', secteur: '',
+  code: '', nom: '', ncc: '', type_client: 'prospect', secteur: '',
   statut: 'actif', telephone: '', email: '', localite: '', notes: '',
 }
 
@@ -67,6 +67,10 @@ export default function ClientForm({ onSuccess, onClose }) {
           <Field label="Nom / Raison sociale" required>
             <input className="input" placeholder="BOUAKÉ CONSTRUCTIONS SARL" value={form.nom}
               onChange={(e) => set('nom', e.target.value)} />
+          </Field>
+          <Field label="NCC" hint="N° Compte Contribuable — requis pour la facturation FNE B2B/B2G">
+            <input className="input" placeholder="CI-1234567 X" value={form.ncc}
+              onChange={(e) => set('ncc', e.target.value)} />
           </Field>
         </FormSection>
 

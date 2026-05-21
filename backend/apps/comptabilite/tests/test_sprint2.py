@@ -141,7 +141,8 @@ class TestFNEServiceMock:
             "invoice":         {"id": "inv-001", "items": [{"id": "item-1"}]},
         }
 
-        with patch("apps.comptabilite.services.fne_service.requests.post") as mock_post:
+        with patch("apps.comptabilite.services.fne_service.requests.post") as mock_post, \
+             patch.object(FNEService, "mode_simulation", return_value=False):
             mock_token = MagicMock()
             mock_token.ok = True
             mock_token.json.return_value = {"access_token": "tok123", "expires_in": 3600}

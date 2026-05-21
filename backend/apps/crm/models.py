@@ -8,6 +8,8 @@ class Client(SoftDeleteModel):
 
     code = models.CharField(max_length=20, unique=True)  # CLI-001
     nom = models.CharField(max_length=200)
+    ncc = models.CharField(max_length=50, blank=True, verbose_name="N° Compte Contribuable",
+                           help_text="NCC du client — requis pour la facturation FNE B2B/B2G")
     type_client = models.CharField(max_length=20, choices=TYPE_CHOICES, default="prospect")
     secteur = models.CharField(max_length=20, choices=SECTEUR_CHOICES, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default="actif")

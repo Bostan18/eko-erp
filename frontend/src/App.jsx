@@ -24,6 +24,8 @@ const StockAlertes    = lazy(() => import('./pages/stocks/StockAlertes'))
 const StockMouvements = lazy(() => import('./pages/stocks/StockMouvements'))
 const FactureList     = lazy(() => import('./pages/comptabilite/FactureList'))
 const FactureDetail   = lazy(() => import('./pages/comptabilite/FactureDetail'))
+const AvoirList       = lazy(() => import('./pages/comptabilite/AvoirList'))
+const StickerList     = lazy(() => import('./pages/comptabilite/StickerList'))
 const ChargeList      = lazy(() => import('./pages/comptabilite/ChargeList'))
 const DevisList       = lazy(() => import('./pages/comptabilite/DevisList'))
 const DevisDetail     = lazy(() => import('./pages/comptabilite/DevisDetail'))
@@ -60,6 +62,8 @@ export default function App() {
         <Route path="/stocks/mouvements"            element={<StockMouvements />} />
         <Route path="/comptabilite/factures"        element={<FactureList />} />
         <Route path="/comptabilite/factures/:id"    element={<FactureDetail />} />
+        <Route path="/comptabilite/avoirs"          element={<AvoirList />} />
+        <Route path="/comptabilite/stickers"        element={<StickerList />} />
         <Route path="/comptabilite/charges"         element={<ChargeList />} />
         <Route path="/comptabilite/devis"           element={<DevisList />} />
         <Route path="/comptabilite/devis/:id"       element={<DevisDetail />} />

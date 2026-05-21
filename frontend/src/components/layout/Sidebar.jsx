@@ -1,5 +1,11 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
+import { useAlerts } from '../../context/AlertsContext'
+
+const BADGE_TONE = {
+  red:  'bg-red-500 text-white',
+  gold: 'bg-gold-500 text-forest-950',
+}
 
 const NAV = [
   {
@@ -87,6 +93,7 @@ export default function Sidebar() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
+  const { badges } = useAlerts()
 
   function handleLogout() {
     logout()
@@ -114,6 +121,7 @@ export default function Sidebar() {
               const parentActive =
                 location.pathname === path ||
                 (children && location.pathname.startsWith(path + '/'))
+              const badge = badges?.[path]
 
               return (
                 <div key={path}>
@@ -126,6 +134,13 @@ export default function Sidebar() {
                   >
                     <Icon className="w-[15px] h-[15px] opacity-90" />
                     <span className="flex-1">{label}</span>
+                    {badge?.count > 0 && (
+                      <span className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center
+                                        text-[10px] font-mono font-bold rounded-full shrink-0
+                                        ${BADGE_TONE[badge.tone] ?? 'bg-forest-600 text-white'}`}>
+                        {badge.count > 99 ? '99+' : badge.count}
+                      </span>
+                    )}
                   </NavLink>
 
                   {children && parentActive && (

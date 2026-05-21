@@ -1,4 +1,6 @@
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import GlobalSearch from './GlobalSearch'
+import NotificationsBell from './NotificationsBell'
 
 const ROUTE_LABELS = {
   '/':                          ['Pilotage', 'Tableau de bord'],
@@ -44,25 +46,9 @@ export default function Topbar() {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <div className="relative">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-               className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-sand-500">
-            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-          </svg>
-          <input
-            className="bg-sand-100 border border-sand-200 rounded-lg pl-8 pr-3 py-1.5 text-[13px] w-[240px]
-                       focus:outline-none focus:border-forest-500 focus:bg-white transition"
-            placeholder="Rechercher facture, client, employé…"
-          />
-        </div>
+        <GlobalSearch />
 
-        <button className="w-8 h-8 rounded-lg border border-sand-200 bg-white flex items-center justify-center hover:bg-sand-50 relative" title="Notifications">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 text-sand-700">
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-          </svg>
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white" />
-        </button>
+        <NotificationsBell />
 
         <button className="w-8 h-8 rounded-lg border border-sand-200 bg-white flex items-center justify-center hover:bg-sand-50" title="Aide">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 text-sand-700">

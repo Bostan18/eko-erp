@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import { AlertsProvider } from '../../context/AlertsContext'
 import useAuthStore from '../../store/authStore'
 
 function PageLoader() {
@@ -17,18 +18,20 @@ export default function MainLayout() {
   if (!token) return <Navigate to="/login" replace />
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar />
-        <main className="flex-1 overflow-y-auto bg-sand-100">
-          <div className="px-7 py-6 max-w-[1400px] mx-auto">
-            <Suspense fallback={<PageLoader />}>
-              <Outlet />
-            </Suspense>
-          </div>
-        </main>
+    <AlertsProvider>
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Topbar />
+          <main className="flex-1 overflow-y-auto bg-sand-100">
+            <div className="px-7 py-6 max-w-[1400px] mx-auto">
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </AlertsProvider>
   )
 }

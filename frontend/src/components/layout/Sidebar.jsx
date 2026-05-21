@@ -73,6 +73,15 @@ const NAV = [
           { label: 'Charges',  path: '/comptabilite/charges'  },
         ],
       },
+      {
+        label: 'Achats & Trésorerie', path: '/achats', icon: IconAchats,
+        children: [
+          { label: 'Factures achats', path: '/achats/factures' },
+          { label: 'Fournisseurs',    path: '/achats/fournisseurs' },
+          { label: 'Comptes',         path: '/achats/comptes' },
+          { label: 'Paiements',       path: '/achats/tresorerie' },
+        ],
+      },
     ],
   },
   {
@@ -247,6 +256,14 @@ function IconCompta({ className }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
       <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" />
       <path d="M6 15h2M10 15h4" />
+    </svg>
+  )
+}
+function IconAchats({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M2 7h20l-1.5 10.5a2 2 0 0 1-2 1.5H5.5a2 2 0 0 1-2-1.5L2 7Z" />
+      <path d="M8 7V5a4 4 0 0 1 8 0v2" />
     </svg>
   )
 }

@@ -35,6 +35,13 @@ export const COMPTA_TABS = [
   { label: 'Charges',  to: '/comptabilite/charges' },
 ]
 
+export const ACHATS_TABS = [
+  { label: 'Factures achats', to: '/achats/factures', end: true },
+  { label: 'Fournisseurs',    to: '/achats/fournisseurs' },
+  { label: 'Comptes',         to: '/achats/comptes' },
+  { label: 'Paiements',       to: '/achats/tresorerie' },
+]
+
 export const RH_TABS = [
   { label: 'Employés',     to: '/rh', end: true },
   { label: 'Pointage',     to: '/rh/pointage' },

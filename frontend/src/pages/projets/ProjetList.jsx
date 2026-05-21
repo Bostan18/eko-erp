@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
-import Badge from '../../components/ui/Badge'
+import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { PROJETS_TABS } from '../../components/ui/ModuleTabs'
 import ProjetForm from '../../components/forms/ProjetForm'
 import { useFetchList } from '../../hooks/useFetchList'
@@ -124,11 +124,11 @@ export default function ProjetList() {
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Code','Nom','Type','Statut','Client','Début','Budget'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Code','Nom','Type','Centre','Statut','Client','Début','Budget'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun projet</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun projet</td></tr>
               ) : filtered.map((p) => (
                 <tr key={p.id}>
                   <td className="mono-cell text-forest-700">{p.code}</td>
@@ -138,6 +138,7 @@ export default function ProjetList() {
                     </Link>
                   </td>
                   <td><Badge tone={TYPE_TONE[p.type_projet] ?? 'gray'}>{TYPE_LABEL[p.type_projet] ?? p.type_projet}</Badge></td>
+                  <td>{p.centre_cout_display ? <CenterBadge center={p.centre_cout_display} /> : <span className="text-sand-400">—</span>}</td>
                   <td><Badge tone={STATUT_TONE[p.statut] ?? 'gray'}>{STATUT_LABEL[p.statut] ?? p.statut}</Badge></td>
                   <td className="text-sand-600">{p.client_nom ?? '—'}</td>
                   <td className="mono-cell">{p.date_debut ?? '—'}</td>

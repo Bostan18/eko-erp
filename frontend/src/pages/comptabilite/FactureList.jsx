@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
-import { StatusBadge } from '../../components/ui/Badge'
+import { StatusBadge, CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import FactureForm from '../../components/forms/FactureForm'
 import { useFetchList } from '../../hooks/useFetchList'
@@ -14,8 +15,14 @@ export default function FactureList() {
     'Impossible de charger les factures.'
   )
   const [filtre, setFiltre] = useState('toutes')
+  const [filtreCentre, setFiltreCentre] = useState('tous')
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [centres, setCentres] = useState([])
+
+  useEffect(() => {
+    api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
+  }, [])
 
   const filtrees = factures
     .filter((f) => {
@@ -23,6 +30,7 @@ export default function FactureList() {
       if (filtre === 'en_retard') return factureEnRetard(f)
       return f.statut === filtre
     })
+    .filter((f) => filtreCentre === 'tous' ? true : String(f.centre_cout) === filtreCentre)
     .filter((f) =>
       !search
         ? true
@@ -124,6 +132,14 @@ export default function FactureList() {
                 <option key={s.key} value={s.key}>{s.label}</option>
               ))}
             </select>
+            <select
+              className="input input-sm w-auto"
+              value={filtreCentre}
+              onChange={(e) => setFiltreCentre(e.target.value)}
+            >
+              <option value="tous">Tous les centres</option>
+              {centres.map((c) => <option key={c.id} value={String(c.id)}>{c.nom}</option>)}
+            </select>
             <input
               type="text"
               className="input input-sm w-[210px]"
@@ -141,7 +157,7 @@ export default function FactureList() {
           <table className="table-eko">
             <thead>
               <tr>
-                {['Numéro', 'Client', 'Projet', 'TTC', 'Payé', 'Solde', 'Statut', 'Échéance'].map((h) => (
+                {['Numéro', 'Client', 'Projet', 'Centre', 'TTC', 'Payé', 'Solde', 'Statut', 'Échéance'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -149,7 +165,7 @@ export default function FactureList() {
             <tbody>
               {filtrees.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">
+                  <td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">
                     Aucune facture
                   </td>
                 </tr>
@@ -171,6 +187,7 @@ export default function FactureList() {
                       {f.type_facture === 'avoir' && <span className="badge-red ml-2">Avoir</span>}
                     </td>
                     <td className="text-[12px] text-sand-500">{f.projet_nom || '—'}</td>
+                    <td>{f.centre_cout_display ? <CenterBadge center={f.centre_cout_display} /> : <span className="text-sand-400">—</span>}</td>
                     <td className="num">
                       {fmt(f.total_ttc)} <span className="text-[10px] font-normal text-sand-500">F</span>
                     </td>

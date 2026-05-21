@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
-import Badge from '../../components/ui/Badge'
+import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import ChargeForm from '../../components/forms/ChargeForm'
 import { useFetchList } from '../../hooks/useFetchList'
@@ -119,11 +119,11 @@ export default function ChargeList() {
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Fournisseur', 'Référence'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Centre', 'Fournisseur', 'Référence'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {filtrees.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucune charge</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucune charge</td></tr>
               ) : filtrees.map((c) => (
                 <tr key={c.id}>
                   <td className="mono-cell">{c.date}</td>
@@ -131,6 +131,7 @@ export default function ChargeList() {
                   <td><Badge tone={badgeToTone(CHARGE_CAT_BADGE[c.categorie])}>{CHARGE_CAT_LABEL[c.categorie] ?? c.categorie}</Badge></td>
                   <td className="num">{fmt(c.montant)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
                   <td className="text-sand-600 text-[12px]">{c.projet_nom || '—'}</td>
+                  <td>{c.centre_cout_display ? <CenterBadge center={c.centre_cout_display} /> : <span className="text-sand-400">—</span>}</td>
                   <td className="text-sand-600">{c.fournisseur || '—'}</td>
                   <td className="mono-cell text-sand-500">{c.reference || '—'}</td>
                 </tr>
@@ -142,7 +143,7 @@ export default function ChargeList() {
                   Total {filtre !== 'toutes' ? CHARGE_CAT_LABEL[filtre] : 'charges'}
                 </td>
                 <td className="px-4 py-3 num text-[14px]">{fmt(totalFiltre)} F</td>
-                <td colSpan={3} />
+                <td colSpan={4} />
               </tr>
             </tfoot>
           </table>

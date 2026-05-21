@@ -87,7 +87,7 @@ class FactureSerializer(serializers.ModelSerializer):
     devis_source   = serializers.SerializerMethodField()
     avoirs         = serializers.SerializerMethodField()
     facture_origine_numero = serializers.CharField(source="facture_origine.numero_local", read_only=True, default="")
-    centre_cout_display = serializers.CharField(source="get_centre_cout_display", read_only=True, default="")
+    centre_cout_display = serializers.CharField(source="centre_cout.nom", read_only=True, default="")
     total_ht       = serializers.ReadOnlyField()
     total_tva      = serializers.ReadOnlyField()
     total_ttc      = serializers.ReadOnlyField()
@@ -168,13 +168,15 @@ class PaiementSerializer(serializers.ModelSerializer):
 # ── Charge ────────────────────────────────────────────────────────────────────
 
 class ChargeSerializer(serializers.ModelSerializer):
-    projet_nom = serializers.CharField(source="projet.nom", read_only=True, default="")
+    projet_nom          = serializers.CharField(source="projet.nom", read_only=True, default="")
+    centre_cout_display = serializers.CharField(source="centre_cout.nom", read_only=True, default="")
 
     class Meta:
         model  = Charge
         fields = [
             "id", "libelle", "categorie", "montant", "date",
-            "projet", "projet_nom", "fournisseur", "reference", "notes",
+            "projet", "projet_nom", "centre_cout", "centre_cout_display",
+            "fournisseur", "reference", "notes",
             "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]

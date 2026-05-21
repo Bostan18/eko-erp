@@ -77,6 +77,27 @@ class EntrepriseConfig(models.Model):
         return self.raison_sociale or "Configuration entreprise"
 
 
+class CentreCout(TimeStampedModel):
+    """Centre de coût analytique transversal (item 15).
+    Ventile factures, charges et projets par activité EKO
+    (BTP / Pépinière / Location / Plantation)."""
+
+    code    = models.CharField(max_length=20, unique=True)   # slug stable : btp, pepiniere…
+    nom     = models.CharField(max_length=100)
+    couleur = models.CharField(max_length=7, default="#386641",
+                               help_text="Couleur hex pour les graphes de ventilation")
+    actif   = models.BooleanField(default=True)
+    ordre   = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Centre de coût"
+        verbose_name_plural = "Centres de coût"
+        ordering = ["ordre", "nom"]
+
+    def __str__(self):
+        return self.nom
+
+
 class Document(SoftDeleteModel):
     """Pièces justificatives métier (permis, médicales, assurances, etc.)."""
 

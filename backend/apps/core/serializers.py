@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import EntrepriseConfig, Document
+from .models import EntrepriseConfig, Document, CentreCout
+
+
+class CentreCoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = CentreCout
+        fields = ["id", "code", "nom", "couleur", "actif", "ordre"]
+        read_only_fields = ["id"]
 
 
 class EntrepriseConfigSerializer(serializers.ModelSerializer):

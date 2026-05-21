@@ -102,7 +102,7 @@ class LigneDevisViewSet(viewsets.ModelViewSet):
 # ── Facture ───────────────────────────────────────────────────────────────────
 
 class FactureViewSet(viewsets.ModelViewSet):
-    queryset         = Facture.objects.select_related("client", "projet", "devis")
+    queryset         = Facture.objects.select_related("client", "projet", "devis", "centre_cout")
     serializer_class = FactureSerializer
     filterset_fields = ["statut", "client", "projet", "type_facture", "centre_cout"]
     search_fields    = ["numero_local", "fne_reference", "client__nom"]
@@ -267,9 +267,9 @@ class PaiementViewSet(viewsets.ModelViewSet):
 
 
 class ChargeViewSet(viewsets.ModelViewSet):
-    queryset         = Charge.objects.filter(is_deleted=False).select_related("projet")
+    queryset         = Charge.objects.filter(is_deleted=False).select_related("projet", "centre_cout")
     serializer_class = ChargeSerializer
-    filterset_fields = ["categorie", "projet"]
+    filterset_fields = ["categorie", "projet", "centre_cout"]
     search_fields    = ["libelle", "fournisseur", "reference"]
 
     @action(detail=False, methods=["get"])

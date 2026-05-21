@@ -150,13 +150,6 @@ class Facture(TimeStampedModel):
     TEMPLATE_CHOICES = [
         ("B2B", "B2B"), ("B2C", "B2C"), ("B2G", "B2G"), ("B2F", "B2F"),
     ]
-    # Centre de coût analytique — amorce (item 15). Devient une entité dédiée au Sprint 3.
-    CENTRE_COUT_CHOICES = [
-        ("btp",        "BTP"),
-        ("pepiniere",  "Pépinière"),
-        ("location",   "Location"),
-        ("plantation", "Plantation"),
-    ]
 
     # Numérotation locale
     numero_local  = models.CharField(max_length=30, unique=True, editable=False)
@@ -186,7 +179,8 @@ class Facture(TimeStampedModel):
     date_echeance  = models.DateField(null=True, blank=True)
     mode_reglement = models.CharField(max_length=20, choices=MODE_CHOICES, default="cash")
     template_fne   = models.CharField(max_length=5, choices=TEMPLATE_CHOICES, default="B2B")
-    centre_cout    = models.CharField(max_length=15, choices=CENTRE_COUT_CHOICES, blank=True)
+    centre_cout    = models.ForeignKey("core.CentreCout", null=True, blank=True,
+                        on_delete=models.SET_NULL, related_name="factures")
 
     # Paiements (montant_paye mis à jour par Paiement.save)
     montant_paye = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
@@ -329,6 +323,7 @@ class Charge(SoftDeleteModel):
     montant    = models.DecimalField(max_digits=15, decimal_places=2)
     date       = models.DateField()
     projet     = models.ForeignKey("projets.Projet", on_delete=models.SET_NULL, null=True, blank=True, related_name="charges")
+    centre_cout = models.ForeignKey("core.CentreCout", null=True, blank=True, on_delete=models.SET_NULL, related_name="charges")
     fournisseur = models.CharField(max_length=200, blank=True)
     reference  = models.CharField(max_length=100, blank=True)
     notes      = models.TextField(blank=True)

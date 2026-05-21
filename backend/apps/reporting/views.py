@@ -128,6 +128,23 @@ def kpis(request):
         })
         y, m = _decaler_mois(y, m, 1)
 
+    # ── CA par centre de coût (12 derniers mois, hors avoirs) ─────────
+    from apps.core.models import CentreCout
+    ca_centre_agg = defaultdict(float)
+    for f in factures_12m:
+        if f.type_facture == "avoir":
+            continue
+        ca_centre_agg[f.centre_cout_id] += float(f.total_ttc)
+    ca_par_centre = [
+        {"code": c.code, "nom": c.nom, "couleur": c.couleur,
+         "ca": round(ca_centre_agg.get(c.id, 0.0), 2)}
+        for c in CentreCout.objects.filter(actif=True)
+    ]
+    non_ventile = round(ca_centre_agg.get(None, 0.0), 2)
+    if non_ventile:
+        ca_par_centre.append({"code": "", "nom": "Non ventilé",
+                              "couleur": "#9ca3af", "ca": non_ventile})
+
     return Response({
         "rh": {
             "employes_actifs": employes_actifs,
@@ -161,6 +178,7 @@ def kpis(request):
             "mois": mois,
             "annee": annee,
             "serie_mensuelle": serie_mensuelle,
+            "ca_par_centre": ca_par_centre,
         },
     })
 

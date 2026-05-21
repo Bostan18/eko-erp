@@ -120,6 +120,9 @@ export default function Dashboard() {
         <RepartitionCard parType={kpis?.projets.par_type ?? []} loading={loading} />
       </div>
 
+      {/* ─── CA par centre de coût (item 15) ─────────────── */}
+      <VentilationCentresCard centres={kpis?.finance.ca_par_centre ?? []} loading={loading} />
+
       {/* ─── Dernières factures ──────────────────────────── */}
       <div className="card overflow-hidden">
         <div className="th-row">
@@ -250,6 +253,40 @@ function RepartitionCard({ parType, loading }) {
                 </div>
                 <div className="progress">
                   <div className={`progress-fill ${PF_TONES[i % PF_TONES.length]}`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
+
+function VentilationCentresCard({ centres, loading }) {
+  const total = centres.reduce((s, c) => s + Number(c.ca || 0), 0)
+  return (
+    <div className="card">
+      <div className="th-row"><div className="th-title">CA par centre de coût · 12 derniers mois</div></div>
+      <div className="px-[18px] py-4">
+        {loading ? (
+          <div className="h-[90px] flex items-center justify-center text-sand-500 text-sm">Chargement…</div>
+        ) : total === 0 ? (
+          <div className="h-[90px] flex items-center justify-center text-sand-500 text-sm">Aucun chiffre d'affaires ventilé</div>
+        ) : (
+          centres.filter((c) => Number(c.ca) > 0).map((c) => {
+            const pct = Math.round((Number(c.ca) / total) * 100)
+            return (
+              <div key={c.code || c.nom} className="mb-3 last:mb-0">
+                <div className="flex justify-between text-[12px] mb-1">
+                  <span className="font-medium text-ink flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full" style={{ background: c.couleur }} />
+                    {c.nom}
+                  </span>
+                  <span className="text-sand-500">{fmt(c.ca)} F · {pct}%</span>
+                </div>
+                <div className="progress">
+                  <div className="progress-fill" style={{ width: `${pct}%`, background: c.couleur }} />
                 </div>
               </div>
             )

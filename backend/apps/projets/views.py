@@ -14,9 +14,9 @@ from .serializers import (
 
 
 class ProjetViewSet(viewsets.ModelViewSet):
-    queryset = Projet.objects.filter(is_deleted=False).select_related("client", "chef_projet")
+    queryset = Projet.objects.filter(is_deleted=False).select_related("client", "chef_projet", "centre_cout")
     serializer_class = ProjetSerializer
-    filterset_fields = ["type_projet", "statut", "client"]
+    filterset_fields = ["type_projet", "statut", "client", "centre_cout"]
     search_fields = ["code", "nom", "localisation"]
 
     @action(detail=False, methods=["get"])

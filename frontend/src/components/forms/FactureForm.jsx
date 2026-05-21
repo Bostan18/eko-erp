@@ -25,12 +25,14 @@ export default function FactureForm({ onSuccess, onClose }) {
   const [lignes, setLignes]   = useState([{ ...LIGNE_INIT }])
   const [clients, setClients] = useState([])
   const [projets, setProjets] = useState([])
+  const [centres, setCentres] = useState([])
   const [error, setError]     = useState('')
   const [saving, setSaving]   = useState(false)
 
   useEffect(() => {
     api.get('/crm/clients/').then(({ data }) => setClients(data.results ?? data))
     api.get('/projets/projets/').then(({ data }) => setProjets(data.results ?? data))
+    api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
   }, [])
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
@@ -56,6 +58,7 @@ export default function FactureForm({ onSuccess, onClose }) {
         ...form,
         client: form.client || null,
         projet: form.projet || null,
+        centre_cout: form.centre_cout || null,
         montant_ht: montantHT,
         montant_tva: montantTVA,
         montant_ttc: montantTTC,
@@ -152,10 +155,7 @@ export default function FactureForm({ onSuccess, onClose }) {
           <Field label="Centre de coût" hint="Ventilation analytique (optionnel)">
             <select className="input" value={form.centre_cout} onChange={(e) => set('centre_cout', e.target.value)}>
               <option value="">— Aucun —</option>
-              <option value="btp">BTP</option>
-              <option value="pepiniere">Pépinière</option>
-              <option value="location">Location</option>
-              <option value="plantation">Plantation</option>
+              {centres.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
             </select>
           </Field>
           {clientSelectionne && ['B2B', 'B2G'].includes(form.template_fne) && (

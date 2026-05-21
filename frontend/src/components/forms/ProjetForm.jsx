@@ -4,7 +4,7 @@ import { apiErrorMessage } from '../../utils/errors'
 import { FormSection, FormRow, Field } from '../ui/Modal'
 
 const INIT = {
-  code: '', nom: '', type_projet: 'btp', statut: 'planifie',
+  code: '', nom: '', type_projet: 'btp', centre_cout: '', statut: 'planifie',
   client: '', localisation: '', date_debut: '', date_fin_prevue: '',
   budget_estime: '', description: '',
 }
@@ -23,11 +23,13 @@ function validate(form) {
 export default function ProjetForm({ onSuccess, onClose }) {
   const [form, setForm]       = useState(INIT)
   const [clients, setClients] = useState([])
+  const [centres, setCentres] = useState([])
   const [error, setError]     = useState('')
   const [saving, setSaving]   = useState(false)
 
   useEffect(() => {
     api.get('/crm/clients/?statut=actif').then(({ data }) => setClients(data.results ?? data))
+    api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
   }, [])
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
@@ -42,6 +44,7 @@ export default function ProjetForm({ onSuccess, onClose }) {
       await api.post('/projets/projets/', {
         ...form,
         client: form.client || null,
+        centre_cout: form.centre_cout || null,
         budget_estime: form.budget_estime || 0,
         date_debut: form.date_debut || null,
         date_fin_prevue: form.date_fin_prevue || null,
@@ -104,10 +107,18 @@ export default function ProjetForm({ onSuccess, onClose }) {
               </select>
             </Field>
           </FormRow>
-          <Field label="Localisation">
-            <input className="input" placeholder="Cocody, Abidjan" value={form.localisation}
-              onChange={(e) => set('localisation', e.target.value)} />
-          </Field>
+          <FormRow cols={2}>
+            <Field label="Localisation">
+              <input className="input" placeholder="Cocody, Abidjan" value={form.localisation}
+                onChange={(e) => set('localisation', e.target.value)} />
+            </Field>
+            <Field label="Centre de coût" hint="Ventilation analytique">
+              <select className="input" value={form.centre_cout} onChange={(e) => set('centre_cout', e.target.value)}>
+                <option value="">— Aucun —</option>
+                {centres.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
+              </select>
+            </Field>
+          </FormRow>
         </FormSection>
 
         <FormSection titre="Planning & budget">

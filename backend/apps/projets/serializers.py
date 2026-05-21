@@ -32,12 +32,13 @@ class IntervenantProjetSerializer(serializers.ModelSerializer):
 class ProjetSerializer(serializers.ModelSerializer):
     client_nom = serializers.CharField(source="client.nom", read_only=True, default="")
     chef_projet_nom = serializers.CharField(source="chef_projet.nom_complet", read_only=True, default="")
+    centre_cout_display = serializers.CharField(source="centre_cout.nom", read_only=True, default="")
     intervenants = IntervenantProjetSerializer(many=True, read_only=True)
 
     class Meta:
         model = Projet
         fields = [
-            "id", "code", "nom", "type_projet", "statut",
+            "id", "code", "nom", "type_projet", "centre_cout", "centre_cout_display", "statut",
             "client", "client_nom", "chef_projet", "chef_projet_nom",
             "localisation", "date_debut", "date_fin_prevue", "date_fin_reelle",
             "budget_estime", "description", "notes", "intervenants",

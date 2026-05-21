@@ -22,6 +22,7 @@ class Projet(SoftDeleteModel):
     code = models.CharField(max_length=20, unique=True)  # PRJ-001
     nom = models.CharField(max_length=200)
     type_projet = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    centre_cout = models.ForeignKey("core.CentreCout", null=True, blank=True, on_delete=models.SET_NULL, related_name="projets")
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default="planifie")
     client = models.ForeignKey(
         "crm.Client", on_delete=models.PROTECT, related_name="projets", null=True, blank=True

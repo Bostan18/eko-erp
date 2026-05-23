@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import Badge, { StatusBadge } from '../../components/ui/Badge'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconFolder, IconCheck, IconClock, IconX } from '../../components/ui/Icons'
 import DocumentForm from '../../components/forms/DocumentForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -98,30 +100,30 @@ export default function DocumentList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📁</div>
-          <p className="kpi-label">Documents enregistrés</p>
-          <p className="kpi-value">{documents.length}</p>
-          <p className="kpi-sub">Toutes entités confondues</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Valides</p>
-          <p className="kpi-value text-forest-700">{nbValid}</p>
-          <p className="kpi-sub">Aucune action requise</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⏰</div>
-          <p className="kpi-label">Expire bientôt</p>
-          <p className={'kpi-value ' + (nbExpiring > 0 ? 'text-gold-600' : 'text-sand-400')}>{nbExpiring}</p>
-          <p className="kpi-sub">À renouveler &lt; 30 j</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">❌</div>
-          <p className="kpi-label">Expirés</p>
-          <p className={'kpi-value ' + (nbExpired > 0 ? 'text-red-600' : 'text-sand-400')}>{nbExpired}</p>
-          <p className="kpi-sub">{nbExpired > 0 ? 'Action immédiate' : 'Aucun expiré'}</p>
-        </div>
+        <KpiCard
+          icon={<IconFolder />} tone="sand"
+          label="Documents enregistrés"
+          value={documents.length}
+          sub="Toutes entités confondues"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Valides"
+          value={nbValid}
+          sub="Aucune action requise"
+        />
+        <KpiCard
+          icon={<IconClock />} tone={nbExpiring > 0 ? 'gold' : 'sand'} valueTone={nbExpiring > 0 ? 'gold' : 'sand'}
+          label="Expire bientôt"
+          value={nbExpiring}
+          sub={<>À renouveler &lt; 30 j</>}
+        />
+        <KpiCard
+          icon={<IconX />} tone={nbExpired > 0 ? 'red' : 'sand'} valueTone={nbExpired > 0 ? 'red' : 'sand'}
+          label="Expirés"
+          value={nbExpired}
+          sub={nbExpired > 0 ? 'Action immédiate' : 'Aucun expiré'}
+        />
       </div>
 
       {/* ─── Carte : th-row (filtre + recherche) + table ── */}

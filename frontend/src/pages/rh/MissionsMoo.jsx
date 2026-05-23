@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconTool, IconHourglass, IconCheck } from '../../components/ui/Icons'
 import MissionMooForm from '../../components/forms/MissionMooForm'
 import api from '../../services/api'
 import { useFetchList } from '../../hooks/useFetchList'
@@ -64,24 +66,24 @@ export default function MissionsMoo() {
 
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🛠</div>
-          <p className="kpi-label">Missions</p>
-          <p className="kpi-value">{missions.length}</p>
-          <p className="kpi-sub">Forfaits enregistrés</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⏳</div>
-          <p className="kpi-label">À payer</p>
-          <p className="kpi-value text-gold-600">{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Missions non réglées</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Payées</p>
-          <p className="kpi-value text-forest-700">{fmt(totalPayees)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Cumul réglé</p>
-        </div>
+        <KpiCard
+          icon={<IconTool />} tone="sand"
+          label="Missions"
+          value={missions.length}
+          sub="Forfaits enregistrés"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          label="À payer"
+          value={<>{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></>}
+          sub="Missions non réglées"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Payées"
+          value={<>{fmt(totalPayees)} <span className="kpi-unit">FCFA</span></>}
+          sub="Cumul réglé"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

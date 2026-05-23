@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { StatusBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconCornerUpLeft, IconDocument } from '../../components/ui/Icons'
 import { useFetchList } from '../../hooks/useFetchList'
 import { FACTURE_STATUT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
@@ -36,18 +38,18 @@ export default function AvoirList() {
       </div>
 
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">↩️</div>
-          <p className="kpi-label">Total avoirs</p>
-          <p className="kpi-value text-red-600">{fmt(totalAvoirs)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">montant annulé cumulé</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📄</div>
-          <p className="kpi-label">Nombre d'avoirs</p>
-          <p className="kpi-value">{avoirs.length}</p>
-          <p className="kpi-sub">émis</p>
-        </div>
+        <KpiCard
+          icon={<IconCornerUpLeft />} tone="red" valueTone="red"
+          label="Total avoirs"
+          value={<>{fmt(totalAvoirs)} <span className="kpi-unit">FCFA</span></>}
+          sub="montant annulé cumulé"
+        />
+        <KpiCard
+          icon={<IconDocument />} tone="sand"
+          label="Nombre d'avoirs"
+          value={avoirs.length}
+          sub="émis"
+        />
       </div>
 
       <div className="card overflow-hidden">

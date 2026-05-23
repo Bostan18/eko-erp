@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconDocument, IconCheck, IconHourglass, IconClock } from '../../components/ui/Icons'
 import DevisForm from '../../components/forms/DevisForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { useConvertirDevis } from '../../hooks/useConvertirDevis'
@@ -69,30 +71,30 @@ export default function DevisList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📄</div>
-          <p className="kpi-label">Total devis</p>
-          <p className="kpi-value">{fmt(totalFacture)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">{devis.length} devis · cumul</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Acceptés</p>
-          <p className="kpi-value text-forest-700">{fmt(totalAccepte)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Montant validé</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⏳</div>
-          <p className="kpi-label">En attente</p>
-          <p className="kpi-value text-gold-600">{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Brouillons & envoyés</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⌛</div>
-          <p className="kpi-label">Expirés</p>
-          <p className={`kpi-value ${nbExpire > 0 ? 'text-red-600' : 'text-sand-400'}`}>{nbExpire}</p>
-          <p className="kpi-sub">{nbExpire > 0 ? 'À renouveler' : 'Aucun'}</p>
-        </div>
+        <KpiCard
+          icon={<IconDocument />} tone="sand"
+          label="Total devis"
+          value={<>{fmt(totalFacture)} <span className="kpi-unit">FCFA</span></>}
+          sub={`${devis.length} devis · cumul`}
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Acceptés"
+          value={<>{fmt(totalAccepte)} <span className="kpi-unit">FCFA</span></>}
+          sub="Montant validé"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          label="En attente"
+          value={<>{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></>}
+          sub="Brouillons & envoyés"
+        />
+        <KpiCard
+          icon={<IconClock />} tone={nbExpire > 0 ? 'red' : 'sand'} valueTone={nbExpire > 0 ? 'red' : 'sand'}
+          label="Expirés"
+          value={nbExpire}
+          sub={nbExpire > 0 ? 'À renouveler' : 'Aucun'}
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

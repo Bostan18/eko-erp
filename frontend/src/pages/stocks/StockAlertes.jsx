@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconAlert, IconTrendDown, IconTruck } from '../../components/ui/Icons'
 import { useFetchList } from '../../hooks/useFetchList'
 import { ARTICLE_CAT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
@@ -38,24 +40,24 @@ export default function StockAlertes() {
 
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⚠</div>
-          <p className="kpi-label">Articles en alerte</p>
-          <p className={`kpi-value ${articles.length > 0 ? 'text-red-600' : 'text-sand-400'}`}>{articles.length}</p>
-          <p className="kpi-sub">{articles.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📉</div>
-          <p className="kpi-label">Manque cumulé</p>
-          <p className="kpi-value text-red-600">{fmt(manqueTotal)}</p>
-          <p className="kpi-sub">Unités à réapprovisionner</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🚚</div>
-          <p className="kpi-label">Fournisseurs</p>
-          <p className="kpi-value">{nbFournisseurs}</p>
-          <p className="kpi-sub">À solliciter</p>
-        </div>
+        <KpiCard
+          icon={<IconAlert />} tone={articles.length > 0 ? 'red' : 'sand'} valueTone={articles.length > 0 ? 'red' : 'sand'}
+          label="Articles en alerte"
+          value={articles.length}
+          sub={articles.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}
+        />
+        <KpiCard
+          icon={<IconTrendDown />} tone="red" valueTone="red"
+          label="Manque cumulé"
+          value={fmt(manqueTotal)}
+          sub="Unités à réapprovisionner"
+        />
+        <KpiCard
+          icon={<IconTruck />} tone="blue"
+          label="Fournisseurs"
+          value={nbFournisseurs}
+          sub="À solliciter"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

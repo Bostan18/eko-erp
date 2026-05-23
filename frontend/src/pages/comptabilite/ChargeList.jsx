@@ -3,6 +3,8 @@ import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconWallet, IconChartBar, IconTrendUp, IconFolder } from '../../components/ui/Icons'
 import ChargeForm from '../../components/forms/ChargeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { CHARGE_CAT_LABEL, CHARGE_CAT_BADGE } from '../../utils/constants'
@@ -66,30 +68,30 @@ export default function ChargeList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💸</div>
-          <p className="kpi-label">Total charges</p>
-          <p className="kpi-value">{fmt(totalGlobal)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">{charges.length} ligne{charges.length !== 1 ? 's' : ''} · cumul</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📊</div>
-          <p className="kpi-label">Charge moyenne</p>
-          <p className="kpi-value">{fmt(moyenne)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Par ligne</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📈</div>
-          <p className="kpi-label">Plus grosse charge</p>
-          <p className="kpi-value text-gold-600">{fmt(plusGrosse)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Montant maximal</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🗂</div>
-          <p className="kpi-label">Catégories</p>
-          <p className="kpi-value">{nbCategories}</p>
-          <p className="kpi-sub">Types de charge</p>
-        </div>
+        <KpiCard
+          icon={<IconWallet />} tone="red" valueTone="red"
+          label="Total charges"
+          value={<>{fmt(totalGlobal)} <span className="kpi-unit">FCFA</span></>}
+          sub={`${charges.length} ligne${charges.length !== 1 ? 's' : ''} · cumul`}
+        />
+        <KpiCard
+          icon={<IconChartBar />} tone="sand"
+          label="Charge moyenne"
+          value={<>{fmt(moyenne)} <span className="kpi-unit">FCFA</span></>}
+          sub="Par ligne"
+        />
+        <KpiCard
+          icon={<IconTrendUp />} tone="gold" valueTone="gold"
+          label="Plus grosse charge"
+          value={<>{fmt(plusGrosse)} <span className="kpi-unit">FCFA</span></>}
+          sub="Montant maximal"
+        />
+        <KpiCard
+          icon={<IconFolder />} tone="sand"
+          label="Catégories"
+          value={nbCategories}
+          sub="Types de charge"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

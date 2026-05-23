@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
 import { fmt } from '../../utils/format'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconBank, IconArrowUp, IconArrowDown, IconChartBar } from '../../components/ui/Icons'
 
 /* Bandeau KPI trésorerie — partagé entre les pages Comptes et Paiements. */
 export default function TresorerieKpis() {
@@ -10,36 +12,35 @@ export default function TresorerieKpis() {
     api.get('/achats/tresorerie/kpis/').then(({ data }) => setK(data)).catch(() => setK(null))
   }, [])
 
+  const soldeNeg = k && k.solde_total < 0
+  const fluxNeg  = k && k.flux_net_mois < 0
+
   return (
     <div className="kpi-grid">
-      <div className="kpi">
-        <div className="kpi-icon text-2xl">🏦</div>
-        <p className="kpi-label">Solde total</p>
-        <p className={`kpi-value ${k && k.solde_total < 0 ? 'text-red-600' : 'text-forest-700'}`}>
-          {k ? fmt(k.solde_total) : '…'} <span className="kpi-unit">FCFA</span>
-        </p>
-        <p className="kpi-sub">{k ? `${k.comptes.length} compte${k.comptes.length !== 1 ? 's' : ''} actif${k.comptes.length !== 1 ? 's' : ''}` : ''}</p>
-      </div>
-      <div className="kpi">
-        <div className="kpi-icon text-2xl">⬆</div>
-        <p className="kpi-label">Encaissements (mois)</p>
-        <p className="kpi-value text-forest-700">{k ? fmt(k.entrees_mois) : '…'} <span className="kpi-unit">FCFA</span></p>
-        <p className="kpi-sub">entrées du mois</p>
-      </div>
-      <div className="kpi">
-        <div className="kpi-icon text-2xl">⬇</div>
-        <p className="kpi-label">Décaissements (mois)</p>
-        <p className="kpi-value text-red-600">{k ? fmt(k.sorties_mois) : '…'} <span className="kpi-unit">FCFA</span></p>
-        <p className="kpi-sub">sorties du mois</p>
-      </div>
-      <div className="kpi">
-        <div className="kpi-icon text-2xl">📊</div>
-        <p className="kpi-label">Flux net (mois)</p>
-        <p className={`kpi-value ${k && k.flux_net_mois < 0 ? 'text-red-600' : 'text-forest-700'}`}>
-          {k ? fmt(k.flux_net_mois) : '…'} <span className="kpi-unit">FCFA</span>
-        </p>
-        <p className="kpi-sub">entrées − sorties</p>
-      </div>
+      <KpiCard
+        icon={<IconBank />} tone={soldeNeg ? 'red' : 'forest'} valueTone={soldeNeg ? 'red' : 'forest'}
+        label="Solde total"
+        value={<>{k ? fmt(k.solde_total) : '…'} <span className="kpi-unit">FCFA</span></>}
+        sub={k ? `${k.comptes.length} compte${k.comptes.length !== 1 ? 's' : ''} actif${k.comptes.length !== 1 ? 's' : ''}` : ''}
+      />
+      <KpiCard
+        icon={<IconArrowUp />} tone="forest" valueTone="forest"
+        label="Encaissements (mois)"
+        value={<>{k ? fmt(k.entrees_mois) : '…'} <span className="kpi-unit">FCFA</span></>}
+        sub="entrées du mois"
+      />
+      <KpiCard
+        icon={<IconArrowDown />} tone="red" valueTone="red"
+        label="Décaissements (mois)"
+        value={<>{k ? fmt(k.sorties_mois) : '…'} <span className="kpi-unit">FCFA</span></>}
+        sub="sorties du mois"
+      />
+      <KpiCard
+        icon={<IconChartBar />} tone={fluxNeg ? 'red' : 'forest'} valueTone={fluxNeg ? 'red' : 'forest'}
+        label="Flux net (mois)"
+        value={<>{k ? fmt(k.flux_net_mois) : '…'} <span className="kpi-unit">FCFA</span></>}
+        sub="entrées − sorties"
+      />
     </div>
   )
 }

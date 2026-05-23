@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconTarget, IconFolder, IconPhone } from '../../components/ui/Icons'
 import ClientForm from '../../components/forms/ClientForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { CLIENT_STATUT_BADGE } from '../../utils/constants'
@@ -40,24 +42,24 @@ export default function ProspectList() {
 
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🎯</div>
-          <p className="kpi-label">Total prospects</p>
-          <p className="kpi-value text-gold-600">{prospects.length}</p>
-          <p className="kpi-sub">À convertir en clients</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🗂</div>
-          <p className="kpi-label">Secteurs</p>
-          <p className="kpi-value">{nbSecteurs}</p>
-          <p className="kpi-sub">Secteurs distincts</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📞</div>
-          <p className="kpi-label">Avec téléphone</p>
-          <p className="kpi-value text-forest-700">{nbAvecTel}</p>
-          <p className="kpi-sub">Joignables directement</p>
-        </div>
+        <KpiCard
+          icon={<IconTarget />} tone="gold" valueTone="gold"
+          label="Total prospects"
+          value={prospects.length}
+          sub="À convertir en clients"
+        />
+        <KpiCard
+          icon={<IconFolder />} tone="sand"
+          label="Secteurs"
+          value={nbSecteurs}
+          sub="Secteurs distincts"
+        />
+        <KpiCard
+          icon={<IconPhone />} tone="forest" valueTone="forest"
+          label="Avec téléphone"
+          value={nbAvecTel}
+          sub="Joignables directement"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

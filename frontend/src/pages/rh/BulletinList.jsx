@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../../services/api'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconDocument, IconCard, IconWallet, IconCheck } from '../../components/ui/Icons'
 import { useFetchList } from '../../hooks/useFetchList'
 import {
   BULLETIN_STATUT_BADGE, BULLETIN_STATUT_LABEL, moisLabel,
@@ -81,30 +83,30 @@ export default function BulletinList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📄</div>
-          <p className="kpi-label">Bulletins</p>
-          <p className="kpi-value">{bulletins.length}</p>
-          <p className="kpi-sub">{moisLabel(moisActif)}</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💳</div>
-          <p className="kpi-label">Masse salariale brute</p>
-          <p className="kpi-value">{fmt(totalBrut)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Cumul du mois</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💰</div>
-          <p className="kpi-label">Net à payer</p>
-          <p className="kpi-value text-forest-700">{fmt(totalNet)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Après cotisations</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Payés</p>
-          <p className="kpi-value text-forest-700">{nbPayes} <span className="kpi-unit">/ {bulletins.length}</span></p>
-          <p className="kpi-sub">Bulletins réglés</p>
-        </div>
+        <KpiCard
+          icon={<IconDocument />} tone="sand"
+          label="Bulletins"
+          value={bulletins.length}
+          sub={moisLabel(moisActif)}
+        />
+        <KpiCard
+          icon={<IconCard />} tone="blue"
+          label="Masse salariale brute"
+          value={<>{fmt(totalBrut)} <span className="kpi-unit">FCFA</span></>}
+          sub="Cumul du mois"
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="forest" valueTone="forest"
+          label="Net à payer"
+          value={<>{fmt(totalNet)} <span className="kpi-unit">FCFA</span></>}
+          sub="Après cotisations"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Payés"
+          value={<>{nbPayes} <span className="kpi-unit">/ {bulletins.length}</span></>}
+          sub="Bulletins réglés"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

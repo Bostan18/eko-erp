@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { PROJETS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconBuilding, IconRefresh, IconCheck, IconWallet } from '../../components/ui/Icons'
 import ProjetForm from '../../components/forms/ProjetForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -62,30 +64,30 @@ export default function ProjetList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🏗</div>
-          <p className="kpi-label">Projets</p>
-          <p className="kpi-value">{projets.length}</p>
-          <p className="kpi-sub">Tous statuts</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🔄</div>
-          <p className="kpi-label">En cours</p>
-          <p className="kpi-value text-blue-600">{nbEnCours}</p>
-          <p className="kpi-sub">Projets actifs</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Terminés</p>
-          <p className="kpi-value text-forest-700">{nbTermines}</p>
-          <p className="kpi-sub">Cumul</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💰</div>
-          <p className="kpi-label">Budget cumulé</p>
-          <p className="kpi-value">{fmt(budgetTotal)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Tous projets confondus</p>
-        </div>
+        <KpiCard
+          icon={<IconBuilding />} tone="sand"
+          label="Projets"
+          value={projets.length}
+          sub="Tous statuts"
+        />
+        <KpiCard
+          icon={<IconRefresh />} tone="blue" valueTone="blue"
+          label="En cours"
+          value={nbEnCours}
+          sub="Projets actifs"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Terminés"
+          value={nbTermines}
+          sub="Cumul"
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="sand"
+          label="Budget cumulé"
+          value={<>{fmt(budgetTotal)} <span className="kpi-unit">FCFA</span></>}
+          sub="Tous projets confondus"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

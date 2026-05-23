@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import api from '../../services/api'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconHardHat, IconCheck, IconWallet } from '../../components/ui/Icons'
 import { fmt } from '../../utils/format'
 
 function today() { return new Date().toISOString().slice(0, 10) }
@@ -97,24 +99,24 @@ export default function Pointage() {
 
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">👷</div>
-          <p className="kpi-label">Journaliers</p>
-          <p className="kpi-value">{rows.length}</p>
-          <p className="kpi-sub">Actifs ce jour</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Présents</p>
-          <p className="kpi-value text-forest-700">{nbPresents} <span className="kpi-unit">/ {rows.length}</span></p>
-          <p className="kpi-sub">Pointés présents</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💰</div>
-          <p className="kpi-label">À payer</p>
-          <p className="kpi-value text-gold-600">{fmt(totalJour)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Total de la journée</p>
-        </div>
+        <KpiCard
+          icon={<IconHardHat />} tone="sand"
+          label="Journaliers"
+          value={rows.length}
+          sub="Actifs ce jour"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Présents"
+          value={<>{nbPresents} <span className="kpi-unit">/ {rows.length}</span></>}
+          sub="Pointés présents"
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="gold" valueTone="gold"
+          label="À payer"
+          value={<>{fmt(totalJour)} <span className="kpi-unit">FCFA</span></>}
+          sub="Total de la journée"
+        />
       </div>
 
       {error && <div className="alert-red"><span className="w-1.5 h-1.5 bg-red-500 rounded-full" />{error}</div>}

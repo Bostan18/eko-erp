@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconHandshake, IconCheck, IconTarget, IconMoon } from '../../components/ui/Icons'
 import ClientForm from '../../components/forms/ClientForm'
 import { useFetchList } from '../../hooks/useFetchList'
 
@@ -45,30 +47,30 @@ export default function ClientList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🤝</div>
-          <p className="kpi-label">Total fiches</p>
-          <p className="kpi-value">{clients.length}</p>
-          <p className="kpi-sub">Clients & prospects</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Actifs</p>
-          <p className="kpi-value text-forest-700">{nbActifs}</p>
-          <p className="kpi-sub">Clients en activité</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🎯</div>
-          <p className="kpi-label">Prospects</p>
-          <p className="kpi-value text-gold-600">{nbProspects}</p>
-          <p className="kpi-sub">À convertir</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💤</div>
-          <p className="kpi-label">Inactifs</p>
-          <p className="kpi-value text-sand-400">{nbInactifs}</p>
-          <p className="kpi-sub">Sans activité récente</p>
-        </div>
+        <KpiCard
+          icon={<IconHandshake />} tone="sand"
+          label="Total fiches"
+          value={clients.length}
+          sub="Clients & prospects"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Actifs"
+          value={nbActifs}
+          sub="Clients en activité"
+        />
+        <KpiCard
+          icon={<IconTarget />} tone="gold" valueTone="gold"
+          label="Prospects"
+          value={nbProspects}
+          sub="À convertir"
+        />
+        <KpiCard
+          icon={<IconMoon />} tone="sand" valueTone="sand"
+          label="Inactifs"
+          value={nbInactifs}
+          sub="Sans activité récente"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

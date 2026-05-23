@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { ACHATS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconInvoice, IconHourglass, IconAlert } from '../../components/ui/Icons'
 import FactureAchatForm from '../../components/forms/FactureAchatForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -68,24 +70,24 @@ export default function AchatFactureList() {
       )}
 
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🧾</div>
-          <p className="kpi-label">Total achats</p>
-          <p className="kpi-value">{fmt(totalAchats)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">cumul hors annulées</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⏳</div>
-          <p className="kpi-label">Reste à payer</p>
-          <p className="kpi-value text-gold-600">{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">soldes fournisseurs</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⚠</div>
-          <p className="kpi-label">En retard</p>
-          <p className={`kpi-value ${nbEnRetard > 0 ? 'text-red-600' : 'text-sand-400'}`}>{nbEnRetard}</p>
-          <p className="kpi-sub">{nbEnRetard > 0 ? 'Action requise' : 'À jour'}</p>
-        </div>
+        <KpiCard
+          icon={<IconInvoice />} tone="sand"
+          label="Total achats"
+          value={<>{fmt(totalAchats)} <span className="kpi-unit">FCFA</span></>}
+          sub="cumul hors annulées"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          label="Reste à payer"
+          value={<>{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></>}
+          sub="soldes fournisseurs"
+        />
+        <KpiCard
+          icon={<IconAlert />} tone={nbEnRetard > 0 ? 'red' : 'sand'} valueTone={nbEnRetard > 0 ? 'red' : 'sand'}
+          label="En retard"
+          value={nbEnRetard}
+          sub={nbEnRetard > 0 ? 'Action requise' : 'À jour'}
+        />
       </div>
 
       <div className="card overflow-hidden">

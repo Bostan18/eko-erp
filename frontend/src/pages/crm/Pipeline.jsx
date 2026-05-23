@@ -3,6 +3,8 @@ import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconBriefcase, IconTarget, IconTrophy } from '../../components/ui/Icons'
 import OpportuniteForm from '../../components/forms/OpportuniteForm'
 import { fmt } from '../../utils/format'
 
@@ -56,24 +58,24 @@ export default function Pipeline() {
       </div>
 
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💼</div>
-          <p className="kpi-label">Pipeline ouvert</p>
-          <p className="kpi-value">{fmt(pipelineBrut)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">valeur brute en cours</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🎯</div>
-          <p className="kpi-label">Valeur pondérée</p>
-          <p className="kpi-value text-forest-700">{fmt(pipelinePond)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">× probabilité</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🏆</div>
-          <p className="kpi-label">Taux de conversion</p>
-          <p className="kpi-value">{tauxConv}%</p>
-          <p className="kpi-sub">{nbGagnee} gagnée{nbGagnee !== 1 ? 's' : ''} · {nbPerdue} perdue{nbPerdue !== 1 ? 's' : ''}</p>
-        </div>
+        <KpiCard
+          icon={<IconBriefcase />} tone="sand"
+          label="Pipeline ouvert"
+          value={<>{fmt(pipelineBrut)} <span className="kpi-unit">FCFA</span></>}
+          sub="valeur brute en cours"
+        />
+        <KpiCard
+          icon={<IconTarget />} tone="forest" valueTone="forest"
+          label="Valeur pondérée"
+          value={<>{fmt(pipelinePond)} <span className="kpi-unit">FCFA</span></>}
+          sub="× probabilité"
+        />
+        <KpiCard
+          icon={<IconTrophy />} tone="gold"
+          label="Taux de conversion"
+          value={<>{tauxConv}%</>}
+          sub={`${nbGagnee} gagnée${nbGagnee !== 1 ? 's' : ''} · ${nbPerdue} perdue${nbPerdue !== 1 ? 's' : ''}`}
+        />
       </div>
 
       <div className="card p-3">

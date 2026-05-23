@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconFile, IconWallet } from '../../components/ui/Icons'
 import ContratForm from '../../components/forms/ContratForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -32,18 +34,18 @@ export default function ContratList() {
       </div>
 
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📑</div>
-          <p className="kpi-label">Contrats actifs</p>
-          <p className="kpi-value text-forest-700">{nbActifs}</p>
-          <p className="kpi-sub">en cours</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💰</div>
-          <p className="kpi-label">Valeur sous contrat</p>
-          <p className="kpi-value">{fmt(valeurActive)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">montant des contrats actifs</p>
-        </div>
+        <KpiCard
+          icon={<IconFile />} tone="forest" valueTone="forest"
+          label="Contrats actifs"
+          value={nbActifs}
+          sub="en cours"
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="sand"
+          label="Valeur sous contrat"
+          value={<>{fmt(valeurActive)} <span className="kpi-unit">FCFA</span></>}
+          sub="montant des contrats actifs"
+        />
       </div>
 
       <div className="card overflow-hidden">

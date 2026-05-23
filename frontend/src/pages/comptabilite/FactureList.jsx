@@ -4,6 +4,8 @@ import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
 import { StatusBadge, CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconInvoice, IconWallet, IconHourglass, IconAlert } from '../../components/ui/Icons'
 import FactureForm from '../../components/forms/FactureForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { FACTURE_STATUT_LABEL, factureEnRetard } from '../../utils/constants'
@@ -87,30 +89,30 @@ export default function FactureList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🧾</div>
-          <p className="kpi-label">Total facturé</p>
-          <p className="kpi-value">{fmt(totalFacture)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">{factures.length} facture{factures.length !== 1 ? 's' : ''} · cumul</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💰</div>
-          <p className="kpi-label">Encaissé</p>
-          <p className="kpi-value text-forest-700">{fmt(totalEncaisse)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Factures payées</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⏳</div>
-          <p className="kpi-label">En attente</p>
-          <p className="kpi-value text-gold-600">{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Soldes envoyés non réglés</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⚠</div>
-          <p className="kpi-label">En retard</p>
-          <p className={`kpi-value ${nbEnRetard > 0 ? 'text-red-600' : 'text-sand-400'}`}>{nbEnRetard}</p>
-          <p className="kpi-sub">{nbEnRetard > 0 ? 'Action requise' : 'Tout est à jour'}</p>
-        </div>
+        <KpiCard
+          icon={<IconInvoice />} tone="sand"
+          label="Total facturé"
+          value={<>{fmt(totalFacture)} <span className="kpi-unit">FCFA</span></>}
+          sub={`${factures.length} facture${factures.length !== 1 ? 's' : ''} · cumul`}
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="forest" valueTone="forest"
+          label="Encaissé"
+          value={<>{fmt(totalEncaisse)} <span className="kpi-unit">FCFA</span></>}
+          sub="Factures payées"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          label="En attente"
+          value={<>{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></>}
+          sub="Soldes envoyés non réglés"
+        />
+        <KpiCard
+          icon={<IconAlert />} tone={nbEnRetard > 0 ? 'red' : 'sand'} valueTone={nbEnRetard > 0 ? 'red' : 'sand'}
+          label="En retard"
+          value={nbEnRetard}
+          sub={nbEnRetard > 0 ? 'Action requise' : 'Tout est à jour'}
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

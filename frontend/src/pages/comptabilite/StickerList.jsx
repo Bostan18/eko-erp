@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import api from '../../services/api'
 import Modal, { FormSection, FormRow, Field } from '../../components/ui/Modal'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconTicket, IconArrowUp, IconArrowDown, IconFlask, IconLink } from '../../components/ui/Icons'
 import { apiErrorMessage } from '../../utils/errors'
 import { today } from '../../utils/format'
 
@@ -57,32 +59,32 @@ export default function StickerList() {
       )}
 
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🎟️</div>
-          <p className="kpi-label">Solde actuel</p>
-          <p className={`kpi-value ${soldeBas ? 'text-gold-600' : 'text-forest-700'}`}>
-            {loading ? '…' : solde?.solde ?? 0}
-          </p>
-          <p className="kpi-sub">stickers disponibles</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⬆</div>
-          <p className="kpi-label">Total acheté</p>
-          <p className="kpi-value">{loading ? '…' : solde?.total_achete ?? 0}</p>
-          <p className="kpi-sub">cumul des recharges</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⬇</div>
-          <p className="kpi-label">Total consommé</p>
-          <p className="kpi-value">{loading ? '…' : solde?.total_consomme ?? 0}</p>
-          <p className="kpi-sub">certifications & avoirs</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">{solde?.mode_simulation ? '🧪' : '🔗'}</div>
-          <p className="kpi-label">Mode FNE</p>
-          <p className="kpi-value text-[18px] pt-1">{solde?.mode_simulation ? 'Simulation' : 'API DGI'}</p>
-          <p className="kpi-sub">{solde?.mode_simulation ? 'Credentials non configurés' : 'Connecté à la DGI'}</p>
-        </div>
+        <KpiCard
+          icon={<IconTicket />} tone={soldeBas ? 'gold' : 'forest'} valueTone={soldeBas ? 'gold' : 'forest'}
+          label="Solde actuel"
+          value={loading ? '…' : solde?.solde ?? 0}
+          sub="stickers disponibles"
+        />
+        <KpiCard
+          icon={<IconArrowUp />} tone="forest"
+          label="Total acheté"
+          value={loading ? '…' : solde?.total_achete ?? 0}
+          sub="cumul des recharges"
+        />
+        <KpiCard
+          icon={<IconArrowDown />} tone="sand"
+          label="Total consommé"
+          value={loading ? '…' : solde?.total_consomme ?? 0}
+          sub="certifications & avoirs"
+        />
+        <KpiCard
+          icon={solde?.mode_simulation ? <IconFlask /> : <IconLink />}
+          tone={solde?.mode_simulation ? 'gold' : 'blue'}
+          valueTone={solde?.mode_simulation ? 'gold' : 'blue'}
+          label="Mode FNE"
+          value={<span className="text-[18px]">{solde?.mode_simulation ? 'Simulation' : 'API DGI'}</span>}
+          sub={solde?.mode_simulation ? 'Credentials non configurés' : 'Connecté à la DGI'}
+        />
       </div>
 
       <div className="card overflow-hidden">

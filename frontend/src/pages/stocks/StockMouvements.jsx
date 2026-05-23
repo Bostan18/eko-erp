@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconRefresh, IconDownload, IconUpload } from '../../components/ui/Icons'
 import MouvementStockForm from '../../components/forms/MouvementStockForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -48,24 +50,24 @@ export default function StockMouvements() {
 
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🔄</div>
-          <p className="kpi-label">Total mouvements</p>
-          <p className="kpi-value">{mouvements.length}</p>
-          <p className="kpi-sub">Entrées & sorties</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📥</div>
-          <p className="kpi-label">Entrées</p>
-          <p className="kpi-value text-forest-700">{nbEntrees}</p>
-          <p className="kpi-sub">Réapprovisionnements</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📤</div>
-          <p className="kpi-label">Sorties</p>
-          <p className="kpi-value text-gold-600">{nbSorties}</p>
-          <p className="kpi-sub">Consommations</p>
-        </div>
+        <KpiCard
+          icon={<IconRefresh />} tone="blue"
+          label="Total mouvements"
+          value={mouvements.length}
+          sub="Entrées & sorties"
+        />
+        <KpiCard
+          icon={<IconDownload />} tone="forest" valueTone="forest"
+          label="Entrées"
+          value={nbEntrees}
+          sub="Réapprovisionnements"
+        />
+        <KpiCard
+          icon={<IconUpload />} tone="gold" valueTone="gold"
+          label="Sorties"
+          value={nbSorties}
+          sub="Consommations"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

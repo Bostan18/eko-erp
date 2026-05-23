@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
 import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconBox, IconWallet, IconAlert, IconFolder } from '../../components/ui/Icons'
 import ArticleForm from '../../components/forms/ArticleForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { ARTICLE_CAT_LABEL } from '../../utils/constants'
@@ -60,30 +62,30 @@ export default function StockList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📦</div>
-          <p className="kpi-label">Articles</p>
-          <p className="kpi-value">{articles.length}</p>
-          <p className="kpi-sub">Références en stock</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">💰</div>
-          <p className="kpi-label">Valeur du stock</p>
-          <p className="kpi-value text-forest-700">{fmt(valeurStock)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Valorisation au prix unitaire</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⚠</div>
-          <p className="kpi-label">Alertes</p>
-          <p className={`kpi-value ${alertes.length > 0 ? 'text-red-600' : 'text-sand-400'}`}>{alertes.length}</p>
-          <p className="kpi-sub">{alertes.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🗂</div>
-          <p className="kpi-label">Catégories</p>
-          <p className="kpi-value">{Object.keys(ARTICLE_CAT_LABEL).length}</p>
-          <p className="kpi-sub">Types d'article</p>
-        </div>
+        <KpiCard
+          icon={<IconBox />} tone="sand"
+          label="Articles"
+          value={articles.length}
+          sub="Références en stock"
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="forest" valueTone="forest"
+          label="Valeur du stock"
+          value={<>{fmt(valeurStock)} <span className="kpi-unit">FCFA</span></>}
+          sub="Valorisation au prix unitaire"
+        />
+        <KpiCard
+          icon={<IconAlert />} tone={alertes.length > 0 ? 'red' : 'sand'} valueTone={alertes.length > 0 ? 'red' : 'sand'}
+          label="Alertes"
+          value={alertes.length}
+          sub={alertes.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}
+        />
+        <KpiCard
+          icon={<IconFolder />} tone="sand"
+          label="Catégories"
+          value={Object.keys(ARTICLE_CAT_LABEL).length}
+          sub="Types d'article"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

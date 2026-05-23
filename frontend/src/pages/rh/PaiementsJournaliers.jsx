@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconHardHat, IconClipboard, IconCheck, IconHourglass } from '../../components/ui/Icons'
 import { fmt } from '../../utils/format'
 import { apiErrorMessage } from '../../utils/errors'
 
@@ -100,32 +102,30 @@ export default function PaiementsJournaliers() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">👷</div>
-          <p className="kpi-label">Journaliers</p>
-          <p className="kpi-value">{recap.length}</p>
-          <p className="kpi-sub">Avec présences</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">📋</div>
-          <p className="kpi-label">Total dû</p>
-          <p className="kpi-value">{fmt(totalDu)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Cumul des journées</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">✅</div>
-          <p className="kpi-label">Payé</p>
-          <p className="kpi-value text-forest-700">{fmt(totalPaye)} <span className="kpi-unit">FCFA</span></p>
-          <p className="kpi-sub">Déjà réglé</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">⏳</div>
-          <p className="kpi-label">Restant à payer</p>
-          <p className={`kpi-value ${totalRestant > 0 ? 'text-gold-600' : 'text-sand-400'}`}>
-            {fmt(totalRestant)} <span className="kpi-unit">FCFA</span>
-          </p>
-          <p className="kpi-sub">{totalRestant > 0 ? 'À régler' : 'Tout est payé'}</p>
-        </div>
+        <KpiCard
+          icon={<IconHardHat />} tone="sand"
+          label="Journaliers"
+          value={recap.length}
+          sub="Avec présences"
+        />
+        <KpiCard
+          icon={<IconClipboard />} tone="sand"
+          label="Total dû"
+          value={<>{fmt(totalDu)} <span className="kpi-unit">FCFA</span></>}
+          sub="Cumul des journées"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest" valueTone="forest"
+          label="Payé"
+          value={<>{fmt(totalPaye)} <span className="kpi-unit">FCFA</span></>}
+          sub="Déjà réglé"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone={totalRestant > 0 ? 'gold' : 'sand'} valueTone={totalRestant > 0 ? 'gold' : 'sand'}
+          label="Restant à payer"
+          value={<>{fmt(totalRestant)} <span className="kpi-unit">FCFA</span></>}
+          sub={totalRestant > 0 ? 'À régler' : 'Tout est payé'}
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

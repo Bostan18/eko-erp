@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconUsers, IconBriefcase, IconHardHat, IconTool } from '../../components/ui/Icons'
 import EmployeForm from '../../components/forms/EmployeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -54,30 +56,30 @@ export default function EmployeList() {
 
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">👥</div>
-          <p className="kpi-label">Effectif total</p>
-          <p className="kpi-value">{employes.length}</p>
-          <p className="kpi-sub">Tous contrats</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">👔</div>
-          <p className="kpi-label">Permanents</p>
-          <p className="kpi-value text-forest-700">{nbPermanents}</p>
-          <p className="kpi-sub">CDI / CDD</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">👷</div>
-          <p className="kpi-label">Journaliers</p>
-          <p className="kpi-value text-gold-600">{nbJournaliers}</p>
-          <p className="kpi-sub">Payés à la journée</p>
-        </div>
-        <div className="kpi">
-          <div className="kpi-icon text-2xl">🛠</div>
-          <p className="kpi-label">MOO</p>
-          <p className="kpi-value text-blue-600">{nbMoo}</p>
-          <p className="kpi-sub">Main d'œuvre occasionnelle</p>
-        </div>
+        <KpiCard
+          icon={<IconUsers />} tone="sand"
+          label="Effectif total"
+          value={employes.length}
+          sub="Tous contrats"
+        />
+        <KpiCard
+          icon={<IconBriefcase />} tone="forest" valueTone="forest"
+          label="Permanents"
+          value={nbPermanents}
+          sub="CDI / CDD"
+        />
+        <KpiCard
+          icon={<IconHardHat />} tone="gold" valueTone="gold"
+          label="Journaliers"
+          value={nbJournaliers}
+          sub="Payés à la journée"
+        />
+        <KpiCard
+          icon={<IconTool />} tone="blue" valueTone="blue"
+          label="MOO"
+          value={nbMoo}
+          sub="Main d'œuvre occasionnelle"
+        />
       </div>
 
       {/* ─── Carte : onglets module + th-row + table ────── */}

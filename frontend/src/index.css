@@ -163,7 +163,11 @@
   }
   .kpi-unit { @apply text-[12px] font-normal text-sand-500 ml-1; }
   .kpi-sub  { @apply text-[11px] mt-1.5 text-sand-500 flex items-center gap-1; }
-  .kpi-icon { @apply absolute right-3.5 top-3.5 text-ink opacity-10 pointer-events-none; }
+  .kpi-icon {
+    @apply absolute right-3.5 top-3.5 pointer-events-none transition-opacity duration-200;
+    opacity: 0.22;
+  }
+  .kpi:hover .kpi-icon { opacity: 0.42; }
   .kpi-up   { @apply text-forest-500 font-medium; }
   .kpi-dn   { @apply text-red-600; }
 

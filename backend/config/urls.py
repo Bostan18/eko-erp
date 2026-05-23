@@ -24,6 +24,7 @@ def api_root(request):
             "achats": f"{base}/api/achats/",
             "stocks": f"{base}/api/stocks/",
             "rh": f"{base}/api/rh/",
+            "operations": f"{base}/api/operations/",
             "reporting": f"{base}/api/reporting/",
         },
     }, json_dumps_params={"indent": 2, "ensure_ascii": False})
@@ -41,6 +42,7 @@ urlpatterns = [
     path("api/achats/", include("apps.achats.urls")),
     path("api/stocks/", include("apps.stocks.urls")),
     path("api/rh/", include("apps.rh.urls")),
+    path("api/operations/", include("apps.operations.urls")),
     path("api/reporting/", include("apps.reporting.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

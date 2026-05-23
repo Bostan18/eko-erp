@@ -69,3 +69,10 @@ export const PROJETS_TABS = [
   { label: 'Projets',        to: '/projets', end: true },
   { label: 'Planning Gantt', to: '/projets/planning' },
 ]
+
+export const OPERATIONS_TABS = [
+  { label: 'Sites',           to: '/operations/sites', end: true },
+  { label: 'Journaliers',     to: '/operations/journaliers' },
+  { label: 'Logs de travail', to: '/operations/logs' },
+  { label: 'Tâches',          to: '/operations/taches-catalogue' },
+]

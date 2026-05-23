@@ -41,6 +41,15 @@ const NAV = [
         ],
       },
       {
+        label: 'Opérations terrain', path: '/operations', icon: IconOperations,
+        children: [
+          { label: 'Sites',           path: '/operations/sites' },
+          { label: 'Journaliers',     path: '/operations/journaliers' },
+          { label: 'Logs de travail', path: '/operations/logs' },
+          { label: 'Tâches',          path: '/operations/taches-catalogue' },
+        ],
+      },
+      {
         label: 'Stocks', path: '/stocks', icon: IconStocks,
         children: [
           { label: 'Articles',   path: '/stocks' },
@@ -266,6 +275,14 @@ function IconAchats({ className }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
       <path d="M2 7h20l-1.5 10.5a2 2 0 0 1-2 1.5H5.5a2 2 0 0 1-2-1.5L2 7Z" />
       <path d="M8 7V5a4 4 0 0 1 8 0v2" />
+    </svg>
+  )
+}
+function IconOperations({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z" />
+      <path d="M9 12l2 2 4-4" />
     </svg>
   )
 }

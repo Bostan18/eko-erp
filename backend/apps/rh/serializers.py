@@ -18,12 +18,15 @@ class EmployeSerializer(serializers.ModelSerializer):
 
 class PresenceJournaliereSerializer(serializers.ModelSerializer):
     employe_nom = serializers.CharField(source="employe.nom_complet", read_only=True)
+    site_nom    = serializers.CharField(source="site.nom", read_only=True, default="")
+    site_code   = serializers.CharField(source="site.code", read_only=True, default="")
 
     class Meta:
         model = PresenceJournaliere
         fields = [
             "id", "employe", "employe_nom", "date", "present",
-            "heures_travaillees", "montant_du", "projet_ref", "notes",
+            "heures_travaillees", "montant_du", "projet_ref",
+            "site", "site_nom", "site_code", "notes",
             "paye_le",
             "created_at", "updated_at",
         ]

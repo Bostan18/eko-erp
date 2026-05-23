@@ -35,6 +35,10 @@ const CompteList      = lazy(() => import('./pages/achats/CompteList'))
 const TresorerieList  = lazy(() => import('./pages/achats/TresorerieList'))
 const DevisList       = lazy(() => import('./pages/comptabilite/DevisList'))
 const DevisDetail     = lazy(() => import('./pages/comptabilite/DevisDetail'))
+const SiteList            = lazy(() => import('./pages/operations/SiteList'))
+const JournalierList      = lazy(() => import('./pages/operations/JournalierList'))
+const LogTravailList      = lazy(() => import('./pages/operations/LogTravailList'))
+const TacheCatalogueList  = lazy(() => import('./pages/operations/TacheCatalogueList'))
 const DocumentList    = lazy(() => import('./pages/documents/DocumentList'))
 const ParametresEntreprise = lazy(() => import('./pages/parametres/ParametresEntreprise'))
 
@@ -85,6 +89,11 @@ export default function App() {
         <Route path="/achats/comptes"               element={<CompteList />} />
         <Route path="/achats/tresorerie"            element={<TresorerieList />} />
         <Route path="/achats"                       element={<Navigate to="/achats/factures" replace />} />
+        <Route path="/operations"                   element={<Navigate to="/operations/sites" replace />} />
+        <Route path="/operations/sites"             element={<SiteList />} />
+        <Route path="/operations/journaliers"       element={<JournalierList />} />
+        <Route path="/operations/logs"              element={<LogTravailList />} />
+        <Route path="/operations/taches-catalogue"  element={<TacheCatalogueList />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

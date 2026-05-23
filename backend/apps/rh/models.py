@@ -36,6 +36,10 @@ class PresenceJournaliere(TimeStampedModel):
     heures_travaillees = models.DecimalField(max_digits=4, decimal_places=1, default=8)
     montant_du = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     projet_ref = models.CharField(max_length=50, blank=True)  # FK souple vers Projet
+    site = models.ForeignKey(
+        "operations.Site", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="presences",
+    )
     notes = models.CharField(max_length=300, blank=True)
     paye_le = models.DateField(null=True, blank=True)
 

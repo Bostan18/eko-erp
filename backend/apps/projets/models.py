@@ -80,6 +80,11 @@ class TacheProjet(SoftDeleteModel):
     ]
 
     projet = models.ForeignKey(Projet, on_delete=models.CASCADE, related_name="taches")
+    tache_catalogue = models.ForeignKey(
+        "operations.TacheCatalogue", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="taches_projet",
+        help_text="Modèle de tâche du référentiel — prérenseigne type/unité/tarif.",
+    )
     nom = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     type_objectif = models.CharField(max_length=20, choices=TYPE_OBJECTIF_CHOICES, default="unite")
@@ -146,6 +151,10 @@ class RealisationTache(TimeStampedModel):
     date = models.DateField()
     quantite_realisee = models.DecimalField(max_digits=10, decimal_places=2)
     montant_calcule = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    site = models.ForeignKey(
+        "operations.Site", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="realisations",
+    )
     notes = models.CharField(max_length=300, blank=True)
 
     class Meta:

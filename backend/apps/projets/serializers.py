@@ -48,11 +48,18 @@ class ProjetSerializer(serializers.ModelSerializer):
 
 
 class RealisationTacheSerializer(serializers.ModelSerializer):
+    site_nom  = serializers.CharField(source="site.nom", read_only=True, default="")
+    site_code = serializers.CharField(source="site.code", read_only=True, default="")
+    tache_nom = serializers.CharField(source="affectation.tache.nom", read_only=True)
+    employe_nom = serializers.CharField(source="affectation.employe.nom_complet", read_only=True)
+
     class Meta:
         model = RealisationTache
         fields = [
-            "id", "affectation", "date", "quantite_realisee",
-            "montant_calcule", "notes", "created_at", "updated_at",
+            "id", "affectation", "tache_nom", "employe_nom",
+            "date", "quantite_realisee", "montant_calcule",
+            "site", "site_nom", "site_code",
+            "notes", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "montant_calcule", "created_at", "updated_at"]
 
@@ -79,6 +86,8 @@ class TacheProjetSerializer(serializers.ModelSerializer):
     total_realise = serializers.ReadOnlyField()
     progression_pct = serializers.ReadOnlyField()
     affectations = AffectationTacheSerializer(many=True, read_only=True)
+    tache_catalogue_libelle = serializers.CharField(source="tache_catalogue.libelle", read_only=True, default="")
+    tache_catalogue_code    = serializers.CharField(source="tache_catalogue.code", read_only=True, default="")
 
     class Meta:
         model = TacheProjet
@@ -86,6 +95,7 @@ class TacheProjetSerializer(serializers.ModelSerializer):
             "id", "projet", "nom", "description", "type_objectif", "unite_label",
             "objectif_cible", "tarif_unitaire", "bonus_objectif_pct",
             "date_debut", "date_fin_prevue", "statut",
+            "tache_catalogue", "tache_catalogue_libelle", "tache_catalogue_code",
             "total_realise", "progression_pct", "affectations",
             "created_at", "updated_at",
         ]

@@ -24,10 +24,10 @@
     @apply font-body bg-sand-100 text-ink antialiased;
   }
   h1, h2, h3, h4 { @apply font-display tracking-tight; }
-  /* Scrollbar plus discrète */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  /* Scrollbar ultra-discrète (4px, alignée maquette) */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--c-sand-200); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--c-sand-200); border-radius: 2px; }
 }
 
 @layer components {
@@ -186,13 +186,14 @@
     @apply bg-sand-100 text-sand-500 cursor-default;
   }
 
-  /* ─── Sidebar items ─────────────────────────────── */
+  /* ─── Sidebar items (calibré sur maquette : nav désaturée) ───── */
   .nav-eyebrow {
-    @apply font-mono text-[9px] uppercase tracking-[0.16em] text-forest-500/70 px-[15px] pt-3 pb-1.5 font-medium;
+    @apply font-mono text-[9px] uppercase tracking-[0.16em] px-[15px] pt-3 pb-1.5 font-medium
+           text-[#5a8472];
   }
   .nav-item {
     @apply flex items-center gap-2.5 px-[15px] py-2 text-[12.5px] font-display font-normal
-           text-forest-200 border-l-[2.5px] border-transparent transition-colors
+           text-[#7faa97] border-l-[2.5px] border-transparent transition-colors
            hover:bg-forest-900/60 hover:text-white;
   }
   .nav-item.active {

@@ -24,7 +24,7 @@ export default function MainLayout() {
         <div className="flex-1 flex flex-col min-w-0">
           <Topbar />
           <main className="flex-1 overflow-y-auto bg-sand-100">
-            <div className="px-7 py-6 max-w-[1400px] mx-auto">
+            <div className="p-[22px] max-w-[1400px] mx-auto">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>

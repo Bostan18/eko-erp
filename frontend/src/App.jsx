@@ -14,6 +14,8 @@ const PaiementsJournaliers = lazy(() => import('./pages/rh/PaiementsJournaliers'
 const CongesList      = lazy(() => import('./pages/rh/CongesList'))
 const MissionsMoo     = lazy(() => import('./pages/rh/MissionsMoo'))
 const Reporting       = lazy(() => import('./pages/Reporting'))
+const BilanCarboneEsg = lazy(() => import('./pages/reporting/BilanCarboneEsg'))
+const RapportsBi      = lazy(() => import('./pages/reporting/Rapports'))
 const ProjetList      = lazy(() => import('./pages/projets/ProjetList'))
 const ProjetDetail    = lazy(() => import('./pages/projets/ProjetDetail'))
 const TacheDetail     = lazy(() => import('./pages/projets/TacheDetail'))
@@ -91,6 +93,8 @@ export default function App() {
         <Route path="/comptabilite/devis/:id"       element={<DevisDetail />} />
         <Route path="/documents"                    element={<DocumentList />} />
         <Route path="/reporting"                    element={<Reporting />} />
+        <Route path="/reporting/esg"                element={<BilanCarboneEsg />} />
+        <Route path="/reporting/rapports"           element={<RapportsBi />} />
         <Route path="/parametres/entreprise"        element={<ParametresEntreprise />} />
         <Route path="/parametres"                   element={<Navigate to="/parametres/entreprise" replace />} />
         <Route path="/comptabilite"                 element={<Navigate to="/comptabilite/factures" replace />} />

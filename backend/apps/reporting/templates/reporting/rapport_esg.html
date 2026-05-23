@@ -1,0 +1,49 @@
+{% extends "reporting/_base_rapport.html" %}
+{% block content %}
+  <div class="kpi-row">
+    <div class="kpi" style="border-left-color: #1d4d2e;">
+      <div class="kpi-label">Score global ESG</div>
+      <div class="kpi-value">{{ esg.score_global|floatformat:1 }} / 100</div>
+    </div>
+    <div class="kpi" style="border-left-color: #639922;">
+      <div class="kpi-label">Environnement</div>
+      <div class="kpi-value positive">{{ esg.environnement.score|floatformat:1 }}</div>
+    </div>
+    <div class="kpi" style="border-left-color: #2c7da0;">
+      <div class="kpi-label">Social</div>
+      <div class="kpi-value" style="color: #2c7da0;">{{ esg.social.score|floatformat:1 }}</div>
+    </div>
+    <div class="kpi" style="border-left-color: #b8860b;">
+      <div class="kpi-label">Gouvernance</div>
+      <div class="kpi-value" style="color: #b8860b;">{{ esg.gouvernance.score|floatformat:1 }}</div>
+    </div>
+  </div>
+
+  <h2>Axe Environnement</h2>
+  <table>
+    <tbody>
+      <tr><td>Taux de valorisation des déchets</td><td class="num"><strong>{{ esg.environnement.taux_valorisation_dechets|floatformat:1 }} %</strong></td></tr>
+      <tr><td>Ratio CO₂ séquestré sur total carbone</td><td class="num"><strong>{{ esg.environnement.ratio_co2_sequestre_pct|floatformat:1 }} %</strong></td></tr>
+      <tr><td>CO₂ séquestré</td><td class="num positive">{{ esg.environnement.co2_sequestre_kg|floatformat:0 }} kg</td></tr>
+      <tr><td>CO₂ émis</td><td class="num negative">{{ esg.environnement.co2_emis_kg|floatformat:0 }} kg</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Axe Social</h2>
+  <table>
+    <tbody>
+      <tr><td>Employés actifs</td><td class="num"><strong>{{ esg.social.nb_employes }}</strong></td></tr>
+      <tr><td>% CDI permanents</td><td class="num"><strong>{{ esg.social.pct_cdi|floatformat:1 }} %</strong></td></tr>
+      <tr><td>% certifications valides</td><td class="num"><strong>{{ esg.social.pct_certifs_valides|floatformat:1 }} %</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Axe Gouvernance</h2>
+  <table>
+    <tbody>
+      <tr><td>% factures certifiées FNE</td><td class="num"><strong>{{ esg.gouvernance.pct_factures_fne|floatformat:1 }} %</strong></td></tr>
+      <tr><td>% factures payées à temps</td><td class="num"><strong>{{ esg.gouvernance.pct_factures_a_temps|floatformat:1 }} %</strong></td></tr>
+      <tr><td>Factures en retard</td><td class="num negative">{{ esg.gouvernance.nb_factures_retard }} / {{ esg.gouvernance.nb_factures_total }}</td></tr>
+    </tbody>
+  </table>
+{% endblock %}

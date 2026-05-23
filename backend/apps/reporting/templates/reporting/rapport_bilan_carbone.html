@@ -1,0 +1,52 @@
+{% extends "reporting/_base_rapport.html" %}
+{% block content %}
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">CO₂ séquestré (lots biologiques)</div>
+      <div class="kpi-value positive">{{ co2.co2_sequestre_kg|floatformat:0 }} kg</div>
+      <div class="kpi-sub">{{ co2.nb_lots }} lot(s) actif(s)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">CO₂ émis (parc engins)</div>
+      <div class="kpi-value negative">{{ co2.co2_emis_kg|floatformat:0 }} kg</div>
+      <div class="kpi-sub">{{ co2.nb_engins }} engin(s)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Solde net</div>
+      <div class="kpi-value {% if co2.solde_net_kg >= 0 %}positive{% else %}negative{% endif %}">
+        {{ co2.solde_net_kg|floatformat:0 }} kg
+      </div>
+      <div class="kpi-sub">{% if co2.solde_net_kg >= 0 %}Bilan positif{% else %}À compenser{% endif %}</div>
+    </div>
+  </div>
+
+  <h2>Séquestration par espèce</h2>
+  <table>
+    <thead><tr><th>Espèce</th><th class="num">Plants</th><th class="num">CO₂ séquestré (kg/an)</th></tr></thead>
+    <tbody>
+      {% for e in co2.par_espece %}
+        <tr><td>{{ e.espece }}</td><td class="num">{{ e.plants|floatformat:0 }}</td><td class="num positive">{{ e.co2_kg|floatformat:0 }}</td></tr>
+      {% empty %}
+        <tr><td colspan="3" style="text-align: center; color: #888;">Aucun lot biologique enregistré</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Émissions par type d'engin</h2>
+  <table>
+    <thead><tr><th>Type d'engin</th><th class="num">Nb</th><th class="num">Heures cumulées</th><th class="num">CO₂ émis (kg)</th></tr></thead>
+    <tbody>
+      {% for e in co2.par_type_engin %}
+        <tr><td>{{ e.type }}</td><td class="num">{{ e.nb }}</td><td class="num">{{ e.heures|floatformat:0 }}</td><td class="num negative">{{ e.co2_kg|floatformat:0 }}</td></tr>
+      {% empty %}
+        <tr><td colspan="4" style="text-align: center; color: #888;">Aucun engin enregistré</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Hypothèses & sources</h3>
+  <p style="font-size: 9pt; color: #5b5b5b;">
+    Séquestration : 20 kg CO₂eq/an par plant (réf. ADEME, jeune forêt tropicale).
+    Émissions diesel : 2.64 kg CO₂eq par litre, consommation horaire estimée par type d'engin.
+  </p>
+{% endblock %}

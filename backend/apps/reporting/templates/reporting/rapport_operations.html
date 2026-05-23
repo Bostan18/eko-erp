@@ -1,0 +1,35 @@
+{% extends "reporting/_base_rapport.html" %}
+{% block content %}
+  <h2>Bilan Carbone</h2>
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">CO₂ séquestré</div>
+      <div class="kpi-value positive">{{ co2.co2_sequestre_kg|floatformat:0 }} kg</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">CO₂ émis</div>
+      <div class="kpi-value negative">{{ co2.co2_emis_kg|floatformat:0 }} kg</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Solde</div>
+      <div class="kpi-value {% if co2.solde_net_kg >= 0 %}positive{% else %}negative{% endif %}">
+        {{ co2.solde_net_kg|floatformat:0 }} kg
+      </div>
+    </div>
+  </div>
+
+  <h2>Indicateurs ESG</h2>
+  <table>
+    <tbody>
+      <tr><td>Score global</td><td class="num"><strong>{{ esg.score_global|floatformat:1 }} / 100</strong></td></tr>
+      <tr><td>Environnement</td><td class="num">{{ esg.environnement.score|floatformat:1 }}</td></tr>
+      <tr><td>Social</td><td class="num">{{ esg.social.score|floatformat:1 }}</td></tr>
+      <tr><td>Gouvernance</td><td class="num">{{ esg.gouvernance.score|floatformat:1 }}</td></tr>
+    </tbody>
+  </table>
+
+  {% if rapport.notes %}
+    <h2>Notes</h2>
+    <p>{{ rapport.notes|linebreaksbr }}</p>
+  {% endif %}
+{% endblock %}

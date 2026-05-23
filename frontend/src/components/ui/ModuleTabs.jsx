@@ -74,6 +74,13 @@ export const PROJETS_TABS = [
   { label: 'Planning Gantt', to: '/projets/planning' },
 ]
 
+export const REPORTING_TABS = [
+  { label: 'Tableau de bord',       to: '/' , end: true },
+  { label: 'KPIs métier',           to: '/reporting', end: true },
+  { label: 'Bilan Carbone & ESG',   to: '/reporting/esg' },
+  { label: 'Rapports',              to: '/reporting/rapports' },
+]
+
 export const OPERATIONS_TABS = [
   { label: 'Sites',           to: '/operations/sites', end: true },
   { label: 'Journaliers',     to: '/operations/journaliers' },

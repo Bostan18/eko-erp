@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { fmt, MOIS_FR } from '../utils/format'
 import { Icon } from '../components/icons'
+import ModuleTabs, { REPORTING_TABS } from '../components/ui/ModuleTabs'
 
 const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 const TYPE_PROJET_LABEL = { btp: 'BTP', agriculture: 'Agriculture', pepiniere: 'Pépinière', location: 'Location', espaces_verts: 'Espaces verts', autre: 'Autre' }
@@ -29,19 +30,31 @@ export default function Reporting() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <p className="text-center text-sand-500 font-body text-sm py-12">Chargement…</p>
-  if (error) return <p className="text-center text-red-500 font-body text-sm py-12">{error}</p>
+  if (loading) return (
+    <div className="space-y-5">
+      <div className="card overflow-hidden"><ModuleTabs items={REPORTING_TABS} /></div>
+      <p className="text-center text-sand-500 font-body text-sm py-12">Chargement…</p>
+    </div>
+  )
+  if (error) return (
+    <div className="space-y-5">
+      <div className="card overflow-hidden"><ModuleTabs items={REPORTING_TABS} /></div>
+      <p className="text-center text-red-500 font-body text-sm py-12">{error}</p>
+    </div>
+  )
 
   const moisLabel = `${MOIS_FR[kpis.finance.mois]} ${kpis.finance.annee}`
   const f = kpis.finance
 
   return (
     <div className="space-y-5">
+      <div className="card overflow-hidden"><ModuleTabs items={REPORTING_TABS} /></div>
+
       {/* ─── sec-head ───────────────────────────────────── */}
       <div className="sec-head">
         <div>
           <div className="sec-title">BI &amp; Reporting</div>
-          <div className="sec-sub">Vue analytique consolidée — {moisLabel}</div>
+          <div className="sec-sub">KPIs métier consolidés — {moisLabel}</div>
         </div>
       </div>
 

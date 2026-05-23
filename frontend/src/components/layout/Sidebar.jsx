@@ -12,7 +12,14 @@ const NAV = [
     section: 'Pilotage',
     items: [
       { label: 'Tableau de bord', path: '/',          icon: IconDash },
-      { label: 'Reporting',       path: '/reporting', icon: IconReport },
+      {
+        label: 'Reporting & BI', path: '/reporting', icon: IconReport,
+        children: [
+          { label: 'KPIs métier',         path: '/reporting' },
+          { label: 'Bilan Carbone & ESG', path: '/reporting/esg' },
+          { label: 'Rapports',            path: '/reporting/rapports' },
+        ],
+      },
     ],
   },
   {

@@ -7,95 +7,27 @@ const BADGE_TONE = {
   gold: 'bg-gold-500 text-forest-950',
 }
 
+// Ordre & nommage des sections : aligné sur la maquette « EKO ERP.html »
+//   Vue d'ensemble · Comptabilité · Ressources Humaines · Opérations · Commercial · Analyse
+// (+ Configuration en bas, hors maquette mais nécessaire ici)
 const NAV = [
   {
-    section: 'Pilotage',
+    section: "Vue d'ensemble",
     items: [
-      { label: 'Tableau de bord', path: '/',          icon: IconDash },
-      {
-        label: 'Reporting & BI', path: '/reporting', icon: IconReport,
-        children: [
-          { label: 'KPIs métier',         path: '/reporting' },
-          { label: 'Bilan Carbone & ESG', path: '/reporting/esg' },
-          { label: 'Rapports',            path: '/reporting/rapports' },
-        ],
-      },
+      { label: 'Tableau de bord', path: '/', icon: IconDash },
     ],
   },
   {
-    section: 'Opérations',
+    section: 'Comptabilité',
     items: [
       {
-        label: 'RH & Paie', path: '/rh', icon: IconRH,
-        children: [
-          { label: 'Employés',              path: '/rh' },
-          { label: 'Pointage journée',      path: '/rh/pointage' },
-          { label: 'Pointage semaine',      path: '/rh/pointage-semaine' },
-          { label: 'Congés',                path: '/rh/conges' },
-          { label: 'Bulletins de paie',     path: '/rh/paie/bulletins' },
-          { label: 'Paiements journaliers', path: '/rh/paie/journaliers' },
-          { label: 'Missions MOO',          path: '/rh/paie/missions' },
-        ],
-      },
-      {
-        label: 'Projets', path: '/projets', icon: IconProjets,
-        children: [
-          { label: 'Tous les projets', path: '/projets' },
-          { label: 'Planning Gantt',   path: '/projets/planning' },
-          { label: 'BTP',              path: '/projets/btp' },
-          { label: 'Agriculture',      path: '/projets/agriculture' },
-          { label: 'Pépinière',        path: '/projets/pepiniere' },
-          { label: 'Locations',        path: '/projets/locations' },
-        ],
-      },
-      {
-        label: 'Parc machines', path: '/parc', icon: IconParc,
-      },
-      {
-        label: 'Opérations terrain', path: '/operations', icon: IconOperations,
-        children: [
-          { label: 'Sites',           path: '/operations/sites' },
-          { label: 'Journaliers',     path: '/operations/journaliers' },
-          { label: 'Logs de travail', path: '/operations/logs' },
-          { label: 'Tâches',          path: '/operations/taches-catalogue' },
-        ],
-      },
-      {
-        label: 'Stocks', path: '/stocks', icon: IconStocks,
-        children: [
-          { label: 'Articles',          path: '/stocks' },
-          { label: 'Mouvements',        path: '/stocks/mouvements' },
-          { label: 'Lots biologiques',  path: '/stocks/lots-biologiques' },
-          { label: 'Matériaux BTP',     path: '/stocks/materiaux-btp' },
-          { label: 'Déchets',           path: '/stocks/dechets' },
-          { label: 'Alertes',           path: '/stocks/alertes' },
-        ],
-      },
-    ],
-  },
-  {
-    section: 'Commerce',
-    items: [
-      {
-        label: 'CRM', path: '/crm', icon: IconCRM,
-        children: [
-          { label: 'Clients',   path: '/crm' },
-          { label: 'Prospects', path: '/crm/prospects' },
-          { label: 'Pipeline',  path: '/crm/pipeline' },
-          { label: 'Contrats',  path: '/crm/contrats' },
-        ],
-      },
-    ],
-  },
-  {
-    section: 'Finance',
-    items: [
-      {
-        label: 'Comptabilité', path: '/comptabilite', icon: IconCompta,
+        label: 'Facturation FNE', path: '/comptabilite', icon: IconCompta,
         children: [
           { label: 'Factures', path: '/comptabilite/factures' },
+          { label: 'Avoirs',   path: '/comptabilite/avoirs' },
           { label: 'Devis',    path: '/comptabilite/devis' },
-          { label: 'Charges',  path: '/comptabilite/charges'  },
+          { label: 'Stickers', path: '/comptabilite/stickers' },
+          { label: 'Charges',  path: '/comptabilite/charges' },
         ],
       },
       {
@@ -110,8 +42,84 @@ const NAV = [
     ],
   },
   {
-    section: 'Conformité',
+    section: 'Ressources Humaines',
     items: [
+      {
+        label: 'RH & Paie', path: '/rh', icon: IconRH,
+        children: [
+          { label: 'Employés',              path: '/rh' },
+          { label: 'Pointage journée',      path: '/rh/pointage' },
+          { label: 'Pointage semaine',      path: '/rh/pointage-semaine' },
+          { label: 'Congés',                path: '/rh/conges' },
+          { label: 'Bulletins de paie',     path: '/rh/paie/bulletins' },
+          { label: 'Paiements journaliers', path: '/rh/paie/journaliers' },
+          { label: 'Missions MOO',          path: '/rh/paie/missions' },
+        ],
+      },
+    ],
+  },
+  {
+    section: 'Opérations',
+    items: [
+      {
+        label: 'Projets', path: '/projets', icon: IconProjets,
+        children: [
+          { label: 'Tous les projets', path: '/projets' },
+          { label: 'Planning Gantt',   path: '/projets/planning' },
+          { label: 'BTP',              path: '/projets/btp' },
+          { label: 'Agriculture',      path: '/projets/agriculture' },
+          { label: 'Pépinière',        path: '/projets/pepiniere' },
+          { label: 'Locations',        path: '/projets/locations' },
+        ],
+      },
+      {
+        label: 'Opérations terrain', path: '/operations', icon: IconOperations,
+        children: [
+          { label: 'Sites',           path: '/operations/sites' },
+          { label: 'Journaliers',     path: '/operations/journaliers' },
+          { label: 'Logs de travail', path: '/operations/logs' },
+          { label: 'Tâches',          path: '/operations/taches-catalogue' },
+        ],
+      },
+      { label: 'Parc machines', path: '/parc', icon: IconParc },
+      {
+        label: 'Stocks', path: '/stocks', icon: IconStocks,
+        children: [
+          { label: 'Articles',          path: '/stocks' },
+          { label: 'Mouvements',        path: '/stocks/mouvements' },
+          { label: 'Lots biologiques',  path: '/stocks/lots-biologiques' },
+          { label: 'Matériaux BTP',     path: '/stocks/materiaux-btp' },
+          { label: 'Déchets',           path: '/stocks/dechets' },
+          { label: 'Alertes',           path: '/stocks/alertes' },
+        ],
+      },
+    ],
+  },
+  {
+    section: 'Commercial',
+    items: [
+      {
+        label: 'CRM & Ventes', path: '/crm', icon: IconCRM,
+        children: [
+          { label: 'Clients',   path: '/crm' },
+          { label: 'Prospects', path: '/crm/prospects' },
+          { label: 'Pipeline',  path: '/crm/pipeline' },
+          { label: 'Contrats',  path: '/crm/contrats' },
+        ],
+      },
+    ],
+  },
+  {
+    section: 'Analyse',
+    items: [
+      {
+        label: 'BI & Reporting', path: '/reporting', icon: IconReport,
+        children: [
+          { label: 'KPIs métier',         path: '/reporting' },
+          { label: 'Bilan Carbone & ESG', path: '/reporting/esg' },
+          { label: 'Rapports',            path: '/reporting/rapports' },
+        ],
+      },
       { label: 'Documents', path: '/documents', icon: IconDoc },
     ],
   },

@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Tokens OKLCH (miroir Tailwind, exposés pour overrides ponctuels) ──── */
+:root {
+  --c-forest-950: #0f2b1c;
+  --c-forest-900: #173e29;
+  --c-forest-800: #1c4f33;
+  --c-forest-700: #1a6539;
+  --c-forest-500: #1f8f53;
+  --c-forest-100: #d3eedc;
+  --c-sand-100:   #f3f1eb;
+  --c-sand-200:   #dedbd2;
+  --c-sand-500:   #7e7a6e;
+  --c-gold-500:   #c89a1d;
+  --c-gold-100:   #f5ecc8;
+  --c-ink:        #211f17;
+}
+
 @layer base {
   * { box-sizing: border-box; }
   body {
@@ -11,7 +27,7 @@
   /* Scrollbar plus discrète */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #dcd6c5; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--c-sand-200); border-radius: 3px; }
 }
 
 @layer components {

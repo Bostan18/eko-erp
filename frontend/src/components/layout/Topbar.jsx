@@ -2,18 +2,26 @@ import { useLocation } from 'react-router-dom'
 import GlobalSearch from './GlobalSearch'
 import NotificationsBell from './NotificationsBell'
 
+// Sections alignées sur la maquette
 const ROUTE_LABELS = {
-  '/':                          ['Pilotage', 'Tableau de bord'],
-  '/reporting':                 ['Pilotage', 'Reporting'],
-  '/rh':                        ['Opérations', 'RH & Paie', 'Employés'],
-  '/rh/pointage':               ['Opérations', 'RH & Paie', 'Pointage journée'],
-  '/rh/pointage-semaine':       ['Opérations', 'RH & Paie', 'Pointage semaine'],
+  '/':                          ["Vue d'ensemble", 'Tableau de bord'],
+  '/reporting':                 ['Analyse', 'BI & Reporting'],
+  '/reporting/esg':             ['Analyse', 'BI & Reporting', 'Bilan Carbone & ESG'],
+  '/reporting/rapports':        ['Analyse', 'BI & Reporting', 'Rapports'],
+  '/rh':                        ['Ressources Humaines', 'RH & Paie', 'Employés'],
+  '/rh/pointage':               ['Ressources Humaines', 'RH & Paie', 'Pointage journée'],
+  '/rh/pointage-semaine':       ['Ressources Humaines', 'RH & Paie', 'Pointage semaine'],
+  '/rh/conges':                 ['Ressources Humaines', 'RH & Paie', 'Congés'],
   '/projets':                   ['Opérations', 'Projets'],
+  '/operations':                ['Opérations', 'Opérations terrain'],
+  '/parc':                      ['Opérations', 'Parc machines'],
   '/stocks':                    ['Opérations', 'Stocks'],
-  '/crm':                       ['Commerce', 'CRM'],
-  '/comptabilite/factures':     ['Finance', 'Comptabilité', 'Factures'],
-  '/comptabilite/charges':      ['Finance', 'Comptabilité', 'Charges'],
-  '/documents':                 ['Conformité', 'Documents'],
+  '/crm':                       ['Commercial', 'CRM & Ventes'],
+  '/comptabilite/factures':     ['Comptabilité', 'Facturation FNE', 'Factures'],
+  '/comptabilite/charges':      ['Comptabilité', 'Facturation FNE', 'Charges'],
+  '/comptabilite/devis':        ['Comptabilité', 'Facturation FNE', 'Devis'],
+  '/achats/factures':           ['Comptabilité', 'Achats & Trésorerie', 'Factures'],
+  '/documents':                 ['Analyse', 'Documents'],
 }
 
 function deriveCrumb(pathname) {
@@ -22,7 +30,7 @@ function deriveCrumb(pathname) {
   const match = Object.keys(ROUTE_LABELS)
     .filter((k) => pathname.startsWith(k))
     .sort((a, b) => b.length - a.length)[0]
-  return match ? [...ROUTE_LABELS[match], '…'] : ['EKO']
+  return match ? [...ROUTE_LABELS[match], '…'] : ['EKO ERP']
 }
 
 export default function Topbar() {
@@ -39,7 +47,7 @@ export default function Topbar() {
           {parents.map((c, i) => (
             <span key={i}>
               {c}
-              {i < parents.length - 1 && <span className="text-sand-300 mx-1">/</span>}
+              {i < parents.length - 1 && <span className="text-sand-300 mx-1">›</span>}
             </span>
           ))}
         </p>

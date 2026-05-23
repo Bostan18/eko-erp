@@ -7,129 +7,68 @@ const BADGE_TONE = {
   gold: 'bg-gold-500 text-forest-950',
 }
 
-// Ordre & nommage des sections : aligné sur la maquette « EKO ERP.html »
-//   Vue d'ensemble · Comptabilité · Ressources Humaines · Opérations · Commercial · Analyse
-// (+ Configuration en bas, hors maquette mais nécessaire ici)
+/**
+ * Sidebar plate, alignée maquette.
+ * `path` = cible de navigation (1er onglet d'un module).
+ * `prefix` = préfixe d'URL pour matcher l'état actif (le sous-onglet courant
+ *            laisse le parent surligné).
+ * Les ModuleTabs in-page prennent le relais pour naviguer entre sous-pages.
+ */
 const NAV = [
   {
     section: "Vue d'ensemble",
     items: [
-      { label: 'Tableau de bord', path: '/', icon: IconDash },
+      { label: 'Tableau de bord', path: '/', exact: true, icon: IconDash },
     ],
   },
   {
     section: 'Comptabilité',
     items: [
-      {
-        label: 'Facturation FNE', path: '/comptabilite', icon: IconCompta,
-        children: [
-          { label: 'Factures', path: '/comptabilite/factures' },
-          { label: 'Avoirs',   path: '/comptabilite/avoirs' },
-          { label: 'Devis',    path: '/comptabilite/devis' },
-          { label: 'Stickers', path: '/comptabilite/stickers' },
-          { label: 'Charges',  path: '/comptabilite/charges' },
-        ],
-      },
-      {
-        label: 'Achats & Trésorerie', path: '/achats', icon: IconAchats,
-        children: [
-          { label: 'Factures achats', path: '/achats/factures' },
-          { label: 'Fournisseurs',    path: '/achats/fournisseurs' },
-          { label: 'Comptes',         path: '/achats/comptes' },
-          { label: 'Paiements',       path: '/achats/tresorerie' },
-        ],
-      },
+      { label: 'Facturation FNE',     path: '/comptabilite/factures', prefix: '/comptabilite', icon: IconCompta },
+      { label: 'Achats & Trésorerie', path: '/achats/factures',       prefix: '/achats',       icon: IconAchats },
     ],
   },
   {
     section: 'Ressources Humaines',
     items: [
-      {
-        label: 'RH & Paie', path: '/rh', icon: IconRH,
-        children: [
-          { label: 'Employés',              path: '/rh' },
-          { label: 'Pointage journée',      path: '/rh/pointage' },
-          { label: 'Pointage semaine',      path: '/rh/pointage-semaine' },
-          { label: 'Congés',                path: '/rh/conges' },
-          { label: 'Bulletins de paie',     path: '/rh/paie/bulletins' },
-          { label: 'Paiements journaliers', path: '/rh/paie/journaliers' },
-          { label: 'Missions MOO',          path: '/rh/paie/missions' },
-        ],
-      },
+      { label: 'RH & Paie', path: '/rh', prefix: '/rh', icon: IconRH },
     ],
   },
   {
     section: 'Opérations',
     items: [
-      {
-        label: 'Projets', path: '/projets', icon: IconProjets,
-        children: [
-          { label: 'Tous les projets', path: '/projets' },
-          { label: 'Planning Gantt',   path: '/projets/planning' },
-          { label: 'BTP',              path: '/projets/btp' },
-          { label: 'Agriculture',      path: '/projets/agriculture' },
-          { label: 'Pépinière',        path: '/projets/pepiniere' },
-          { label: 'Locations',        path: '/projets/locations' },
-        ],
-      },
-      {
-        label: 'Opérations terrain', path: '/operations', icon: IconOperations,
-        children: [
-          { label: 'Sites',           path: '/operations/sites' },
-          { label: 'Journaliers',     path: '/operations/journaliers' },
-          { label: 'Logs de travail', path: '/operations/logs' },
-          { label: 'Tâches',          path: '/operations/taches-catalogue' },
-        ],
-      },
-      { label: 'Parc machines', path: '/parc', icon: IconParc },
-      {
-        label: 'Stocks', path: '/stocks', icon: IconStocks,
-        children: [
-          { label: 'Articles',          path: '/stocks' },
-          { label: 'Mouvements',        path: '/stocks/mouvements' },
-          { label: 'Lots biologiques',  path: '/stocks/lots-biologiques' },
-          { label: 'Matériaux BTP',     path: '/stocks/materiaux-btp' },
-          { label: 'Déchets',           path: '/stocks/dechets' },
-          { label: 'Alertes',           path: '/stocks/alertes' },
-        ],
-      },
+      { label: 'Projets',            path: '/projets',          prefix: '/projets',    icon: IconProjets },
+      { label: 'Opérations terrain', path: '/operations/sites', prefix: '/operations', icon: IconOperations },
+      { label: 'Parc machines',      path: '/parc',             prefix: '/parc',       icon: IconParc },
+      { label: 'Stocks',             path: '/stocks',           prefix: '/stocks',     icon: IconStocks },
     ],
   },
   {
     section: 'Commercial',
     items: [
-      {
-        label: 'CRM & Ventes', path: '/crm', icon: IconCRM,
-        children: [
-          { label: 'Clients',   path: '/crm' },
-          { label: 'Prospects', path: '/crm/prospects' },
-          { label: 'Pipeline',  path: '/crm/pipeline' },
-          { label: 'Contrats',  path: '/crm/contrats' },
-        ],
-      },
+      { label: 'CRM & Ventes', path: '/crm', prefix: '/crm', icon: IconCRM },
     ],
   },
   {
     section: 'Analyse',
     items: [
-      {
-        label: 'BI & Reporting', path: '/reporting', icon: IconReport,
-        children: [
-          { label: 'KPIs métier',         path: '/reporting' },
-          { label: 'Bilan Carbone & ESG', path: '/reporting/esg' },
-          { label: 'Rapports',            path: '/reporting/rapports' },
-        ],
-      },
-      { label: 'Documents', path: '/documents', icon: IconDoc },
+      { label: 'BI & Reporting', path: '/reporting',  prefix: '/reporting',  icon: IconReport },
+      { label: 'Documents',      path: '/documents',  prefix: '/documents',  icon: IconDoc },
     ],
   },
   {
     section: 'Configuration',
     items: [
-      { label: 'Paramètres', path: '/parametres', icon: IconSettings },
+      { label: 'Paramètres', path: '/parametres', prefix: '/parametres', icon: IconSettings },
     ],
   },
 ]
+
+function isActive(pathname, item) {
+  if (item.exact) return pathname === item.path
+  const p = item.prefix ?? item.path
+  return pathname === p || pathname.startsWith(p + '/')
+}
 
 export default function Sidebar() {
   const { user, logout } = useAuthStore()
@@ -154,59 +93,33 @@ export default function Sidebar() {
         </p>
       </div>
 
-      {/* Nav */}
+      {/* Nav plate */}
       <nav className="flex-1 overflow-y-auto py-2">
         {NAV.map(({ section, items }) => (
           <div key={section} className="mb-1">
             <p className="nav-eyebrow">{section}</p>
-            {items.map(({ label, path, icon: Icon, children }) => {
-              const parentActive =
-                location.pathname === path ||
-                (children && location.pathname.startsWith(path + '/'))
-              const badge = badges?.[path]
+            {items.map((it) => {
+              const { label, path, icon: Icon, exact } = it
+              const active = isActive(location.pathname, it)
+              const badge = badges?.[it.prefix ?? path]
 
               return (
-                <div key={path}>
-                  <NavLink
-                    to={children ? children[0].path : path}
-                    end={!children && path === '/'}
-                    className={() =>
-                      `nav-item ${parentActive ? 'active' : ''}`
-                    }
-                  >
-                    <Icon className="w-[15px] h-[15px] opacity-90" />
-                    <span className="flex-1">{label}</span>
-                    {badge?.count > 0 && (
-                      <span className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center
-                                        text-[10px] font-mono font-bold rounded-full shrink-0
-                                        ${BADGE_TONE[badge.tone] ?? 'bg-forest-600 text-white'}`}>
-                        {badge.count > 99 ? '99+' : badge.count}
-                      </span>
-                    )}
-                  </NavLink>
-
-                  {children && parentActive && (
-                    <div className="mb-1">
-                      {children.map((child) => (
-                        <NavLink
-                          key={child.path}
-                          to={child.path}
-                          end
-                          className={({ isActive }) =>
-                            `flex items-center pl-[3.25rem] pr-5 py-1.5 text-[12px]
-                             font-display font-medium transition-colors
-                             ${isActive
-                               ? 'text-white'
-                               : 'text-forest-300 hover:text-white'}`
-                          }
-                        >
-                          <span className={`w-1 h-1 rounded-full mr-2 ${''}`} style={{ background: 'currentColor', opacity: .5 }} />
-                          {child.label}
-                        </NavLink>
-                      ))}
-                    </div>
+                <NavLink
+                  key={path}
+                  to={path}
+                  end={exact}
+                  className={`nav-item ${active ? 'active' : ''}`}
+                >
+                  <Icon className="w-[15px] h-[15px] opacity-90" />
+                  <span className="flex-1">{label}</span>
+                  {badge?.count > 0 && (
+                    <span className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center
+                                      text-[10px] font-mono font-bold rounded-full shrink-0
+                                      ${BADGE_TONE[badge.tone] ?? 'bg-forest-600 text-white'}`}>
+                      {badge.count > 99 ? '99+' : badge.count}
+                    </span>
                   )}
-                </div>
+                </NavLink>
               )
             })}
           </div>

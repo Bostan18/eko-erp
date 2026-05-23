@@ -46,6 +46,7 @@ export const RH_TABS = [
   { label: 'Employés',     to: '/rh', end: true },
   { label: 'Pointage',     to: '/rh/pointage' },
   { label: 'Semaine',      to: '/rh/pointage-semaine' },
+  { label: 'Congés',       to: '/rh/conges' },
   { label: 'Bulletins',    to: '/rh/paie/bulletins' },
   { label: 'Journaliers',  to: '/rh/paie/journaliers' },
   { label: 'Missions MOO', to: '/rh/paie/missions' },

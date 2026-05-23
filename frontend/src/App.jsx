@@ -11,6 +11,7 @@ const PointageSemaine = lazy(() => import('./pages/rh/PointageSemaine'))
 const BulletinList    = lazy(() => import('./pages/rh/BulletinList'))
 const BulletinDetail  = lazy(() => import('./pages/rh/BulletinDetail'))
 const PaiementsJournaliers = lazy(() => import('./pages/rh/PaiementsJournaliers'))
+const CongesList      = lazy(() => import('./pages/rh/CongesList'))
 const MissionsMoo     = lazy(() => import('./pages/rh/MissionsMoo'))
 const Reporting       = lazy(() => import('./pages/Reporting'))
 const ProjetList      = lazy(() => import('./pages/projets/ProjetList'))
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/rh/:id"                       element={<EmployeDetail />} />
         <Route path="/rh/pointage"                  element={<Pointage />} />
         <Route path="/rh/pointage-semaine"          element={<PointageSemaine />} />
+        <Route path="/rh/conges"                    element={<CongesList />} />
         <Route path="/rh/paie/bulletins"            element={<BulletinList />} />
         <Route path="/rh/paie/bulletins/:id"        element={<BulletinDetail />} />
         <Route path="/rh/paie/journaliers"          element={<PaiementsJournaliers />} />

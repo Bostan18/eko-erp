@@ -24,6 +24,7 @@ const NAV = [
           { label: 'Employés',              path: '/rh' },
           { label: 'Pointage journée',      path: '/rh/pointage' },
           { label: 'Pointage semaine',      path: '/rh/pointage-semaine' },
+          { label: 'Congés',                path: '/rh/conges' },
           { label: 'Bulletins de paie',     path: '/rh/paie/bulletins' },
           { label: 'Paiements journaliers', path: '/rh/paie/journaliers' },
           { label: 'Missions MOO',          path: '/rh/paie/missions' },

@@ -41,6 +41,9 @@ const NAV = [
         ],
       },
       {
+        label: 'Parc machines', path: '/parc', icon: IconParc,
+      },
+      {
         label: 'Opérations terrain', path: '/operations', icon: IconOperations,
         children: [
           { label: 'Sites',           path: '/operations/sites' },
@@ -278,6 +281,16 @@ function IconAchats({ className }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
       <path d="M2 7h20l-1.5 10.5a2 2 0 0 1-2 1.5H5.5a2 2 0 0 1-2-1.5L2 7Z" />
       <path d="M8 7V5a4 4 0 0 1 8 0v2" />
+    </svg>
+  )
+}
+function IconParc({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M3 17h14v-5a3 3 0 0 0-3-3H3v8Z" />
+      <circle cx="7" cy="18" r="2" />
+      <circle cx="15" cy="18" r="2" />
+      <path d="M17 12h3l1 2v3h-4" />
     </svg>
   )
 }

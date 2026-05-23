@@ -54,8 +54,9 @@
 
   /* ─── Cards ─────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl border border-sand-200;
+    @apply bg-white rounded-xl border border-sand-200 transition-shadow duration-200;
   }
+  .card:hover { @apply shadow-card; }
   .card-head {
     @apply flex items-center justify-between px-[18px] py-[13px] border-b border-sand-200;
   }
@@ -147,8 +148,13 @@
 
   /* ─── KPI ─────────────────────────────────────────── */
   .kpi {
-    @apply relative bg-white rounded-xl border border-sand-200 px-[18px] py-4 overflow-hidden;
+    @apply relative bg-white rounded-xl border border-sand-200 px-[18px] py-4 overflow-hidden
+           transition-all duration-200 ease-out;
   }
+  .kpi:hover {
+    @apply -translate-y-px shadow-card;
+  }
+  .kpi:hover .kpi-icon { @apply opacity-20; }
   .kpi-label {
     @apply font-mono text-[10.5px] uppercase tracking-[0.1em] text-sand-500 font-medium mb-1.5;
   }
@@ -204,4 +210,49 @@
   }
   .nav-count-gold { @apply bg-gold-400 text-forest-950; }
   .nav-count-red  { @apply bg-red-500  text-white; }
+
+  /* ─── Page transition (fade + slide up, déclenché par key={pathname}) ─ */
+  .screen {
+    animation: screenIn .26s cubic-bezier(.2,.7,.2,1) both;
+  }
+
+  /* ─── Skeleton (shimmer sand) ───────────────────────── */
+  .skeleton {
+    @apply rounded bg-sand-200/60 relative overflow-hidden;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,255,255,.7) 50%,
+      transparent 100%);
+    animation: shimmer 1.4s infinite;
+  }
+
+  /* ─── Tabs : indicateur animé (rail constant + barre glissante) ───── */
+  .tabs {
+    @apply relative;
+  }
+  .tab-indicator {
+    @apply absolute bottom-0 h-[2px] bg-forest-500 pointer-events-none;
+    transition: left .28s cubic-bezier(.65,0,.35,1),
+                width .28s cubic-bezier(.65,0,.35,1),
+                opacity .18s ease;
+  }
+  /* Quand un indicateur glisse, l'underline statique de .tab.active devient
+     redondante : on la masque pour éviter le double trait. */
+  .tabs.has-indicator .tab.active {
+    border-bottom-color: transparent !important;
+  }
+}
+
+/* ─── Keyframes globaux ───────────────────────────────── */
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

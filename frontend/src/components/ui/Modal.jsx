@@ -22,13 +22,15 @@ export default function Modal({ titre, sousTitre, onClose, footer, children, wid
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-ink/35 z-[900] animate-[fadeIn_.18s_ease]"
+        className="fixed inset-0 bg-ink/30 backdrop-blur-[2px] z-[900]
+                   animate-[fadeIn_.24s_cubic-bezier(.4,0,.2,1)]"
         onClick={onClose}
       />
 
-      {/* Drawer */}
+      {/* Drawer (entrée avec léger overshoot, sortie douce) */}
       <aside
-        className="fixed top-0 right-0 h-screen bg-white z-[901] flex flex-col shadow-drawer animate-[slideIn_.22s_ease]"
+        className="fixed top-0 right-0 h-screen bg-white z-[901] flex flex-col shadow-drawer
+                   animate-[slideIn_.32s_cubic-bezier(.22,1.15,.36,1)]"
         style={{ width }}
       >
         {/* Head */}

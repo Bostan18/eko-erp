@@ -24,6 +24,9 @@ const ContratList     = lazy(() => import('./pages/crm/ContratList'))
 const StockList       = lazy(() => import('./pages/stocks/StockList'))
 const StockAlertes    = lazy(() => import('./pages/stocks/StockAlertes'))
 const StockMouvements = lazy(() => import('./pages/stocks/StockMouvements'))
+const LotBiologiqueList = lazy(() => import('./pages/stocks/LotBiologiqueList'))
+const MateriauxBtpList  = lazy(() => import('./pages/stocks/MateriauxBtpList'))
+const DechetList        = lazy(() => import('./pages/stocks/DechetList'))
 const FactureList     = lazy(() => import('./pages/comptabilite/FactureList'))
 const FactureDetail   = lazy(() => import('./pages/comptabilite/FactureDetail'))
 const AvoirList       = lazy(() => import('./pages/comptabilite/AvoirList'))
@@ -72,6 +75,9 @@ export default function App() {
         <Route path="/stocks"                       element={<StockList />} />
         <Route path="/stocks/alertes"               element={<StockAlertes />} />
         <Route path="/stocks/mouvements"            element={<StockMouvements />} />
+        <Route path="/stocks/lots-biologiques"      element={<LotBiologiqueList />} />
+        <Route path="/stocks/materiaux-btp"         element={<MateriauxBtpList />} />
+        <Route path="/stocks/dechets"               element={<DechetList />} />
         <Route path="/comptabilite/factures"        element={<FactureList />} />
         <Route path="/comptabilite/factures/:id"    element={<FactureDetail />} />
         <Route path="/comptabilite/avoirs"          element={<AvoirList />} />

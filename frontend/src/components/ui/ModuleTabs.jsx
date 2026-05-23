@@ -52,9 +52,12 @@ export const RH_TABS = [
 ]
 
 export const STOCKS_TABS = [
-  { label: 'Articles',   to: '/stocks', end: true },
-  { label: 'Mouvements', to: '/stocks/mouvements' },
-  { label: 'Alertes',    to: '/stocks/alertes' },
+  { label: 'Articles',          to: '/stocks', end: true },
+  { label: 'Mouvements',        to: '/stocks/mouvements' },
+  { label: 'Lots biologiques',  to: '/stocks/lots-biologiques' },
+  { label: 'Matériaux BTP',     to: '/stocks/materiaux-btp' },
+  { label: 'Déchets',           to: '/stocks/dechets' },
+  { label: 'Alertes',           to: '/stocks/alertes' },
 ]
 
 export const CRM_TABS = [

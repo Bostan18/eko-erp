@@ -52,9 +52,12 @@ const NAV = [
       {
         label: 'Stocks', path: '/stocks', icon: IconStocks,
         children: [
-          { label: 'Articles',   path: '/stocks' },
-          { label: 'Alertes',    path: '/stocks/alertes' },
-          { label: 'Mouvements', path: '/stocks/mouvements' },
+          { label: 'Articles',          path: '/stocks' },
+          { label: 'Mouvements',        path: '/stocks/mouvements' },
+          { label: 'Lots biologiques',  path: '/stocks/lots-biologiques' },
+          { label: 'Matériaux BTP',     path: '/stocks/materiaux-btp' },
+          { label: 'Déchets',           path: '/stocks/dechets' },
+          { label: 'Alertes',           path: '/stocks/alertes' },
         ],
       },
     ],

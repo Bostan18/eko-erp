@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
+import { ModalFooter } from '../ui/Modal'
 
 const LIGNE_INIT = { designation: '', centre_cout: '', quantite: '1', prix_unitaire: '', remise_pct: '0', taux_tva: '18' }
 
@@ -164,12 +165,12 @@ export default function DevisForm({ onSuccess, onClose }) {
         <textarea className="input min-h-[60px]" value={form.notes} onChange={(e) => set('notes', e.target.value)} />
       </div>
 
-      <div className="flex gap-3">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose}>Annuler</button>
-        <button type="submit" className="btn-primary flex-1" disabled={saving}>
+      <ModalFooter>
+        <button type="button" className="btn-secondary" onClick={onClose}>Annuler</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? 'Enregistrement…' : 'Créer le devis'}
         </button>
-      </div>
+      </ModalFooter>
     </form>
   )
 }

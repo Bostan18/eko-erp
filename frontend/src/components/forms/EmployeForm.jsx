@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
-import { FormSection, FormRow, Field } from '../ui/Modal'
+import { FormSection, FormRow, Field, ModalFooter } from '../ui/Modal'
 
 const INIT = {
   code: '', nom: '', prenom: '', type_contrat: 'journalier',
@@ -55,8 +55,7 @@ export default function EmployeForm({ onSuccess, onClose }) {
   const isJournalier = ['journalier', 'moo'].includes(form.type_contrat)
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <div className="flex-1">
+    <form onSubmit={handleSubmit}>
         {error && (
           <div className="alert-red mb-5">
             <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
@@ -132,16 +131,14 @@ export default function EmployeForm({ onSuccess, onClose }) {
             </Field>
           )}
         </FormSection>
-      </div>
-
-      <div className="flex gap-2 justify-end pt-4 border-t border-sand-200 -mx-6 px-6 -mb-5 pb-5 mt-2 bg-sand-50/40">
+      <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>
           Annuler
         </button>
         <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? 'Enregistrement…' : "Créer l'employé"}
         </button>
-      </div>
+      </ModalFooter>
     </form>
   )
 }

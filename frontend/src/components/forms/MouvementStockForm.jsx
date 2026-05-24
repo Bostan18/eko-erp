@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
+import { ModalFooter } from '../ui/Modal'
 
 const INIT = {
   article: '',
@@ -120,12 +121,12 @@ export default function MouvementStockForm({ onSuccess, onClose }) {
         )
       )}
 
-      <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
-        <button type="submit" className="btn-primary flex-1" disabled={saving}>
+      <ModalFooter>
+        <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? 'Enregistrement…' : 'Enregistrer le mouvement'}
         </button>
-      </div>
+      </ModalFooter>
     </form>
   )
 }

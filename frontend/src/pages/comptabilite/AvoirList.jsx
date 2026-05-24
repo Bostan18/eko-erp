@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { StatusBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
-import { IconCornerUpLeft, IconDocument } from '../../components/ui/Icons'
+import { IconCornerUpLeft, IconDocument, IconUsers, IconChartBar } from '../../components/ui/Icons'
 import { useFetchList } from '../../hooks/useFetchList'
 import { FACTURE_STATUT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
@@ -24,6 +24,8 @@ export default function AvoirList() {
   )
 
   const totalAvoirs = avoirs.reduce((s, a) => s + Number(a.total_ttc ?? 0), 0)
+  const avoirMoyen  = avoirs.length ? Math.round(totalAvoirs / avoirs.length) : 0
+  const clientsImpactes = new Set(avoirs.map((a) => a.client_nom).filter(Boolean)).size
 
   return (
     <div className="space-y-5">
@@ -39,7 +41,7 @@ export default function AvoirList() {
 
       <div className="kpi-grid">
         <KpiCard
-          icon={<IconCornerUpLeft />} tone="red" valueTone="red"
+          icon={<IconCornerUpLeft />} tone="red"
           label="Total avoirs"
           value={<>{fmt(totalAvoirs)} <span className="kpi-unit">FCFA</span></>}
           sub="montant annulé cumulé"
@@ -49,6 +51,18 @@ export default function AvoirList() {
           label="Nombre d'avoirs"
           value={avoirs.length}
           sub="émis"
+        />
+        <KpiCard
+          icon={<IconChartBar />} tone="gold"
+          label="Avoir moyen"
+          value={<>{fmt(avoirMoyen)} <span className="kpi-unit">FCFA</span></>}
+          sub="Par avoir émis"
+        />
+        <KpiCard
+          icon={<IconUsers />} tone="blue"
+          label="Clients impactés"
+          value={clientsImpactes}
+          sub={`Sur ${avoirs.length} avoir${avoirs.length !== 1 ? 's' : ''}`}
         />
       </div>
 

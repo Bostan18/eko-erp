@@ -55,11 +55,8 @@ export default function EnginList() {
           <Kpi label="Total parc" value={kpis.total} />
           <Kpi label="Disponibles" value={kpis.disponibles} tone="green" />
           <Kpi label="En chantier / location" value={kpis.en_chantier + kpis.en_location} tone="gold" />
-          <Kpi label="Maintenance / HS" value={kpis.en_maintenance + kpis.hors_service}
-            tone={kpis.en_maintenance + kpis.hors_service > 0 ? 'red' : 'gray'} />
           <Kpi label="Alertes révision" value={kpis.en_alerte}
             tone={kpis.en_alerte > 0 ? 'red' : 'green'} />
-          <Kpi label="Valeur parc" value={`${(kpis.valeur_parc / 1_000_000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M F`} />
         </div>
       )}
 

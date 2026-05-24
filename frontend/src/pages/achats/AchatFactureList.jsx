@@ -3,7 +3,7 @@ import Modal from '../../components/ui/Modal'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { ACHATS_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
-import { IconInvoice, IconHourglass, IconAlert } from '../../components/ui/Icons'
+import { IconInvoice, IconHourglass, IconAlert, IconUsers } from '../../components/ui/Icons'
 import FactureAchatForm from '../../components/forms/FactureAchatForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
@@ -36,6 +36,9 @@ export default function AchatFactureList() {
   const totalAchats = factures.filter((f) => f.statut !== 'annulee').reduce((s, f) => s + Number(f.total_ttc ?? 0), 0)
   const totalAPayer = factures.filter((f) => f.statut !== 'payee' && f.statut !== 'annulee').reduce((s, f) => s + Number(f.solde_restant ?? 0), 0)
   const nbEnRetard  = factures.filter(enRetard).length
+  const nbFournisseurs = new Set(
+    factures.filter((f) => f.statut !== 'annulee').map((f) => f.fournisseur_nom).filter(Boolean)
+  ).size
 
   const STATUTS = [
     { key: 'toutes', label: 'Tous les statuts' },
@@ -77,7 +80,7 @@ export default function AchatFactureList() {
           sub="cumul hors annulées"
         />
         <KpiCard
-          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          icon={<IconHourglass />} tone="gold"
           label="Reste à payer"
           value={<>{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></>}
           sub="soldes fournisseurs"
@@ -87,6 +90,13 @@ export default function AchatFactureList() {
           label="En retard"
           value={nbEnRetard}
           sub={nbEnRetard > 0 ? 'Action requise' : 'À jour'}
+        />
+        <KpiCard
+          icon={<IconUsers />} tone="blue"
+          label="Fournisseurs"
+          value={nbFournisseurs}
+          sub={`Distincts · ${factures.length} facture${factures.length !== 1 ? 's' : ''}`}
+          to="/achats/fournisseurs"
         />
       </div>
 

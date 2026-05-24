@@ -41,7 +41,7 @@ export default function StockAlertes() {
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
         <KpiCard
-          icon={<IconAlert />} tone={articles.length > 0 ? 'red' : 'sand'} valueTone={articles.length > 0 ? 'red' : 'sand'}
+          icon={<IconAlert />} tone="red"
           label="Articles en alerte"
           value={articles.length}
           sub={articles.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}

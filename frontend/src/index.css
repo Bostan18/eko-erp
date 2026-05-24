@@ -20,14 +20,20 @@
 
 @layer base {
   * { box-sizing: border-box; }
+  html { scrollbar-gutter: stable; }
   body {
     @apply font-body bg-sand-100 text-ink antialiased;
+    scrollbar-gutter: stable;
   }
   h1, h2, h3, h4 { @apply font-display tracking-tight; }
   /* Scrollbar ultra-discrète (4px, alignée maquette) */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--c-sand-200); border-radius: 2px; }
+
+  /* Utilitaire : masque la scrollbar mais garde le scroll fonctionnel */
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 }
 
 @layer components {
@@ -54,9 +60,12 @@
 
   /* ─── Cards ─────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl border border-sand-200 transition-shadow duration-200;
+    @apply bg-white rounded-xl border border-sand-200;
   }
-  .card:hover { @apply shadow-card; }
+  /* Variante : carte cliquable / interactive (à ajouter explicitement) */
+  .card-interactive {
+    @apply transition-shadow duration-200 cursor-pointer hover:shadow-card;
+  }
   .card-head {
     @apply flex items-center justify-between px-[18px] py-[13px] border-b border-sand-200;
   }
@@ -66,7 +75,8 @@
   .input {
     @apply w-full px-2.5 py-2 bg-white border border-sand-200 rounded-lg text-[12.5px] font-body
            text-ink placeholder-sand-400 transition-colors
-           focus:outline-none focus:border-forest-500;
+           focus:outline-none focus:border-forest-500
+           focus:ring-2 focus:ring-forest-500/15;
   }
   .input-sm { @apply py-1.5 text-[12px]; }
 
@@ -85,14 +95,24 @@
   .sec-sub   { @apply font-body text-[11.5px] text-sand-500 mt-0.5; }
 
   /* ─── Layout helpers (gabarit maquette) ─────────────── */
-  /* sec-head : titre + sous-titre à gauche, actions à droite */
-  .sec-head  { @apply flex items-start justify-between gap-4; }
+  /* sec-head : titre + sous-titre à gauche, actions à droite.
+     Mobile : stack vertical (titre puis actions plein largeur). */
+  .sec-head  { @apply flex flex-col md:flex-row items-stretch md:items-start justify-between gap-3 md:gap-4; }
   .kpi-grid  { @apply grid grid-cols-2 lg:grid-cols-4 gap-[14px]; }
   .two-col   { @apply grid grid-cols-1 lg:grid-cols-2 gap-[14px]; }
   .three-col { @apply grid grid-cols-1 lg:grid-cols-3 gap-[14px]; }
-  /* th-row : en-tête interne d'une carte (titre + recherche/action) */
-  .th-row    { @apply flex items-center justify-between gap-3 px-[18px] py-[13px] border-b border-sand-200; }
+  /* sec-actions : wrapper boutons à droite de sec-head ; en mobile prend toute la largeur,
+     et les boutons enfants s'étirent pour s'aligner. */
+  .sec-actions { @apply flex gap-2 w-full md:w-auto; }
+  .sec-actions > * { @apply flex-1 md:flex-none justify-center; }
+  /* th-row : en-tête interne d'une carte (titre + recherche/action).
+     flex-wrap pour que les filtres passent dessous si l'espace manque. */
+  .th-row    { @apply flex flex-wrap items-center justify-between gap-2 md:gap-3 px-[18px] py-[13px] border-b border-sand-200; }
   .th-title  { @apply font-display font-semibold text-[13.5px] text-ink; }
+  /* th-filters : groupe de filtres/recherche dans un th-row. En mobile : largeur pleine. */
+  .th-filters { @apply flex flex-wrap items-center gap-2 w-full md:w-auto; }
+  .th-filters > input[type="text"],
+  .th-filters > input[type="search"] { @apply flex-1 min-w-[140px] md:flex-none md:w-[210px]; }
 
   /* ─── Badges (forme pilule sobre, voir Badge.jsx) ─── */
   .badge {
@@ -123,11 +143,12 @@
 
   /* ─── Tabs ──────────────────────────────────────────── */
   .tabs {
-    @apply flex border-b border-sand-200 px-[18px];
+    @apply flex border-b border-sand-200 px-[18px] overflow-x-auto scrollbar-hide;
   }
   .tab {
     @apply px-[15px] py-[11px] text-[12.5px] font-display font-medium text-sand-500
-           border-b-2 border-transparent cursor-pointer transition-colors -mb-px;
+           border-b-2 border-transparent cursor-pointer transition-colors -mb-px
+           whitespace-nowrap shrink-0;
   }
   .tab:hover:not(.active) { @apply text-ink; }
   .tab.active { @apply text-forest-500 border-forest-500 font-medium; }
@@ -148,13 +169,35 @@
 
   /* ─── KPI ─────────────────────────────────────────── */
   .kpi {
-    @apply relative bg-white rounded-xl border border-sand-200 px-[18px] py-4 overflow-hidden
+    @apply relative bg-white rounded-xl border border-sand-200 px-[18px] py-4
            transition-all duration-200 ease-out;
   }
-  .kpi:hover {
-    @apply -translate-y-px shadow-card;
+  .kpi:hover { @apply -translate-y-px; }
+  .kpi[data-tone="forest"]:hover {
+    border-color: rgb(31 143 83 / 0.32);
+    box-shadow: 0 0 0 3px rgb(31 143 83 / 0.10), 0 10px 22px -8px rgb(31 143 83 / 0.20);
   }
-  .kpi:hover .kpi-icon { @apply opacity-20; }
+  .kpi[data-tone="gold"]:hover {
+    border-color: rgb(200 154 29 / 0.35);
+    box-shadow: 0 0 0 3px rgb(200 154 29 / 0.12), 0 10px 22px -8px rgb(200 154 29 / 0.24);
+  }
+  .kpi[data-tone="red"]:hover {
+    border-color: rgb(220 38 38 / 0.30);
+    box-shadow: 0 0 0 3px rgb(220 38 38 / 0.10), 0 10px 22px -8px rgb(220 38 38 / 0.20);
+  }
+  .kpi[data-tone="blue"]:hover {
+    border-color: rgb(37 99 235 / 0.30);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.10), 0 10px 22px -8px rgb(37 99 235 / 0.20);
+  }
+  .kpi[data-tone="sand"]:hover {
+    border-color: rgb(160 155 141 / 0.45);
+    box-shadow: 0 0 0 3px rgb(160 155 141 / 0.10), 0 8px 18px -8px rgb(33 31 23 / 0.10);
+  }
+  .kpi-badge {
+    @apply flex items-center justify-center w-10 h-10 rounded-xl shrink-0
+           transition-transform duration-200 ease-out;
+  }
+  .kpi:hover .kpi-badge { transform: scale(1.05); }
   .kpi-label {
     @apply font-mono text-[10.5px] uppercase tracking-[0.1em] text-sand-500 font-medium mb-1.5;
   }
@@ -163,11 +206,6 @@
   }
   .kpi-unit { @apply text-[12px] font-normal text-sand-500 ml-1; }
   .kpi-sub  { @apply text-[11px] mt-1.5 text-sand-500 flex items-center gap-1; }
-  .kpi-icon {
-    @apply absolute right-3.5 top-3.5 pointer-events-none transition-opacity duration-200;
-    opacity: 0.22;
-  }
-  .kpi:hover .kpi-icon { opacity: 0.42; }
   .kpi-up   { @apply text-forest-500 font-medium; }
   .kpi-dn   { @apply text-red-600; }
 
@@ -196,18 +234,36 @@
     @apply bg-sand-100 text-sand-500 cursor-default;
   }
 
-  /* ─── Sidebar items (calibré sur maquette : nav désaturée) ───── */
+  /* ─── Sidebar items ─────────────────────────────────── */
   .nav-eyebrow {
-    @apply font-mono text-[9px] uppercase tracking-[0.16em] px-[15px] pt-3 pb-1.5 font-medium
-           text-[#5a8472];
+    @apply font-mono text-[9px] uppercase tracking-[0.16em] px-[18px] pt-3 pb-1 font-medium;
+    color: rgba(255, 255, 255, 0.32);
   }
   .nav-item {
-    @apply flex items-center gap-2.5 px-[15px] py-2 text-[12.5px] font-display font-normal
-           text-[#7faa97] border-l-[2.5px] border-transparent transition-colors
-           hover:bg-forest-900/60 hover:text-white;
+    @apply relative flex items-center gap-2.5 mx-2 px-3 py-[10px] text-[13px]
+           font-display font-medium rounded-lg;
+    color: rgba(255, 255, 255, 0.62);
+    transition: background-color .22s cubic-bezier(.4,0,.2,1),
+                color .22s cubic-bezier(.4,0,.2,1);
+  }
+  .nav-item:hover {
+    background: #14402d;
+    color: rgba(255, 255, 255, 0.92);
   }
   .nav-item.active {
-    @apply bg-forest-900 text-white border-forest-500;
+    background: #1c4f33;
+    color: #ffffff;
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: #1f8f53;
+    border-radius: 0 4px 4px 0;
   }
   .nav-count {
     @apply text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-forest-800 text-forest-100 font-semibold;
@@ -259,4 +315,12 @@
 @keyframes shimmer {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+@keyframes popoverIn {
+  from { opacity: 0; transform: translateY(4px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.animate-popover {
+  animation: popoverIn .16s cubic-bezier(.2,.7,.2,1) both;
+  transform-origin: bottom center;
 }

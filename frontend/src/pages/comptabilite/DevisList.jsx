@@ -90,7 +90,7 @@ export default function DevisList() {
           sub="Brouillons & envoyés"
         />
         <KpiCard
-          icon={<IconClock />} tone={nbExpire > 0 ? 'red' : 'sand'} valueTone={nbExpire > 0 ? 'red' : 'sand'}
+          icon={<IconClock />} tone="red"
           label="Expirés"
           value={nbExpire}
           sub={nbExpire > 0 ? 'À renouveler' : 'Aucun'}

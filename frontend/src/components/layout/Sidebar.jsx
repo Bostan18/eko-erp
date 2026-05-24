@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
 import { useAlerts } from '../../context/AlertsContext'
@@ -70,31 +71,74 @@ function isActive(pathname, item) {
   return pathname === p || pathname.startsWith(p + '/')
 }
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose }) {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const { badges } = useAlerts()
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDown = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [menuOpen])
+
+  useEffect(() => { setMenuOpen(false) }, [location.pathname])
+
   function handleLogout() {
+    setMenuOpen(false)
     logout()
     navigate('/login')
   }
 
   return (
-    <aside className="w-60 min-w-[15rem] h-screen bg-forest-950 text-forest-100 flex flex-col shrink-0">
+    <aside
+      className={`
+        fixed md:relative inset-y-0 left-0 z-40
+        w-[240px] min-w-[240px] h-screen bg-forest-950 text-forest-100
+        flex flex-col shrink-0
+        transform transition-transform duration-200 ease-out
+        ${open ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0
+      `}
+    >
       {/* Logo — wordmark maquette : EK<span vert>O</span> */}
-      <div className="px-[18px] py-[18px] border-b border-forest-900">
-        <p className="font-display font-extrabold text-white text-[24px] leading-none tracking-[-0.04em]">
-          EK<span className="text-forest-500">O</span>
-        </p>
-        <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-forest-500/80 mt-[3px]">
-          ERP · Côte d'Ivoire
-        </p>
+      <div className="px-[18px] py-[18px] border-b border-forest-900 flex items-center justify-between">
+        <div>
+          <p className="font-display font-extrabold text-white text-[24px] leading-none tracking-[-0.04em]">
+            EK<span className="text-forest-500">O</span>
+          </p>
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-forest-500/80 mt-[3px]">
+            ERP · Côte d'Ivoire
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fermer le menu"
+          className="md:hidden -mr-1 p-2 rounded-lg text-forest-300 hover:text-white hover:bg-forest-900 transition-colors"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+            <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
 
       {/* Nav plate */}
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
         {NAV.map(({ section, items }) => (
           <div key={section} className="mb-1">
             <p className="nav-eyebrow">{section}</p>
@@ -126,15 +170,43 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User + logout */}
-      <div className="px-3 py-3 border-t border-forest-900">
-        <div className="flex items-center gap-2.5 px-2 py-1.5">
+      {/* User menu (popover dropdown) */}
+      <div className="px-3 py-3 border-t border-forest-900 relative" ref={menuRef}>
+        {menuOpen && (
+          <div className="absolute left-3 right-3 bottom-full mb-2 bg-white rounded-xl shadow-lg py-1.5 z-20 border border-sand-200 animate-popover">
+            <NavLink
+              to="/profil"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-ink hover:bg-sand-100 font-display font-medium transition-colors"
+            >
+              <IconUser className="w-4 h-4 text-sand-500" />
+              Mon profil
+            </NavLink>
+            <div className="border-t border-sand-100 my-1" />
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 font-display font-medium transition-colors"
+            >
+              <IconLogout className="w-4 h-4" />
+              Déconnexion
+            </button>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors
+                     ${menuOpen ? 'bg-forest-900' : 'hover:bg-forest-900/60'}`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+        >
           <div className="w-8 h-8 bg-forest-600 rounded-full flex items-center justify-center shrink-0">
             <span className="font-display text-white text-xs font-bold">
               {user?.username?.[0]?.toUpperCase() ?? 'U'}
             </span>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <p className="font-display text-white text-xs font-medium truncate">
               {user?.username ?? 'Utilisateur'}
             </p>
@@ -142,18 +214,31 @@ export default function Sidebar() {
               Admin
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            title="Déconnexion"
-            className="text-forest-400 hover:text-white transition-colors"
+          <svg
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            className={`w-3.5 h-3.5 text-forest-400 transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
-          </button>
-        </div>
+            <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
     </aside>
+  )
+}
+
+function IconUser({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+}
+function IconLogout({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+    </svg>
   )
 }
 

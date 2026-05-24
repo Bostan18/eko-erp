@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
 
 /**
- * Carte KPI unifiée — icon SVG tonal + valeur + sub.
- * La prop `tone` colore l'icône (faded) ; `valueTone` colore la valeur
- * (par défaut : ink). Si `to` est fourni, la carte devient un Link.
+ * Carte KPI — badge icône coloré (haut-droite) + valeur sobre + glow tonal au hover.
+ * Le `tone` régit le badge (fond pâle + icône saturée) et l'anneau de hover.
  *
  *   <KpiCard
  *     icon={<IconBox />}
@@ -11,61 +10,53 @@ import { Link } from 'react-router-dom'
  *     value="1 234"
  *     sub="Total inventaire"
  *     tone="forest"
- *     valueTone="ink"
  *     to="/stocks"
  *   />
  *
- * Tones disponibles :
- *   - forest : info global, positif (icon vert)
+ * Tones :
+ *   - forest : positif, global, actif
  *   - gold   : en attente, à surveiller
  *   - red    : alerte, retard, critique
  *   - blue   : info administrative
- *   - sand   : neutre, secondaire
+ *   - sand   : neutre, secondaire (défaut)
  */
 
-const ICON_TONE = {
-  forest: 'text-forest-500',
-  gold:   'text-gold-500',
-  red:    'text-red-500',
-  blue:   'text-blue-500',
-  sand:   'text-sand-400',
-}
-
-const VALUE_TONE = {
-  ink:    'text-ink',
-  forest: 'text-forest-700',
-  gold:   'text-gold-700',
-  red:    'text-red-600',
-  blue:   'text-blue-700',
-  sand:   'text-sand-600',
+const BADGE = {
+  forest: 'bg-forest-100 text-forest-700',
+  gold:   'bg-gold-100 text-gold-700',
+  red:    'bg-red-100 text-red-600',
+  blue:   'bg-blue-100 text-blue-700',
+  sand:   'bg-sand-100 text-sand-600',
 }
 
 export default function KpiCard({
   icon, label, value, sub,
   tone = 'sand',
-  valueTone = 'ink',
+  // eslint-disable-next-line no-unused-vars
+  valueTone,
   to,
 }) {
   const inner = (
     <>
-      {icon && (
-        <div className={`kpi-icon ${ICON_TONE[tone] ?? ICON_TONE.sand}`}>
-          {/* On force la taille au niveau du wrapper pour ne pas dépendre de la prop className passée à l'icône */}
-          <span className="block w-7 h-7 [&>svg]:w-full [&>svg]:h-full">{icon}</span>
-        </div>
-      )}
-      <p className="kpi-label">{label}</p>
-      <p className={`kpi-value ${VALUE_TONE[valueTone] ?? VALUE_TONE.ink}`}>{value}</p>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <p className="kpi-label !mb-0 mt-1">{label}</p>
+        {icon && (
+          <span className={`kpi-badge ${BADGE[tone] ?? BADGE.sand}`}>
+            <span className="block w-[18px] h-[18px] [&>svg]:w-full [&>svg]:h-full">{icon}</span>
+          </span>
+        )}
+      </div>
+      <p className="kpi-value">{value}</p>
       {sub && <p className="kpi-sub">{sub}</p>}
     </>
   )
 
   if (to) {
     return (
-      <Link to={to} className="kpi block hover:border-forest-300">
+      <Link to={to} data-tone={tone} className="kpi block">
         {inner}
       </Link>
     )
   }
-  return <div className="kpi">{inner}</div>
+  return <div data-tone={tone} className="kpi">{inner}</div>
 }

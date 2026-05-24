@@ -6,7 +6,7 @@ export default function BottomNav({ activeModId }) {
   const navigate = useNavigate()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#212121] border-t border-black/40 px-2 pb-1 pt-1.5 z-30 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 bg-forest-950 border-t border-forest-900 px-2 pt-1.5 pb-[max(4px,env(safe-area-inset-bottom))] z-30 md:hidden">
       <div className="flex items-stretch justify-between">
         {BOTTOM_NAV_IDS.map((id) => {
           const m = MODULE_BY_ID[id]
@@ -18,7 +18,7 @@ export default function BottomNav({ activeModId }) {
               key={id}
               onClick={() => navigate(m.path)}
               className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-colors ${
-                isActive ? 'text-forest-300' : 'text-gray-500'
+                isActive ? 'text-forest-300' : 'text-forest-500/70'
               }`}
             >
               <div className={`relative px-3.5 py-1 rounded-full ${isActive ? 'bg-forest-500/15' : ''}`}>

@@ -49,6 +49,7 @@ const LogTravailList      = lazy(() => import('./pages/operations/LogTravailList
 const TacheCatalogueList  = lazy(() => import('./pages/operations/TacheCatalogueList'))
 const DocumentList    = lazy(() => import('./pages/documents/DocumentList'))
 const ParametresEntreprise = lazy(() => import('./pages/parametres/ParametresEntreprise'))
+const Profil           = lazy(() => import('./pages/Profil'))
 
 export default function App() {
   return (
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="/reporting/rapports"           element={<RapportsBi />} />
         <Route path="/parametres/entreprise"        element={<ParametresEntreprise />} />
         <Route path="/parametres"                   element={<Navigate to="/parametres/entreprise" replace />} />
+        <Route path="/profil"                       element={<Profil />} />
         <Route path="/comptabilite"                 element={<Navigate to="/comptabilite/factures" replace />} />
         <Route path="/achats/factures"              element={<AchatFactureList />} />
         <Route path="/achats/fournisseurs"          element={<FournisseurList />} />

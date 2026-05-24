@@ -11,10 +11,13 @@ export default function Modal({ titre, sousTitre, onClose, footer, children, wid
   useEffect(() => {
     const onEsc = (e) => e.key === 'Escape' && onClose?.()
     window.addEventListener('keydown', onEsc)
-    document.body.style.overflow = 'hidden'
+    // Le scroll réel se passe sur <main> (pas <body>) — on cible le bon container
+    const main = document.querySelector('main')
+    const prevOverflow = main?.style.overflow
+    if (main) main.style.overflow = 'hidden'
     return () => {
       window.removeEventListener('keydown', onEsc)
-      document.body.style.overflow = ''
+      if (main) main.style.overflow = prevOverflow ?? ''
     }
   }, [onClose])
 
@@ -30,21 +33,22 @@ export default function Modal({ titre, sousTitre, onClose, footer, children, wid
       {/* Drawer (entrée avec léger overshoot, sortie douce) */}
       <aside
         className="fixed top-0 right-0 h-screen bg-white z-[901] flex flex-col shadow-drawer
-                   animate-[slideIn_.32s_cubic-bezier(.22,1.15,.36,1)]"
-        style={{ width }}
+                   animate-[slideIn_.32s_cubic-bezier(.22,1.15,.36,1)]
+                   w-full md:w-auto max-w-full"
+        style={{ width: `min(${typeof width === 'number' ? width + 'px' : width}, 100vw)` }}
       >
-        {/* Head */}
-        <div className="px-6 py-4 border-b border-sand-200 flex items-start justify-between shrink-0">
-          <div>
-            <h2 className="font-display font-semibold text-[15px] text-ink">{titre}</h2>
+        {/* Head — alignée pile sur la topbar (h-[52px]) */}
+        <div className="h-[52px] px-6 border-b border-sand-200 flex items-center justify-between shrink-0">
+          <div className="min-w-0">
+            <h2 className="font-display font-semibold text-[14px] text-ink leading-tight truncate">{titre}</h2>
             {sousTitre && (
-              <p className="font-body text-[11.5px] text-sand-500 mt-0.5">{sousTitre}</p>
+              <p className="font-body text-[11px] text-sand-500 leading-tight truncate">{sousTitre}</p>
             )}
           </div>
           <button
             onClick={onClose}
             aria-label="Fermer"
-            className="w-7 h-7 rounded-md border border-sand-200 text-sand-700 hover:bg-sand-50 flex items-center justify-center transition"
+            className="w-7 h-7 rounded-md border border-sand-200 text-sand-700 hover:bg-sand-50 flex items-center justify-center transition shrink-0 ml-3"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
               <path d="M18 6 6 18M6 6l12 12" />

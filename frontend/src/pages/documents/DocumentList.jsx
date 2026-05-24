@@ -119,7 +119,7 @@ export default function DocumentList() {
           sub={<>À renouveler &lt; 30 j</>}
         />
         <KpiCard
-          icon={<IconX />} tone={nbExpired > 0 ? 'red' : 'sand'} valueTone={nbExpired > 0 ? 'red' : 'sand'}
+          icon={<IconX />} tone="red"
           label="Expirés"
           value={nbExpired}
           sub={nbExpired > 0 ? 'Action immédiate' : 'Aucun expiré'}

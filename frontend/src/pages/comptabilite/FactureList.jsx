@@ -108,7 +108,7 @@ export default function FactureList() {
           sub="Soldes envoyés non réglés"
         />
         <KpiCard
-          icon={<IconAlert />} tone={nbEnRetard > 0 ? 'red' : 'sand'} valueTone={nbEnRetard > 0 ? 'red' : 'sand'}
+          icon={<IconAlert />} tone="red"
           label="En retard"
           value={nbEnRetard}
           sub={nbEnRetard > 0 ? 'Action requise' : 'Tout est à jour'}

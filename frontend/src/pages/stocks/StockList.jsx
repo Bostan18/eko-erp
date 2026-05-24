@@ -75,7 +75,7 @@ export default function StockList() {
           sub="Valorisation au prix unitaire"
         />
         <KpiCard
-          icon={<IconAlert />} tone={alertes.length > 0 ? 'red' : 'sand'} valueTone={alertes.length > 0 ? 'red' : 'sand'}
+          icon={<IconAlert />} tone="red"
           label="Alertes"
           value={alertes.length}
           sub={alertes.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}

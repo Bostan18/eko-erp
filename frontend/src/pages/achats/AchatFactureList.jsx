@@ -83,7 +83,7 @@ export default function AchatFactureList() {
           sub="soldes fournisseurs"
         />
         <KpiCard
-          icon={<IconAlert />} tone={nbEnRetard > 0 ? 'red' : 'sand'} valueTone={nbEnRetard > 0 ? 'red' : 'sand'}
+          icon={<IconAlert />} tone="red"
           label="En retard"
           value={nbEnRetard}
           sub={nbEnRetard > 0 ? 'Action requise' : 'À jour'}

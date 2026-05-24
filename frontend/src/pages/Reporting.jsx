@@ -3,6 +3,10 @@ import api from '../services/api'
 import { fmt, MOIS_FR } from '../utils/format'
 import { Icon } from '../components/icons'
 import ModuleTabs, { REPORTING_TABS } from '../components/ui/ModuleTabs'
+import {
+  IconInvoice, IconBank, IconChartBar, IconBox, IconWallet, IconArrowDown,
+  IconUsers, IconCheck, IconCoins, IconBriefcase, IconHandshake, IconAlert,
+} from '../components/ui/Icons'
 
 const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 const TYPE_PROJET_LABEL = { btp: 'BTP', agriculture: 'Agriculture', pepiniere: 'Pépinière', location: 'Location', espaces_verts: 'Espaces verts', autre: 'Autre' }
@@ -60,14 +64,14 @@ export default function Reporting() {
 
       {/* ─── KPI de tête (synthèse multi-domaines) ───────── */}
       <div className="kpi-grid">
-        <KpiCard label="CA facturé" value={fmtCompact(f.ca_facture)} unit="FCFA"
+        <KpiCard icon={<IconInvoice />} label="CA facturé" value={fmtCompact(f.ca_facture)} unit="FCFA"
           delta={pctDelta(f.ca_facture, f.ca_facture_prev)} accent="forest" />
-        <KpiCard label="CA encaissé" value={fmtCompact(f.ca_encaisse)} unit="FCFA"
+        <KpiCard icon={<IconBank />} label="CA encaissé" value={fmtCompact(f.ca_encaisse)} unit="FCFA"
           delta={pctDelta(f.ca_encaisse, f.ca_encaisse_prev)} accent="forest" />
-        <KpiCard label="Marge du mois" value={fmtCompact(f.marge_mois)} unit="FCFA"
+        <KpiCard icon={<IconChartBar />} label="Marge du mois" value={fmtCompact(f.marge_mois)} unit="FCFA"
           delta={pctDelta(f.marge_mois, f.marge_prev)} accent={f.marge_mois >= 0 ? 'forest' : 'red'}
           danger={f.marge_mois < 0} />
-        <KpiCard label="Valeur du stock" value={fmtCompact(kpis.stocks.valeur_stock)} unit="unités"
+        <KpiCard icon={<IconBox />} label="Valeur du stock" value={fmtCompact(kpis.stocks.valeur_stock)} unit="unités"
           accent="neutral" />
       </div>
 
@@ -85,13 +89,13 @@ export default function Reporting() {
           {tab === 'finance' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <KpiCard label="CA facturé" value={fmtCompact(f.ca_facture)} unit="FCFA"
+                <KpiCard icon={<IconInvoice />} label="CA facturé" value={fmtCompact(f.ca_facture)} unit="FCFA"
                   delta={pctDelta(f.ca_facture, f.ca_facture_prev)} accent="forest" />
-                <KpiCard label="CA encaissé" value={fmtCompact(f.ca_encaisse)} unit="FCFA"
+                <KpiCard icon={<IconWallet />} label="CA encaissé" value={fmtCompact(f.ca_encaisse)} unit="FCFA"
                   delta={pctDelta(f.ca_encaisse, f.ca_encaisse_prev)} accent="forest" />
-                <KpiCard label="Charges du mois" value={fmtCompact(f.charges_mois)} unit="FCFA"
+                <KpiCard icon={<IconArrowDown />} label="Charges du mois" value={fmtCompact(f.charges_mois)} unit="FCFA"
                   delta={pctDelta(f.charges_mois, f.charges_prev)} accent="amber" />
-                <KpiCard label="Marge" value={fmtCompact(f.marge_mois)} unit="FCFA"
+                <KpiCard icon={<IconChartBar />} label="Marge" value={fmtCompact(f.marge_mois)} unit="FCFA"
                   delta={pctDelta(f.marge_mois, f.marge_prev)} accent={f.marge_mois >= 0 ? 'forest' : 'red'}
                   danger={f.marge_mois < 0} />
               </div>
@@ -101,17 +105,17 @@ export default function Reporting() {
 
           {tab === 'rh' && (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              <KpiCard label="Employés actifs" value={kpis.rh.employes_actifs} accent="blue" />
-              <KpiCard label="Présences aujourd'hui" value={kpis.rh.presences_aujourd_hui}
+              <KpiCard icon={<IconUsers />} label="Employés actifs" value={kpis.rh.employes_actifs} accent="blue" />
+              <KpiCard icon={<IconCheck />} label="Présences aujourd'hui" value={kpis.rh.presences_aujourd_hui}
                 unit={`/ ${kpis.rh.employes_actifs}`} accent="blue" />
-              <KpiCard label="Masse salariale" value={fmtCompact(kpis.rh.masse_salariale_mois)} unit="FCFA"
+              <KpiCard icon={<IconCoins />} label="Masse salariale" value={fmtCompact(kpis.rh.masse_salariale_mois)} unit="FCFA"
                 delta={pctDelta(kpis.rh.masse_salariale_mois, kpis.rh.masse_salariale_prev)} accent="amber" />
             </div>
           )}
 
           {tab === 'projets' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              <KpiCard label="Projets en cours" value={kpis.projets.en_cours} accent="amber" />
+              <KpiCard icon={<IconBriefcase />} label="Projets en cours" value={kpis.projets.en_cours} accent="amber" />
               <div className="lg:col-span-2 bg-sand-50 rounded-xl border border-sand-200 p-5">
                 <h4 className="font-display font-semibold text-ink text-sm mb-3">Répartition par type</h4>
                 <ProjetsParType data={kpis.projets.par_type} />
@@ -121,16 +125,16 @@ export default function Reporting() {
 
           {tab === 'crm' && (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              <KpiCard label="Clients total" value={kpis.crm.clients_total} accent="forest" />
-              <KpiCard label="Nouveaux clients ce mois" value={kpis.crm.clients_nouveaux_mois}
+              <KpiCard icon={<IconHandshake />} label="Clients total" value={kpis.crm.clients_total} accent="forest" />
+              <KpiCard icon={<IconUsers />} label="Nouveaux clients ce mois" value={kpis.crm.clients_nouveaux_mois}
                 delta={pctDelta(kpis.crm.clients_nouveaux_mois, kpis.crm.clients_nouveaux_prev)} accent="forest" />
             </div>
           )}
 
           {tab === 'stocks' && (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              <KpiCard label="Valeur du stock" value={fmtCompact(kpis.stocks.valeur_stock)} unit="unités" accent="neutral" />
-              <KpiCard label="Articles en alerte" value={kpis.stocks.alertes}
+              <KpiCard icon={<IconBox />} label="Valeur du stock" value={fmtCompact(kpis.stocks.valeur_stock)} unit="unités" accent="neutral" />
+              <KpiCard icon={<IconAlert />} label="Articles en alerte" value={kpis.stocks.alertes}
                 accent={kpis.stocks.alertes > 0 ? 'red' : 'neutral'} danger={kpis.stocks.alertes > 0} />
             </div>
           )}
@@ -140,20 +144,29 @@ export default function Reporting() {
   )
 }
 
-const ACCENT_STYLES = {
-  forest:  { box: 'bg-forest-50', icon: 'text-forest-600' },
-  amber:   { box: 'bg-gold-50',   icon: 'text-gold-600'  },
-  blue:    { box: 'bg-blue-50',   icon: 'text-blue-600'   },
-  red:     { box: 'bg-red-50',    icon: 'text-red-600'    },
-  neutral: { box: 'bg-sand-100',  icon: 'text-sand-500'  },
+const ACCENT_BADGE = {
+  forest:  'bg-forest-100 text-forest-700',
+  amber:   'bg-gold-100 text-gold-700',
+  blue:    'bg-blue-100 text-blue-700',
+  red:     'bg-red-100 text-red-600',
+  neutral: 'bg-sand-100 text-sand-600',
 }
 
-function KpiCard({ label, value, unit, delta, danger, accent = 'neutral' }) {
+function KpiCard({ icon, label, value, unit, delta, danger, accent = 'neutral' }) {
   return (
-    <div className="bg-white rounded-xl border border-sand-200 p-5 min-h-[120px] flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-sand-200 p-5 min-h-[120px] flex flex-col justify-between transition-all duration-200 hover:-translate-y-px">
       <div>
-        <div className="text-[12px] font-body font-medium text-sand-500 uppercase tracking-wider leading-[1.4] truncate">{label}</div>
-        <div className="mt-2 flex items-baseline gap-1.5">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div className="text-[12px] font-body font-medium text-sand-500 uppercase tracking-wider leading-[1.4] flex-1 min-w-0 truncate">
+            {label}
+          </div>
+          {icon && (
+            <span className={`flex items-center justify-center w-10 h-10 rounded-xl shrink-0 ${ACCENT_BADGE[accent] ?? ACCENT_BADGE.neutral}`}>
+              <span className="block w-[18px] h-[18px] [&>svg]:w-full [&>svg]:h-full">{icon}</span>
+            </span>
+          )}
+        </div>
+        <div className="flex items-baseline gap-1.5">
           <span className={`font-display font-bold text-[26px] leading-[1.2] ${danger ? 'text-red-600' : 'text-ink'}`}>
             {value ?? '—'}
           </span>

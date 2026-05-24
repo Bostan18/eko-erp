@@ -40,9 +40,11 @@ export default function ClientList() {
             {loading ? '…' : `${clients.length} fiche${clients.length !== 1 ? 's' : ''}`}
           </div>
         </div>
-        <button className="btn-primary" onClick={() => setModal(true)}>
-          <IconPlus className="w-3.5 h-3.5" /> Nouveau client
-        </button>
+        <div className="sec-actions">
+          <button className="btn-primary" onClick={() => setModal(true)}>
+            <IconPlus className="w-3.5 h-3.5" /> Nouveau client
+          </button>
+        </div>
       </div>
 
       {/* ─── KPI grid ───────────────────────────────────── */}
@@ -82,7 +84,7 @@ export default function ClientList() {
             Base clients ·{' '}
             <span className="text-sand-500 font-normal">{filtered.length}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="th-filters">
             <select
               className="input input-sm w-auto"
               value={filtre}
@@ -95,7 +97,7 @@ export default function ClientList() {
             </select>
             <input
               type="text"
-              className="input input-sm w-[210px]"
+              className="input input-sm"
               placeholder="Rechercher nom ou code…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -107,26 +109,54 @@ export default function ClientList() {
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
-          <table className="table-eko">
-            <thead>
-              <tr>{['Code','Nom','Type','Secteur','Statut','Téléphone','Localité'].map(h => <th key={h}>{h}</th>)}</tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun client</td></tr>
-              ) : filtered.map((c) => (
-                <tr key={c.id}>
-                  <td className="mono-cell text-forest-700">{c.code}</td>
-                  <td className="font-display font-medium text-ink">{c.nom}</td>
-                  <td><Badge tone={TYPE_TONE[c.type_client] ?? 'gray'}>{c.type_client}</Badge></td>
-                  <td className="text-sand-600 capitalize">{c.secteur || '—'}</td>
-                  <td><Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut}</Badge></td>
-                  <td className="mono-cell">{c.telephone || '—'}</td>
-                  <td className="text-sand-600">{c.localite || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <>
+          {/* ─── Cards mobile (< md) ─────────────────────── */}
+          <div className="md:hidden divide-y divide-sand-100">
+            {filtered.length === 0 ? (
+              <div className="px-4 py-10 text-center text-sand-500 font-body text-sm">Aucun client</div>
+            ) : filtered.map((c) => (
+              <div key={c.id} className="px-4 py-3 hover:bg-sand-50 transition-colors">
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="mono-cell text-forest-700 text-[11.5px]">{c.code}</p>
+                  <Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut}</Badge>
+                </div>
+                <p className="font-display font-medium text-ink text-[13.5px] mt-0.5 truncate">{c.nom}</p>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-sand-600">
+                  <Badge tone={TYPE_TONE[c.type_client] ?? 'gray'}>{c.type_client}</Badge>
+                  {c.secteur && <span className="capitalize">{c.secteur}</span>}
+                  {c.localite && (<><span className="text-sand-300">·</span><span>{c.localite}</span></>)}
+                </div>
+                {c.telephone && (
+                  <p className="mt-1 font-mono text-[11px] text-sand-500">{c.telephone}</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* ─── Table desktop (≥ md) ───────────────────── */}
+          <div className="hidden md:block">
+            <table className="table-eko">
+              <thead>
+                <tr>{['Code','Nom','Type','Secteur','Statut','Téléphone','Localité'].map(h => <th key={h}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun client</td></tr>
+                ) : filtered.map((c) => (
+                  <tr key={c.id}>
+                    <td className="mono-cell text-forest-700">{c.code}</td>
+                    <td className="font-display font-medium text-ink">{c.nom}</td>
+                    <td><Badge tone={TYPE_TONE[c.type_client] ?? 'gray'}>{c.type_client}</Badge></td>
+                    <td className="text-sand-600 capitalize">{c.secteur || '—'}</td>
+                    <td><Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut}</Badge></td>
+                    <td className="mono-cell">{c.telephone || '—'}</td>
+                    <td className="text-sand-600">{c.localite || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
         )}
       </div>
 

@@ -102,11 +102,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-[14px]">
+    <div className="space-y-3 md:space-y-[14px]">
       <HeroBand date={dateStr} saison={saison} ca={ca} evolPct={evolPct} mois={mois} />
       <AlertsStrip kpis={kpis} />
 
-      <div className="grid grid-cols-12 gap-[14px]">
+      <div className="grid grid-cols-12 gap-3 md:gap-[14px]">
         <PulseFinance kpis={kpis} className="col-span-12 lg:col-span-8" />
         <ActiviteToday kpis={kpis} className="col-span-12 lg:col-span-4" />
 
@@ -148,7 +148,7 @@ function HeroBand({ date, saison, ca, evolPct, mois }) {
         ))}
       </svg>
 
-      <div className="relative grid grid-cols-12 gap-6 p-7">
+      <div className="relative grid grid-cols-12 gap-4 md:gap-6 p-4 md:p-7">
         {/* Éphéméride */}
         <div className="col-span-12 md:col-span-3 flex flex-col justify-between gap-3">
           <div>
@@ -195,13 +195,17 @@ function HeroBand({ date, saison, ca, evolPct, mois }) {
       <style>{`
         .hero-btn {
           display: inline-flex; align-items: center; gap: 8px;
-          padding: 8px 14px; border-radius: 8px;
+          padding: 10px 14px; border-radius: 8px;
           font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 500;
           background: rgba(255,255,255,.06);
           border: 1px solid rgba(255,255,255,.1);
           color: rgb(243,241,235);
           transition: all .15s ease;
-          min-width: 200px; justify-content: flex-start;
+          justify-content: flex-start;
+          width: 100%;
+        }
+        @media (min-width: 768px) {
+          .hero-btn { width: auto; min-width: 200px; padding: 8px 14px; }
         }
         .hero-btn:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); }
         .hero-btn-gold {

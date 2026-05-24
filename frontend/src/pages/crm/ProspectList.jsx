@@ -35,9 +35,11 @@ export default function ProspectList() {
             {loading ? '…' : `${prospects.length} prospect${prospects.length !== 1 ? 's' : ''}`}
           </div>
         </div>
-        <button className="btn-primary" onClick={() => setModal(true)}>
-          <IconPlus className="w-3.5 h-3.5" /> Nouveau prospect
-        </button>
+        <div className="sec-actions">
+          <button className="btn-primary" onClick={() => setModal(true)}>
+            <IconPlus className="w-3.5 h-3.5" /> Nouveau prospect
+          </button>
+        </div>
       </div>
 
       {/* ─── KPI ────────────────────────────────────────── */}

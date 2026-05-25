@@ -107,13 +107,13 @@ export default function DocumentList() {
           sub="Toutes entités confondues"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Valides"
           value={nbValid}
           sub="Aucune action requise"
         />
         <KpiCard
-          icon={<IconClock />} tone={nbExpiring > 0 ? 'gold' : 'sand'} valueTone={nbExpiring > 0 ? 'gold' : 'sand'}
+          icon={<IconClock />} tone={nbExpiring > 0 ? 'gold' : 'sand'}
           label="Expire bientôt"
           value={nbExpiring}
           sub={<>À renouveler &lt; 30 j</>}

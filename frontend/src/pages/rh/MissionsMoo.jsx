@@ -73,13 +73,13 @@ export default function MissionsMoo() {
           sub="Forfaits enregistrés"
         />
         <KpiCard
-          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          icon={<IconHourglass />} tone="gold"
           label="À payer"
           value={<>{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></>}
           sub="Missions non réglées"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Payées"
           value={<>{fmt(totalPayees)} <span className="kpi-unit">FCFA</span></>}
           sub="Cumul réglé"

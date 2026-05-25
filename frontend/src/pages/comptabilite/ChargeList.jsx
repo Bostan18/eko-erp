@@ -69,7 +69,7 @@ export default function ChargeList() {
       {/* ─── KPI grid ───────────────────────────────────── */}
       <div className="kpi-grid">
         <KpiCard
-          icon={<IconWallet />} tone="red" valueTone="red"
+          icon={<IconWallet />} tone="red"
           label="Total charges"
           value={<>{fmt(totalGlobal)} <span className="kpi-unit">FCFA</span></>}
           sub={`${charges.length} ligne${charges.length !== 1 ? 's' : ''} · cumul`}
@@ -81,7 +81,7 @@ export default function ChargeList() {
           sub="Par ligne"
         />
         <KpiCard
-          icon={<IconTrendUp />} tone="gold" valueTone="gold"
+          icon={<IconTrendUp />} tone="gold"
           label="Plus grosse charge"
           value={<>{fmt(plusGrosse)} <span className="kpi-unit">FCFA</span></>}
           sub="Montant maximal"

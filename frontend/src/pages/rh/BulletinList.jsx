@@ -96,13 +96,13 @@ export default function BulletinList() {
           sub="Cumul du mois"
         />
         <KpiCard
-          icon={<IconWallet />} tone="forest" valueTone="forest"
+          icon={<IconWallet />} tone="forest"
           label="Net à payer"
           value={<>{fmt(totalNet)} <span className="kpi-unit">FCFA</span></>}
           sub="Après cotisations"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Payés"
           value={<>{nbPayes} <span className="kpi-unit">/ {bulletins.length}</span></>}
           sub="Bulletins réglés"

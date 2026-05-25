@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from apps.core.models import SoftDeleteModel, TimeStampedModel
 
@@ -15,6 +16,14 @@ class Employe(SoftDeleteModel):
     date_entree = models.DateField(null=True, blank=True)
     salaire_mensuel = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     taux_journalier = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    # Lien optionnel vers un compte d'accès logiciel. Tous les employés n'ont
+    # pas de compte (journaliers/MOO p.ex.) — null=True est attendu.
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="employe",
+    )
 
     class Meta:
         verbose_name = "Employé"

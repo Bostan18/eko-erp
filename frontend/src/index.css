@@ -34,6 +34,10 @@
   /* Utilitaire : masque la scrollbar mais garde le scroll fonctionnel */
   .scrollbar-hide { scrollbar-width: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* Masque la searchbar topbar quand un drawer (Modal) est ouvert
+     pour éviter le chevauchement visuel derrière le drawer. */
+  body[data-drawer-open="true"] .topbar-search { display: none; }
 }
 
 @layer components {
@@ -218,22 +222,6 @@
   .pf-gold { @apply bg-gold-400; }
   .pf-r    { @apply bg-red-500; }
 
-  /* ─── Form field group (FormSection / FormRow / Field) ─ */
-  .fld { @apply flex flex-col gap-1; }
-  .fld label {
-    @apply font-display text-[11.5px] font-medium text-ink;
-  }
-  .fld .req  { @apply text-red-500; }
-  .fld .hint { @apply text-[10.5px] text-sand-500; }
-  .fld input, .fld select, .fld textarea {
-    @apply px-2.5 py-2 bg-white border border-sand-200 rounded-lg text-[12.5px] font-body
-           text-ink placeholder-sand-400 transition-colors
-           focus:outline-none focus:border-forest-500;
-  }
-  .fld input[readonly], .fld select[readonly], .fld textarea[readonly] {
-    @apply bg-sand-100 text-sand-500 cursor-default;
-  }
-
   /* ─── Sidebar items ─────────────────────────────────── */
   .nav-eyebrow {
     @apply font-mono text-[9px] uppercase tracking-[0.16em] px-[18px] pt-3 pb-1 font-medium;
@@ -323,4 +311,17 @@
 .animate-popover {
   animation: popoverIn .16s cubic-bezier(.2,.7,.2,1) both;
   transform-origin: bottom center;
+}
+
+/* ─── Accessibilité : respect de prefers-reduced-motion ───── */
+/* Désactive animations & transitions quand l'OS le demande. Couvre :
+   screenIn, shimmer, popoverIn, tab-indicator, slideIn/fadeIn (Modal),
+   ainsi que toutes les transitions Tailwind (transition-colors, etc.). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

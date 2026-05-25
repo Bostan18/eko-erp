@@ -35,7 +35,7 @@ export default function ContratList() {
 
       <div className="kpi-grid">
         <KpiCard
-          icon={<IconFile />} tone="forest" valueTone="forest"
+          icon={<IconFile />} tone="forest"
           label="Contrats actifs"
           value={nbActifs}
           sub="en cours"

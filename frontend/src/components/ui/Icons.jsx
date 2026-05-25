@@ -277,3 +277,66 @@ export const IconChart = (p) => base(
     <path d="M3 3v18h18" />
     <path d="m7 14 4-4 4 4 6-6" />
   </>, p)
+
+/* ─── Navigation (Sidebar / Topbar) ──────────────────────── */
+
+export const IconDashboard = (p) => base(
+  <>
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </>, p)
+
+export const IconProjects = (p) => base(
+  <>
+    <path d="M2 20h20M5 20V8l7-5 7 5v12" />
+    <path d="M9 20v-5h6v5" />
+  </>, p)
+
+export const IconCRM = (p) => base(
+  <>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </>, p)
+
+export const IconStocks = (p) => base(
+  <>
+    <path d="M5 8h14M5 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8m-14 0-2-4h18l-2 4" />
+  </>, p)
+
+export const IconShoppingBag = (p) => base(
+  <>
+    <path d="M2 7h20l-1.5 10.5a2 2 0 0 1-2 1.5H5.5a2 2 0 0 1-2-1.5L2 7Z" />
+    <path d="M8 7V5a4 4 0 0 1 8 0v2" />
+  </>, p)
+
+export const IconExcavator = (p) => base(
+  <>
+    <path d="M3 17h14v-5a3 3 0 0 0-3-3H3v8Z" />
+    <circle cx="7" cy="18" r="2" />
+    <circle cx="15" cy="18" r="2" />
+    <path d="M17 12h3l1 2v3h-4" />
+  </>, p)
+
+export const IconShield = (p) => base(
+  <>
+    <path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z" />
+    <path d="M9 12l2 2 4-4" />
+  </>, p)
+
+export const IconSettings = (p) => base(
+  <>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </>, p)
+
+export const IconUser = (p) => base(
+  <>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </>, p)
+
+export const IconLogout = (p) => base(
+  <>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+  </>, p)

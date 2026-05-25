@@ -65,7 +65,7 @@ export default function Pipeline() {
           sub="valeur brute en cours"
         />
         <KpiCard
-          icon={<IconTarget />} tone="forest" valueTone="forest"
+          icon={<IconTarget />} tone="forest"
           label="Valeur pondérée"
           value={<>{fmt(pipelinePond)} <span className="kpi-unit">FCFA</span></>}
           sub="× probabilité"

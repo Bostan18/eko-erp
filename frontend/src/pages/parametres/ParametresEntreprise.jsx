@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import api from '../../services/api'
 import { SkeletonPage } from '../../components/ui/Skeleton'
+import ModuleTabs, { PARAMETRES_TABS } from '../../components/ui/ModuleTabs'
 import {
   IconBuilding, IconShield, IconLink, IconInvoice,
   IconCheck, IconAlert, IconRefresh,
@@ -105,6 +106,8 @@ export default function ParametresEntreprise() {
           </div>
         </div>
       </div>
+
+      <ModuleTabs items={PARAMETRES_TABS} />
 
       {/* ─── Status strip ────────────────────────────────── */}
       <div className="card overflow-hidden">

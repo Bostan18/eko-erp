@@ -32,8 +32,6 @@ const BADGE = {
 export default function KpiCard({
   icon, label, value, sub,
   tone = 'sand',
-  // eslint-disable-next-line no-unused-vars
-  valueTone,
   to,
 }) {
   const inner = (

@@ -71,13 +71,13 @@ export default function ProjetList() {
           sub="Tous statuts"
         />
         <KpiCard
-          icon={<IconRefresh />} tone="blue" valueTone="blue"
+          icon={<IconRefresh />} tone="blue"
           label="En cours"
           value={nbEnCours}
           sub="Projets actifs"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Terminés"
           value={nbTermines}
           sub="Cumul"

@@ -1,41 +1,11 @@
 import { useLocation } from 'react-router-dom'
 import GlobalSearch from './GlobalSearch'
 import NotificationsBell from './NotificationsBell'
-
-// Sections alignées sur la maquette
-const ROUTE_LABELS = {
-  '/':                          ["Vue d'ensemble", 'Tableau de bord'],
-  '/reporting':                 ['Analyse', 'BI & Reporting'],
-  '/reporting/esg':             ['Analyse', 'BI & Reporting', 'Bilan Carbone & ESG'],
-  '/reporting/rapports':        ['Analyse', 'BI & Reporting', 'Rapports'],
-  '/rh':                        ['Ressources Humaines', 'RH & Paie', 'Employés'],
-  '/rh/pointage':               ['Ressources Humaines', 'RH & Paie', 'Pointage journée'],
-  '/rh/pointage-semaine':       ['Ressources Humaines', 'RH & Paie', 'Pointage semaine'],
-  '/rh/conges':                 ['Ressources Humaines', 'RH & Paie', 'Congés'],
-  '/projets':                   ['Opérations', 'Projets'],
-  '/operations':                ['Opérations', 'Opérations terrain'],
-  '/parc':                      ['Opérations', 'Parc machines'],
-  '/stocks':                    ['Opérations', 'Stocks'],
-  '/crm':                       ['Commercial', 'CRM & Ventes'],
-  '/comptabilite/factures':     ['Comptabilité', 'Facturation FNE', 'Factures'],
-  '/comptabilite/charges':      ['Comptabilité', 'Facturation FNE', 'Charges'],
-  '/comptabilite/devis':        ['Comptabilité', 'Facturation FNE', 'Devis'],
-  '/achats/factures':           ['Comptabilité', 'Achats & Trésorerie', 'Factures'],
-  '/documents':                 ['Analyse', 'Documents'],
-}
-
-function deriveCrumb(pathname) {
-  if (ROUTE_LABELS[pathname]) return ROUTE_LABELS[pathname]
-  // Fallback : prefix match
-  const match = Object.keys(ROUTE_LABELS)
-    .filter((k) => pathname.startsWith(k))
-    .sort((a, b) => b.length - a.length)[0]
-  return match ? [...ROUTE_LABELS[match], '…'] : ['EKO ERP']
-}
+import { breadcrumbFor } from './modules'
 
 export default function Topbar({ onMenuClick }) {
   const { pathname } = useLocation()
-  const crumb = deriveCrumb(pathname)
+  const crumb = breadcrumbFor(pathname)
   const current = crumb[crumb.length - 1]
   const parents = crumb.slice(0, -1)
 
@@ -65,7 +35,7 @@ export default function Topbar({ onMenuClick }) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <div className="hidden md:block">
+        <div className="hidden md:block topbar-search">
           <GlobalSearch />
         </div>
 

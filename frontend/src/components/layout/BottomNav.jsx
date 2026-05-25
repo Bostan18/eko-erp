@@ -1,14 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../icons'
 import { BOTTOM_NAV_IDS, MODULE_BY_ID } from './modules'
+import useAuthStore from '../../store/authStore'
 
 export default function BottomNav({ activeModId }) {
   const navigate = useNavigate()
+  const can = useAuthStore((s) => s.can)
+
+  // Filtre par rôle pour éviter d'exposer des modules qui redirigeraient
+  // immédiatement vers /. Aligné avec la Sidebar et la garde de MainLayout.
+  const ids = BOTTOM_NAV_IDS.filter((id) => can(id))
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-forest-950 border-t border-forest-900 px-2 pt-1.5 pb-[max(4px,env(safe-area-inset-bottom))] z-30 md:hidden">
       <div className="flex items-stretch justify-between">
-        {BOTTOM_NAV_IDS.map((id) => {
+        {ids.map((id) => {
           const m = MODULE_BY_ID[id]
           if (!m) return null
           const I = Icon[m.icon]

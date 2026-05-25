@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import ModuleTabs, { REPORTING_TABS } from '../../components/ui/ModuleTabs'
 import { SkeletonPage } from '../../components/ui/Skeleton'
+import useCountUp from '../../hooks/useCountUp'
 
 const fmt = (n) => Number(n ?? 0).toLocaleString('fr-FR', { maximumFractionDigits: 0 })
 
@@ -21,24 +22,6 @@ function getVerdict(score) {
 
 const TONE_TXT = { forest: 'text-forest-500', gold: 'text-gold-500', red: 'text-red-500' }
 
-function useCountUp(target, duration = 1100) {
-  const [v, setV] = useState(0)
-  const ref = useRef(target)
-  useEffect(() => {
-    ref.current = target
-    const start = performance.now()
-    let raf
-    const step = (now) => {
-      const t = Math.min(1, (now - start) / duration)
-      const eased = 1 - Math.pow(1 - t, 3)
-      setV(Math.round(ref.current * eased))
-      if (t < 1) raf = requestAnimationFrame(step)
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [target, duration])
-  return v
-}
 
 /* ─────────────────────────────────────────────────────────── */
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import axios from 'axios'
 import useAuthStore from '../store/authStore'
+import api from '../services/api'
 
 const DATE_FMT = new Intl.DateTimeFormat('fr-FR', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -18,7 +19,7 @@ const GRAIN_URI =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"
 
 export default function Login() {
-  const { token, login } = useAuthStore()
+  const { token, login, setMe, logout } = useAuthStore()
   const navigate = useNavigate()
   const [form, setForm]   = useState({ username: '', password: '' })
   const [error, setError] = useState('')
@@ -37,10 +38,23 @@ export default function Login() {
     setLoading(true)
     try {
       const { data } = await axios.post('/api/token/', form)
+      // Pose le token d'abord, puis enrichit le store avec le profil serveur
+      // (rôle, modules, employé lié). Si /me échoue : on déloggue plutôt
+      // qu'entrer dans l'app sans rôle.
       login(data.access, data.refresh, { username: form.username })
+      try {
+        const { data: me } = await api.get('/auth/me/')
+        setMe(me)
+      } catch {
+        logout()
+        throw new Error('profile-failed')
+      }
       navigate('/')
-    } catch {
-      setError('Identifiants incorrects. Veuillez réessayer.')
+    } catch (err) {
+      const msg = err?.message === 'profile-failed'
+        ? 'Authentification OK mais profil indisponible. Réessayez.'
+        : 'Identifiants incorrects. Veuillez réessayer.'
+      setError(msg)
       setShake(true)
       setTimeout(() => setShake(false), 480)
     } finally {

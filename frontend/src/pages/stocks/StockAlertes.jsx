@@ -47,7 +47,7 @@ export default function StockAlertes() {
           sub={articles.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}
         />
         <KpiCard
-          icon={<IconTrendDown />} tone="red" valueTone="red"
+          icon={<IconTrendDown />} tone="red"
           label="Manque cumulé"
           value={fmt(manqueTotal)}
           sub="Unités à réapprovisionner"

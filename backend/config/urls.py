@@ -15,6 +15,9 @@ def api_root(request):
         "auth": {
             "obtenir_token": f"{base}/api/token/",
             "rafraichir_token": f"{base}/api/token/refresh/",
+            "me": f"{base}/api/auth/me/",
+            "users": f"{base}/api/auth/users/",
+            "roles": f"{base}/api/auth/roles/",
         },
         "modules": {
             "core": f"{base}/api/core/",
@@ -36,6 +39,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/auth/", include("apps.accounts.urls")),
     path("api/core/", include("apps.core.urls")),
     path("api/crm/", include("apps.crm.urls")),
     path("api/projets/", include("apps.projets.urls")),

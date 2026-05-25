@@ -63,19 +63,19 @@ export default function EmployeList() {
           sub="Tous contrats"
         />
         <KpiCard
-          icon={<IconBriefcase />} tone="forest" valueTone="forest"
+          icon={<IconBriefcase />} tone="forest"
           label="Permanents"
           value={nbPermanents}
           sub="CDI / CDD"
         />
         <KpiCard
-          icon={<IconHardHat />} tone="gold" valueTone="gold"
+          icon={<IconHardHat />} tone="gold"
           label="Journaliers"
           value={nbJournaliers}
           sub="Payés à la journée"
         />
         <KpiCard
-          icon={<IconTool />} tone="blue" valueTone="blue"
+          icon={<IconTool />} tone="blue"
           label="MOO"
           value={nbMoo}
           sub="Main d'œuvre occasionnelle"

@@ -69,7 +69,7 @@ export default function StockList() {
           sub="Références en stock"
         />
         <KpiCard
-          icon={<IconWallet />} tone="forest" valueTone="forest"
+          icon={<IconWallet />} tone="forest"
           label="Valeur du stock"
           value={<>{fmt(valeurStock)} <span className="kpi-unit">FCFA</span></>}
           sub="Valorisation au prix unitaire"

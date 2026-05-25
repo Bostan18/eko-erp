@@ -56,19 +56,19 @@ export default function ClientList() {
           sub="Clients & prospects"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Actifs"
           value={nbActifs}
           sub="Clients en activité"
         />
         <KpiCard
-          icon={<IconTarget />} tone="gold" valueTone="gold"
+          icon={<IconTarget />} tone="gold"
           label="Prospects"
           value={nbProspects}
           sub="À convertir"
         />
         <KpiCard
-          icon={<IconMoon />} tone="sand" valueTone="sand"
+          icon={<IconMoon />} tone="sand"
           label="Inactifs"
           value={nbInactifs}
           sub="Sans activité récente"

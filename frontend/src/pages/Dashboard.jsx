@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import { fmt, MOIS_FR } from '../utils/format'
 import { SkeletonPage } from '../components/ui/Skeleton'
+import useCountUp from '../hooks/useCountUp'
 
 /* ─────────── Constantes & helpers ─────────── */
 
@@ -26,26 +27,6 @@ function getSaison(month) {
 const GRAIN_URI =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"
 
-/** Anime un nombre de 0 à `target` en ms, ease-out cubic. */
-function useCountUp(target, duration = 900) {
-  const [value, setValue] = useState(0)
-  const ref = useRef(target)
-  useEffect(() => {
-    if (target == null) return
-    ref.current = target
-    const start = performance.now()
-    let raf
-    const step = (now) => {
-      const t = Math.min(1, (now - start) / duration)
-      const eased = 1 - Math.pow(1 - t, 3)
-      setValue(Math.round(ref.current * eased))
-      if (t < 1) raf = requestAnimationFrame(step)
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [target, duration])
-  return value
-}
 
 function relativeTime(iso) {
   if (!iso) return ''

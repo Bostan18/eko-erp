@@ -45,7 +45,7 @@ export default function ProspectList() {
       {/* ─── KPI ────────────────────────────────────────── */}
       <div className="three-col">
         <KpiCard
-          icon={<IconTarget />} tone="gold" valueTone="gold"
+          icon={<IconTarget />} tone="gold"
           label="Total prospects"
           value={prospects.length}
           sub="À convertir en clients"
@@ -57,7 +57,7 @@ export default function ProspectList() {
           sub="Secteurs distincts"
         />
         <KpiCard
-          icon={<IconPhone />} tone="forest" valueTone="forest"
+          icon={<IconPhone />} tone="forest"
           label="Avec téléphone"
           value={nbAvecTel}
           sub="Joignables directement"

@@ -96,13 +96,13 @@ export default function FactureList() {
           sub={`${factures.length} facture${factures.length !== 1 ? 's' : ''} · cumul`}
         />
         <KpiCard
-          icon={<IconWallet />} tone="forest" valueTone="forest"
+          icon={<IconWallet />} tone="forest"
           label="Encaissé"
           value={<>{fmt(totalEncaisse)} <span className="kpi-unit">FCFA</span></>}
           sub="Factures payées"
         />
         <KpiCard
-          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          icon={<IconHourglass />} tone="gold"
           label="En attente"
           value={<>{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></>}
           sub="Soldes envoyés non réglés"

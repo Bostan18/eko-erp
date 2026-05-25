@@ -106,13 +106,13 @@ export default function Pointage() {
           sub="Actifs ce jour"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Présents"
           value={<>{nbPresents} <span className="kpi-unit">/ {rows.length}</span></>}
           sub="Pointés présents"
         />
         <KpiCard
-          icon={<IconWallet />} tone="gold" valueTone="gold"
+          icon={<IconWallet />} tone="gold"
           label="À payer"
           value={<>{fmt(totalJour)} <span className="kpi-unit">FCFA</span></>}
           sub="Total de la journée"

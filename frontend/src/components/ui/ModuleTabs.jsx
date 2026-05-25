@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { tabsForModule } from '../layout/modules'
 
 /**
  * Onglets in-card servant de navigation entre les pages sœurs d'un module
@@ -73,66 +74,16 @@ export default function ModuleTabs({ items }) {
   )
 }
 
-/* ─── Définitions de modules réutilisables ───────────────── */
-/* end:true sur les routes qui sont préfixes d'autres onglets, pour
-   que l'onglet ne reste pas actif sur les routes sœurs. */
-export const COMPTA_TABS = [
-  { label: 'Factures', to: '/comptabilite/factures' },
-  { label: 'Avoirs',   to: '/comptabilite/avoirs' },
-  { label: 'Devis',    to: '/comptabilite/devis' },
-  { label: 'Stickers', to: '/comptabilite/stickers' },
-  { label: 'Charges',  to: '/comptabilite/charges' },
-]
+/* ─── Onglets de modules (dérivés de modules.js) ─────────── */
+/* Source unique : MODULES[i].children dans components/layout/modules.js.
+   end:true sur les routes qui sont préfixes d'autres onglets sœurs. */
 
-export const ACHATS_TABS = [
-  { label: 'Factures achats', to: '/achats/factures', end: true },
-  { label: 'Fournisseurs',    to: '/achats/fournisseurs' },
-  { label: 'Comptes',         to: '/achats/comptes' },
-  { label: 'Paiements',       to: '/achats/tresorerie' },
-]
-
-export const RH_TABS = [
-  { label: 'Employés',     to: '/rh', end: true },
-  { label: 'Pointage',     to: '/rh/pointage' },
-  { label: 'Semaine',      to: '/rh/pointage-semaine' },
-  { label: 'Congés',       to: '/rh/conges' },
-  { label: 'Bulletins',    to: '/rh/paie/bulletins' },
-  { label: 'Journaliers',  to: '/rh/paie/journaliers' },
-  { label: 'Missions MOO', to: '/rh/paie/missions' },
-]
-
-export const STOCKS_TABS = [
-  { label: 'Articles',          to: '/stocks', end: true },
-  { label: 'Mouvements',        to: '/stocks/mouvements' },
-  { label: 'Lots biologiques',  to: '/stocks/lots-biologiques' },
-  { label: 'Matériaux BTP',     to: '/stocks/materiaux-btp' },
-  { label: 'Déchets',           to: '/stocks/dechets' },
-  { label: 'Alertes',           to: '/stocks/alertes' },
-]
-
-export const CRM_TABS = [
-  { label: 'Clients',   to: '/crm', end: true },
-  { label: 'Prospects', to: '/crm/prospects' },
-  { label: 'Devis',     to: '/comptabilite/devis' },
-  { label: 'Pipeline',  to: '/crm/pipeline' },
-  { label: 'Contrats',  to: '/crm/contrats' },
-]
-
-export const PROJETS_TABS = [
-  { label: 'Projets',        to: '/projets', end: true },
-  { label: 'Planning Gantt', to: '/projets/planning' },
-]
-
-export const REPORTING_TABS = [
-  { label: 'Tableau de bord',       to: '/' , end: true },
-  { label: 'KPIs métier',           to: '/reporting', end: true },
-  { label: 'Bilan Carbone & ESG',   to: '/reporting/esg' },
-  { label: 'Rapports',              to: '/reporting/rapports' },
-]
-
-export const OPERATIONS_TABS = [
-  { label: 'Sites',           to: '/operations/sites', end: true },
-  { label: 'Journaliers',     to: '/operations/journaliers' },
-  { label: 'Logs de travail', to: '/operations/logs' },
-  { label: 'Tâches',          to: '/operations/taches-catalogue' },
-]
+export const COMPTA_TABS     = tabsForModule('compta')
+export const ACHATS_TABS     = tabsForModule('achats')
+export const RH_TABS         = tabsForModule('rh')
+export const STOCKS_TABS     = tabsForModule('stocks')
+export const CRM_TABS        = tabsForModule('crm')
+export const PROJETS_TABS    = tabsForModule('projets')
+export const REPORTING_TABS  = tabsForModule('reporting')
+export const OPERATIONS_TABS = tabsForModule('operations')
+export const PARAMETRES_TABS = tabsForModule('parametres')

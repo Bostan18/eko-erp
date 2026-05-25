@@ -78,13 +78,13 @@ export default function DevisList() {
           sub={`${devis.length} devis · cumul`}
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Acceptés"
           value={<>{fmt(totalAccepte)} <span className="kpi-unit">FCFA</span></>}
           sub="Montant validé"
         />
         <KpiCard
-          icon={<IconHourglass />} tone="gold" valueTone="gold"
+          icon={<IconHourglass />} tone="gold"
           label="En attente"
           value={<>{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></>}
           sub="Brouillons & envoyés"

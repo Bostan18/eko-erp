@@ -115,13 +115,13 @@ export default function PaiementsJournaliers() {
           sub="Cumul des journées"
         />
         <KpiCard
-          icon={<IconCheck />} tone="forest" valueTone="forest"
+          icon={<IconCheck />} tone="forest"
           label="Payé"
           value={<>{fmt(totalPaye)} <span className="kpi-unit">FCFA</span></>}
           sub="Déjà réglé"
         />
         <KpiCard
-          icon={<IconHourglass />} tone={totalRestant > 0 ? 'gold' : 'sand'} valueTone={totalRestant > 0 ? 'gold' : 'sand'}
+          icon={<IconHourglass />} tone={totalRestant > 0 ? 'gold' : 'sand'}
           label="Restant à payer"
           value={<>{fmt(totalRestant)} <span className="kpi-unit">FCFA</span></>}
           sub={totalRestant > 0 ? 'À régler' : 'Tout est payé'}

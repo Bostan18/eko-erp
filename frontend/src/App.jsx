@@ -48,7 +48,8 @@ const JournalierList      = lazy(() => import('./pages/operations/JournalierList
 const LogTravailList      = lazy(() => import('./pages/operations/LogTravailList'))
 const TacheCatalogueList  = lazy(() => import('./pages/operations/TacheCatalogueList'))
 const DocumentList    = lazy(() => import('./pages/documents/DocumentList'))
-const ParametresEntreprise = lazy(() => import('./pages/parametres/ParametresEntreprise'))
+const ParametresEntreprise   = lazy(() => import('./pages/parametres/ParametresEntreprise'))
+const ParametresUtilisateurs = lazy(() => import('./pages/parametres/Utilisateurs'))
 const Profil           = lazy(() => import('./pages/Profil'))
 
 export default function App() {
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="/reporting/esg"                element={<BilanCarboneEsg />} />
         <Route path="/reporting/rapports"           element={<RapportsBi />} />
         <Route path="/parametres/entreprise"        element={<ParametresEntreprise />} />
+        <Route path="/parametres/utilisateurs"      element={<ParametresUtilisateurs />} />
         <Route path="/parametres"                   element={<Navigate to="/parametres/entreprise" replace />} />
         <Route path="/profil"                       element={<Profil />} />
         <Route path="/comptabilite"                 element={<Navigate to="/comptabilite/factures" replace />} />
@@ -115,16 +117,5 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  )
-}
-
-function PlaceholderPage({ titre }) {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <p className="font-display text-2xl text-[#A59F9B] font-semibold">{titre}</p>
-        <p className="text-sm text-[#A59F9B] mt-1">Module en cours de développement</p>
-      </div>
-    </div>
   )
 }

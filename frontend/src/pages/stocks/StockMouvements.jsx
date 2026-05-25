@@ -57,13 +57,13 @@ export default function StockMouvements() {
           sub="Entrées & sorties"
         />
         <KpiCard
-          icon={<IconDownload />} tone="forest" valueTone="forest"
+          icon={<IconDownload />} tone="forest"
           label="Entrées"
           value={nbEntrees}
           sub="Réapprovisionnements"
         />
         <KpiCard
-          icon={<IconUpload />} tone="gold" valueTone="gold"
+          icon={<IconUpload />} tone="gold"
           label="Sorties"
           value={nbSorties}
           sub="Consommations"

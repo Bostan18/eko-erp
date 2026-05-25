@@ -60,7 +60,7 @@ export default function StickerList() {
 
       <div className="kpi-grid">
         <KpiCard
-          icon={<IconTicket />} tone={soldeBas ? 'gold' : 'forest'} valueTone={soldeBas ? 'gold' : 'forest'}
+          icon={<IconTicket />} tone={soldeBas ? 'gold' : 'forest'}
           label="Solde actuel"
           value={loading ? '…' : solde?.solde ?? 0}
           sub="stickers disponibles"
@@ -80,7 +80,6 @@ export default function StickerList() {
         <KpiCard
           icon={solde?.mode_simulation ? <IconFlask /> : <IconLink />}
           tone={solde?.mode_simulation ? 'gold' : 'blue'}
-          valueTone={solde?.mode_simulation ? 'gold' : 'blue'}
           label="Mode FNE"
           value={<span className="text-[18px]">{solde?.mode_simulation ? 'Simulation' : 'API DGI'}</span>}
           sub={solde?.mode_simulation ? 'Credentials non configurés' : 'Connecté à la DGI'}

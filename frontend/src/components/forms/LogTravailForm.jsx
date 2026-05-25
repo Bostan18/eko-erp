@@ -9,8 +9,17 @@ const INIT = {
   quantite: '', notes: '',
 }
 
-export default function LogTravailForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function LogTravailForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({
+    ...INIT,
+    ...(initial || {}),
+    projet:  String(initial?.projet ?? ''),
+    tache:   String(initial?.tache ?? ''),
+    employe: String(initial?.employe ?? ''),
+    site:    String(initial?.site ?? ''),
+    quantite: String(initial?.quantite_realisee ?? initial?.quantite ?? ''),
+  })
   const [projets, setProjets]   = useState([])
   const [taches, setTaches]     = useState([])
   const [employes, setEmployes] = useState([])
@@ -51,11 +60,19 @@ export default function LogTravailForm({ onSuccess, onClose }) {
     }
     setSaving(true); setError('')
     try {
-      await api.post('/projets/realisations/saisie_log/', {
+      const payload = {
         tache: form.tache, employe: form.employe,
         date: form.date, quantite: form.quantite,
         site: form.site || null, notes: form.notes,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/projets/realisations/${initial.id}/`, {
+          ...payload,
+          quantite_realisee: form.quantite,
+        })
+      } else {
+        await api.post('/projets/realisations/saisie_log/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -137,7 +154,7 @@ export default function LogTravailForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer le log'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer le log')}
         </button>
       </ModalFooter>
     </form>

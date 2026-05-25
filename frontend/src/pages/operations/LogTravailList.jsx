@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import ModuleTabs, { OPERATIONS_TABS } from '../../components/ui/ModuleTabs'
 import LogTravailForm from '../../components/forms/LogTravailForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 export default function LogTravailList() {
   const { items: logs, loading, error, charger } = useFetchList(
@@ -10,6 +14,23 @@ export default function LogTravailList() {
   )
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/projets/realisations/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtres = logs.filter((l) =>
     !search ? true
@@ -50,14 +71,21 @@ export default function LogTravailList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Date', 'Tâche', 'Employé', 'Site', 'Quantité', 'Montant', 'Notes'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Date', 'Tâche', 'Employé', 'Site', 'Quantité', 'Montant', 'Notes'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun log enregistré</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun log enregistré</td></tr>
               ) : filtres.map((l) => (
                 <tr key={l.id}>
                   <td className="mono-cell text-sand-700">{l.date}</td>
@@ -73,6 +101,12 @@ export default function LogTravailList() {
                     {Number(l.montant_calcule).toLocaleString('fr-FR')} <span className="text-[10px] font-normal text-sand-500">F</span>
                   </td>
                   <td className="text-[12px] text-sand-500">{l.notes || '—'}</td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(l)}
+                      onDelete={() => setDeleting(l)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -80,10 +114,30 @@ export default function LogTravailList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau log de travail" sousTitre="Réalisation à la tâche pour un journalier." onClose={() => setModal(false)}>
-          <LogTravailForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? 'Modifier le log de travail' : 'Nouveau log de travail'}
+          sousTitre="Réalisation à la tâche pour un journalier."
+          onClose={fermerDrawer}
+        >
+          <LogTravailForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce log ?"
+          message={`Le log du ${deleting.date} (${deleting.tache_nom}, ${deleting.employe_nom}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

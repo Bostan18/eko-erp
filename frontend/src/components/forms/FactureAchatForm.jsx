@@ -11,8 +11,15 @@ const INIT = {
   centre_cout: '', projet: '', statut: 'brouillon', notes: '',
 }
 
-export default function FactureAchatForm({ onSuccess, onClose }) {
-  const [form, setForm]               = useState(INIT)
+export default function FactureAchatForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]               = useState({
+    ...INIT,
+    ...(initial || {}),
+    fournisseur: String(initial?.fournisseur ?? ''),
+    centre_cout: String(initial?.centre_cout ?? ''),
+    projet:      String(initial?.projet ?? ''),
+  })
   const [fournisseurs, setFournisseurs] = useState([])
   const [centres, setCentres]         = useState([])
   const [projets, setProjets]         = useState([])
@@ -38,12 +45,17 @@ export default function FactureAchatForm({ onSuccess, onClose }) {
     if (ht <= 0) { setError('Le montant HT doit être supérieur à 0.'); return }
     setSaving(true); setError('')
     try {
-      await api.post('/achats/factures/', {
+      const payload = {
         ...form,
         centre_cout: form.centre_cout || null,
         projet: form.projet || null,
         date_echeance: form.date_echeance || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/achats/factures/${initial.id}/`, payload)
+      } else {
+        await api.post('/achats/factures/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -130,7 +142,7 @@ export default function FactureAchatForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer la facture'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer la facture')}
         </button>
       </ModalFooter>
     </form>

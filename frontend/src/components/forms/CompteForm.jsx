@@ -8,8 +8,9 @@ const INIT = {
   solde_initial: '', actif: true,
 }
 
-export default function CompteForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function CompteForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({ ...INIT, ...(initial || {}) })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -20,7 +21,12 @@ export default function CompteForm({ onSuccess, onClose }) {
     if (!form.nom.trim()) { setError('Le nom du compte est requis.'); return }
     setSaving(true); setError('')
     try {
-      await api.post('/achats/comptes/', { ...form, solde_initial: form.solde_initial || 0 })
+      const payload = { ...form, solde_initial: form.solde_initial || 0 }
+      if (isEdit) {
+        await api.patch(`/achats/comptes/${initial.id}/`, payload)
+      } else {
+        await api.post('/achats/comptes/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -66,7 +72,7 @@ export default function CompteForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le compte'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le compte')}
         </button>
       </ModalFooter>
     </form>

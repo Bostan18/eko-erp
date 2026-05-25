@@ -8,8 +8,9 @@ const INIT = {
   telephone: '', email: '', localite: '', notes: '',
 }
 
-export default function FournisseurForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function FournisseurForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({ ...INIT, ...(initial || {}) })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -20,7 +21,11 @@ export default function FournisseurForm({ onSuccess, onClose }) {
     if (!form.nom.trim()) { setError('Le nom du fournisseur est requis.'); return }
     setSaving(true); setError('')
     try {
-      await api.post('/achats/fournisseurs/', form)
+      if (isEdit) {
+        await api.patch(`/achats/fournisseurs/${initial.id}/`, form)
+      } else {
+        await api.post('/achats/fournisseurs/', form)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -80,7 +85,7 @@ export default function FournisseurForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le fournisseur'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le fournisseur')}
         </button>
       </ModalFooter>
     </form>

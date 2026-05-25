@@ -1,9 +1,13 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { ACHATS_TABS } from '../../components/ui/ModuleTabs'
 import FournisseurForm from '../../components/forms/FournisseurForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 const CAT_TONE = {
   materiaux: 'blue', materiel: 'gold', sous_traitance: 'green',
@@ -16,6 +20,23 @@ export default function FournisseurList() {
   )
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/achats/fournisseurs/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtres = fournisseurs.filter((f) =>
     !search ? true
@@ -48,14 +69,21 @@ export default function FournisseurList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Code', 'Nom', 'Catégorie', 'NCC', 'Téléphone', 'Localité', 'Factures'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Code', 'Nom', 'Catégorie', 'NCC', 'Téléphone', 'Localité', 'Factures'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun fournisseur</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun fournisseur</td></tr>
               ) : filtres.map((f) => (
                 <tr key={f.id}>
                   <td className="mono-cell text-forest-700">{f.code}</td>
@@ -65,6 +93,12 @@ export default function FournisseurList() {
                   <td className="text-sand-600">{f.telephone || '—'}</td>
                   <td className="text-sand-600">{f.localite || '—'}</td>
                   <td className="num">{f.nb_factures}</td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(f)}
+                      onDelete={() => setDeleting(f)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -72,10 +106,30 @@ export default function FournisseurList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau fournisseur" sousTitre="Coordonnées et catégorie." onClose={() => setModal(false)}>
-          <FournisseurForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouveau fournisseur'}
+          sousTitre="Coordonnées et catégorie."
+          onClose={fermerDrawer}
+        >
+          <FournisseurForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce fournisseur ?"
+          message={`Le fournisseur ${deleting.code} — ${deleting.nom} sera supprimé.${deleting.nb_factures ? ` ${deleting.nb_factures} facture(s) liée(s) — le backend peut refuser.` : ''}`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

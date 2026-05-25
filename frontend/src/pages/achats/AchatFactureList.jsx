@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { ACHATS_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconInvoice, IconHourglass, IconAlert, IconUsers } from '../../components/ui/Icons'
 import FactureAchatForm from '../../components/forms/FactureAchatForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
 const STATUT_TONE  = { brouillon: 'gray', validee: 'blue', payee: 'green', annulee: 'gray' }
@@ -21,6 +25,23 @@ export default function AchatFactureList() {
   const [filtre, setFiltre] = useState('toutes')
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/achats/factures/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtrees = factures
     .filter((f) => {
@@ -114,16 +135,24 @@ export default function AchatFactureList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Numéro', 'Fournisseur', 'Libellé', 'Centre', 'TTC', 'Payé', 'Statut', 'Échéance'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Numéro', 'Fournisseur', 'Libellé', 'Centre', 'TTC', 'Payé', 'Statut', 'Échéance'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtrees.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucune facture d'achat</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucune facture d'achat</td></tr>
               ) : filtrees.map((f) => {
                 const retard = enRetard(f)
+                const lockReason = f.statut === 'payee' ? 'Facture payée — verrouillée' : null
                 return (
                   <tr key={f.id} className={retard ? 'bg-red-50/40 hover:bg-red-50' : ''}>
                     <td className="mono-cell text-forest-700">{f.numero}</td>
@@ -134,6 +163,14 @@ export default function AchatFactureList() {
                     <td className="mono-cell">{fmt(f.montant_paye)}</td>
                     <td><Badge tone={STATUT_TONE[f.statut] ?? 'gray'}>{STATUT_LABEL[f.statut] ?? f.statut}</Badge></td>
                     <td className={retard ? 'text-red-700 font-semibold' : 'text-sand-600'}>{f.date_echeance || '—'}</td>
+                    <td>
+                      <RowActions
+                        onEdit={() => setEditing(f)}
+                        onDelete={() => setDeleting(f)}
+                        editDisabledReason={lockReason}
+                        deleteDisabledReason={lockReason}
+                      />
+                    </td>
                   </tr>
                 )
               })}
@@ -142,10 +179,31 @@ export default function AchatFactureList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouvelle facture d'achat" sousTitre="Fournisseur, montant, imputation analytique." onClose={() => setModal(false)} width={580}>
-          <FactureAchatForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.numero}` : "Nouvelle facture d'achat"}
+          sousTitre="Fournisseur, montant, imputation analytique."
+          onClose={fermerDrawer}
+          width={580}
+        >
+          <FactureAchatForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cette facture d'achat ?"
+          message={`La facture ${deleting.numero} de ${deleting.fournisseur_nom} sera supprimée. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

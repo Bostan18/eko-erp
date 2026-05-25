@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconHandshake, IconCheck, IconTarget, IconMoon } from '../../components/ui/Icons'
 import ClientForm from '../../components/forms/ClientForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 const TYPE_TONE   = { particulier: 'gray', entreprise: 'blue', collectivite: 'green' }
 const STATUT_TONE = { actif: 'green', prospect: 'gold', inactif: 'gray' }
@@ -17,6 +21,25 @@ export default function ClientList() {
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState('tous')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]     = useState(null)
+  const [deleting, setDeleting]   = useState(null)
+  const [removing, setRemoving]   = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/crm/clients/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally {
+      setRemoving(false)
+    }
+  }
 
   const filtered = clients
     .filter((c) => filtre === 'tous' ? true : c.statut === filtre)
@@ -106,6 +129,13 @@ export default function ClientList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
@@ -118,7 +148,13 @@ export default function ClientList() {
               <div key={c.id} className="px-4 py-3 hover:bg-sand-50 transition-colors">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="mono-cell text-forest-700 text-[11.5px]">{c.code}</p>
-                  <Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut}</Badge>
+                    <RowActions
+                      onEdit={() => setEditing(c)}
+                      onDelete={() => setDeleting(c)}
+                    />
+                  </div>
                 </div>
                 <p className="font-display font-medium text-ink text-[13.5px] mt-0.5 truncate">{c.nom}</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-sand-600">
@@ -137,11 +173,14 @@ export default function ClientList() {
           <div className="hidden md:block">
             <table className="table-eko">
               <thead>
-                <tr>{['Code','Nom','Type','Secteur','Statut','Téléphone','Localité'].map(h => <th key={h}>{h}</th>)}</tr>
+                <tr>
+                  {['Code','Nom','Type','Secteur','Statut','Téléphone','Localité'].map(h => <th key={h}>{h}</th>)}
+                  <th className="text-right">Actions</th>
+                </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun client</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun client</td></tr>
                 ) : filtered.map((c) => (
                   <tr key={c.id}>
                     <td className="mono-cell text-forest-700">{c.code}</td>
@@ -151,6 +190,12 @@ export default function ClientList() {
                     <td><Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut}</Badge></td>
                     <td className="mono-cell">{c.telephone || '—'}</td>
                     <td className="text-sand-600">{c.localite || '—'}</td>
+                    <td>
+                      <RowActions
+                        onEdit={() => setEditing(c)}
+                        onDelete={() => setDeleting(c)}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -160,10 +205,30 @@ export default function ClientList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau client" sousTitre="Coordonnées et secteur d'activité." onClose={() => setModal(false)}>
-          <ClientForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouveau client'}
+          sousTitre="Coordonnées et secteur d'activité."
+          onClose={fermerDrawer}
+        >
+          <ClientForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce client ?"
+          message={`Le client ${deleting.code} — ${deleting.nom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

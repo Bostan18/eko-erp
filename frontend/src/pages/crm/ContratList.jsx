@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
@@ -7,6 +10,7 @@ import { IconFile, IconWallet } from '../../components/ui/Icons'
 import ContratForm from '../../components/forms/ContratForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
+import { apiErrorMessage } from '../../utils/errors'
 
 const STATUT_TONE = { brouillon: 'gray', actif: 'green', suspendu: 'gold', expire: 'gray', resilie: 'red' }
 
@@ -16,6 +20,23 @@ export default function ContratList() {
   )
   const [filtre, setFiltre] = useState('tous')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/crm/contrats/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtres = contrats.filter((c) => filtre === 'tous' ? true : c.statut === filtre)
   const nbActifs   = contrats.filter((c) => c.statut === 'actif').length
@@ -63,14 +84,21 @@ export default function ContratList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Numéro', 'Client', 'Objet', 'Type', 'Centre', 'Montant', 'Période', 'Statut'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Numéro', 'Client', 'Objet', 'Type', 'Centre', 'Montant', 'Période', 'Statut'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun contrat</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucun contrat</td></tr>
               ) : filtres.map((c) => (
                 <tr key={c.id}>
                   <td className="mono-cell text-forest-700">{c.numero}</td>
@@ -81,6 +109,12 @@ export default function ContratList() {
                   <td className="num">{fmt(c.montant)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
                   <td className="text-[11.5px] text-sand-500">{c.date_debut}{c.date_fin ? ` → ${c.date_fin}` : ''}</td>
                   <td><Badge tone={STATUT_TONE[c.statut] ?? 'gray'}>{c.statut_display}</Badge></td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(c)}
+                      onDelete={() => setDeleting(c)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -88,10 +122,31 @@ export default function ContratList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau contrat" sousTitre="Objet, type, période et montant." onClose={() => setModal(false)} width={560}>
-          <ContratForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.numero}` : 'Nouveau contrat'}
+          sousTitre="Objet, type, période et montant."
+          onClose={fermerDrawer}
+          width={560}
+        >
+          <ContratForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce contrat ?"
+          message={`Le contrat ${deleting.numero} (${deleting.client_nom}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

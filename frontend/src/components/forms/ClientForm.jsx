@@ -17,8 +17,9 @@ function validate(form) {
   return null
 }
 
-export default function ClientForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function ClientForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({ ...INIT, ...(initial || {}) })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -31,7 +32,11 @@ export default function ClientForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/crm/clients/', form)
+      if (isEdit) {
+        await api.patch(`/crm/clients/${initial.id}/`, form)
+      } else {
+        await api.post('/crm/clients/', form)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -51,9 +56,10 @@ export default function ClientForm({ onSuccess, onClose }) {
 
         <FormSection titre="Identification">
           <FormRow cols={2}>
-            <Field label="Code" required hint="Format : CLI-001">
+            <Field label="Code" required hint={isEdit ? 'Le code ne peut pas être modifié.' : 'Format : CLI-001'}>
               <input className="input" placeholder="CLI-001" value={form.code}
-                onChange={(e) => set('code', e.target.value.toUpperCase())} />
+                onChange={(e) => set('code', e.target.value.toUpperCase())}
+                readOnly={isEdit} disabled={isEdit} />
             </Field>
             <Field label="Type" required>
               <select className="input" value={form.type_client} onChange={(e) => set('type_client', e.target.value)}>
@@ -117,7 +123,7 @@ export default function ClientForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le client'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le client')}
         </button>
       </ModalFooter>
     </form>

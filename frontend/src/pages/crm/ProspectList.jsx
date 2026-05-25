@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import ModuleTabs, { CRM_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconTarget, IconFolder, IconPhone } from '../../components/ui/Icons'
 import ClientForm from '../../components/forms/ClientForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { CLIENT_STATUT_BADGE } from '../../utils/constants'
+import { apiErrorMessage } from '../../utils/errors'
 
 export default function ProspectList() {
   const { items: prospects, loading, error, charger } = useFetchList(
@@ -14,6 +18,23 @@ export default function ProspectList() {
   )
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/crm/clients/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtered = prospects.filter(
     (p) =>
@@ -83,6 +104,13 @@ export default function ProspectList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
@@ -92,12 +120,13 @@ export default function ProspectList() {
                 {['Code', 'Nom', 'Secteur', 'Statut', 'Téléphone', 'Localité'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sand-500 font-body">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">
                     Aucun prospect trouvé
                   </td>
                 </tr>
@@ -112,6 +141,12 @@ export default function ProspectList() {
                     </td>
                     <td className="mono-cell">{p.telephone || '—'}</td>
                     <td className="text-sand-600">{p.localite || '—'}</td>
+                    <td>
+                      <RowActions
+                        onEdit={() => setEditing(p)}
+                        onDelete={() => setDeleting(p)}
+                      />
+                    </td>
                   </tr>
                 ))
               )}
@@ -120,10 +155,30 @@ export default function ProspectList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau prospect" onClose={() => setModal(false)}>
-          <ClientForm typeDefault="prospect" onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouveau prospect'}
+          onClose={fermerDrawer}
+        >
+          <ClientForm
+            typeDefault="prospect"
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce prospect ?"
+          message={`Le prospect ${deleting.code} — ${deleting.nom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

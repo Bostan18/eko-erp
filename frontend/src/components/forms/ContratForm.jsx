@@ -10,8 +10,14 @@ const INIT = {
   reconduction_tacite: false, statut: 'brouillon', notes: '',
 }
 
-export default function ContratForm({ onSuccess, onClose }) {
-  const [form, setForm]       = useState(INIT)
+export default function ContratForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]       = useState({
+    ...INIT,
+    ...(initial || {}),
+    client: String(initial?.client ?? ''),
+    centre_cout: String(initial?.centre_cout ?? ''),
+  })
   const [clients, setClients] = useState([])
   const [centres, setCentres] = useState([])
   const [error, setError]     = useState('')
@@ -30,12 +36,17 @@ export default function ContratForm({ onSuccess, onClose }) {
     if (!form.objet.trim()) { setError("L'objet du contrat est requis."); return }
     setSaving(true); setError('')
     try {
-      await api.post('/crm/contrats/', {
+      const payload = {
         ...form,
         montant: form.montant || 0,
         centre_cout: form.centre_cout || null,
         date_fin: form.date_fin || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/crm/contrats/${initial.id}/`, payload)
+      } else {
+        await api.post('/crm/contrats/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -110,7 +121,7 @@ export default function ContratForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le contrat'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le contrat')}
         </button>
       </ModalFooter>
     </form>

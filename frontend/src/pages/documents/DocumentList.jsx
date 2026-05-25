@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge, { StatusBadge } from '../../components/ui/Badge'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconFolder, IconCheck, IconClock, IconX } from '../../components/ui/Icons'
 import DocumentForm from '../../components/forms/DocumentForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
+import { apiErrorMessage } from '../../utils/errors'
 
 const TYPE_LABEL = {
   permis:        'Permis',
@@ -48,6 +52,23 @@ export default function DocumentList() {
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState('tous')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/core/documents/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const docsAvecStatut = documents.map((d) => ({ ...d, _statut: computeStatus(d) }))
 
@@ -155,16 +176,23 @@ export default function DocumentList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Code', 'Titre', 'Type', 'Entité liée', 'Émission', 'Expiration', 'Statut', ''].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Code', 'Titre', 'Type', 'Entité liée', 'Émission', 'Expiration', 'Statut', 'Fichier'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun document</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucun document</td></tr>
               ) : filtered.map((d) => {
                 const days = daysUntil(d.date_expiration)
                 const daysLabel =
@@ -203,6 +231,12 @@ export default function DocumentList() {
                         <span className="text-[11px] text-sand-400">Aucun fichier</span>
                       )}
                     </td>
+                    <td>
+                      <RowActions
+                        onEdit={() => setEditing(d)}
+                        onDelete={() => setDeleting(d)}
+                      />
+                    </td>
                   </tr>
                 )
               })}
@@ -211,17 +245,30 @@ export default function DocumentList() {
         )}
       </div>
 
-      {modal && (
+      {(modal || editing) && (
         <Modal
-          titre="Ajouter un document"
+          titre={editing ? `Modifier ${editing.titre}` : 'Ajouter un document'}
           sousTitre="Permis, médicale, assurance, certification, autorisation…"
-          onClose={() => setModal(false)}
+          onClose={fermerDrawer}
         >
           <DocumentForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
           />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce document ?"
+          message={`Le document « ${deleting.titre} » sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

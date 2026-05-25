@@ -43,8 +43,9 @@ function validate(form) {
   return null
 }
 
-export default function DocumentForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function DocumentForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({ ...INIT, ...(initial || {}) })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -57,12 +58,17 @@ export default function DocumentForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/core/documents/', {
+      const payload = {
         ...form,
         date_emission:   form.date_emission   || null,
         date_expiration: form.date_expiration || null,
         fichier_url:     form.fichier_url     || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/core/documents/${initial.id}/`, payload)
+      } else {
+        await api.post('/core/documents/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -139,7 +145,7 @@ export default function DocumentForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer le document'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer le document')}
         </button>
       </ModalFooter>
     </form>

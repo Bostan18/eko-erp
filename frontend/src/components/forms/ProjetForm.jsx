@@ -20,8 +20,14 @@ function validate(form) {
   return null
 }
 
-export default function ProjetForm({ onSuccess, onClose }) {
-  const [form, setForm]       = useState(INIT)
+export default function ProjetForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]       = useState({
+    ...INIT,
+    ...(initial || {}),
+    client: String(initial?.client ?? ''),
+    centre_cout: String(initial?.centre_cout ?? ''),
+  })
   const [clients, setClients] = useState([])
   const [centres, setCentres] = useState([])
   const [error, setError]     = useState('')
@@ -41,14 +47,19 @@ export default function ProjetForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/projets/projets/', {
+      const payload = {
         ...form,
         client: form.client || null,
         centre_cout: form.centre_cout || null,
         budget_estime: form.budget_estime || 0,
         date_debut: form.date_debut || null,
         date_fin_prevue: form.date_fin_prevue || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/projets/projets/${initial.id}/`, payload)
+      } else {
+        await api.post('/projets/projets/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -144,7 +155,7 @@ export default function ProjetForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le projet'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le projet')}
         </button>
       </ModalFooter>
     </form>

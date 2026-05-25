@@ -1,6 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { PROJETS_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
@@ -8,6 +11,7 @@ import { IconBuilding, IconRefresh, IconCheck, IconWallet } from '../../componen
 import ProjetForm from '../../components/forms/ProjetForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
+import { apiErrorMessage } from '../../utils/errors'
 
 const TYPE_LABEL = {
   btp: 'BTP', agriculture: 'Agriculture', pepiniere: 'Pépinière',
@@ -30,9 +34,27 @@ export default function ProjetList() {
   const { items: projets, loading, error, charger } = useFetchList(
     '/projets/projets/', 'Impossible de charger les projets.'
   )
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState('tous')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/projets/projets/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtered = projets
     .filter((p) => filtre === 'tous' ? true : p.type_projet === filtre)
@@ -121,16 +143,23 @@ export default function ProjetList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Code','Nom','Type','Centre','Statut','Client','Début','Budget'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Code','Nom','Type','Centre','Statut','Client','Début','Budget'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun projet</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucun projet</td></tr>
               ) : filtered.map((p) => (
                 <tr key={p.id}>
                   <td className="mono-cell text-forest-700">{p.code}</td>
@@ -145,6 +174,13 @@ export default function ProjetList() {
                   <td className="text-sand-600">{p.client_nom ?? '—'}</td>
                   <td className="mono-cell">{p.date_debut ?? '—'}</td>
                   <td className="num">{p.budget_estime ? `${fmt(p.budget_estime)} F` : '—'}</td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/projets/${p.id}`)}
+                      onEdit={() => setEditing(p)}
+                      onDelete={() => setDeleting(p)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -152,10 +188,30 @@ export default function ProjetList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau projet" sousTitre="Définir le projet, client, planning et budget." onClose={() => setModal(false)}>
-          <ProjetForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouveau projet'}
+          sousTitre="Définir le projet, client, planning et budget."
+          onClose={fermerDrawer}
+        >
+          <ProjetForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce projet ?"
+          message={`Le projet ${deleting.code} — ${deleting.nom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

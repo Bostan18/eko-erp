@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import { StatusBadge, CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
@@ -9,6 +11,7 @@ import { IconInvoice, IconWallet, IconHourglass, IconAlert } from '../../compone
 import FactureForm from '../../components/forms/FactureForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { FACTURE_STATUT_LABEL, factureEnRetard } from '../../utils/constants'
+import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
 export default function FactureList() {
@@ -16,11 +19,37 @@ export default function FactureList() {
     '/comptabilite/factures/',
     'Impossible de charger les factures.'
   )
+  const navigate = useNavigate()
   const [filtre, setFiltre] = useState('toutes')
   const [filtreCentre, setFiltreCentre] = useState('tous')
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing] = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
   const [centres, setCentres] = useState([])
+
+  function fermerDrawer() {
+    setModal(false)
+    setEditing(null)
+  }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true)
+    setActionError('')
+    try {
+      await api.delete(`/comptabilite/factures/${deleting.id}/`)
+      setDeleting(null)
+      charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err))
+      setDeleting(null)
+    } finally {
+      setRemoving(false)
+    }
+  }
 
   useEffect(() => {
     api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
@@ -153,6 +182,16 @@ export default function FactureList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button
+              type="button"
+              onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100"
+            >Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
@@ -162,18 +201,23 @@ export default function FactureList() {
                 {['Numéro', 'Client', 'Projet', 'Centre', 'TTC', 'Payé', 'Solde', 'Statut', 'Échéance'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtrees.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">
+                  <td colSpan={10} className="px-4 py-10 text-center text-sand-500 font-body">
                     Aucune facture
                   </td>
                 </tr>
               ) : (
                 filtrees.map((f) => {
                   const enRetard = factureEnRetard(f)
+                  const verrouillee = !!f.fne_reference
+                  const lockReason = verrouillee
+                    ? 'Facture certifiée FNE — verrouillée'
+                    : null
                   return (
                   <tr key={f.id} className={enRetard ? 'bg-red-50/40 hover:bg-red-50' : ''}>
                     <td>
@@ -206,6 +250,15 @@ export default function FactureList() {
                     <td className={enRetard ? 'text-red-700 font-semibold' : 'text-sand-600'}>
                       {f.date_echeance || '—'}
                     </td>
+                    <td>
+                      <RowActions
+                        onView={() => navigate(`/comptabilite/factures/${f.id}`)}
+                        onEdit={() => setEditing(f)}
+                        onDelete={() => setDeleting(f)}
+                        editDisabledReason={lockReason}
+                        deleteDisabledReason={lockReason}
+                      />
+                    </td>
                   </tr>
                 )})
               )}
@@ -214,18 +267,33 @@ export default function FactureList() {
         )}
       </div>
 
-      {modal && (
+      {(modal || editing) && (
         <Modal
-          titre="Nouvelle facture"
-          sousTitre="Client, lignes de facturation, échéance."
-          onClose={() => setModal(false)}
+          titre={editing ? `Modifier la facture ${editing.numero_local}` : 'Nouvelle facture'}
+          sousTitre={editing
+            ? 'Échéance, mode de règlement, notes — les lignes restent figées.'
+            : 'Client, lignes de facturation, échéance.'}
+          onClose={fermerDrawer}
           width={620}
         >
           <FactureForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
           />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer la facture ?"
+          message={`La facture ${deleting.numero_local} (${deleting.client_nom}) sera supprimée. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

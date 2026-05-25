@@ -8,8 +8,13 @@ const INIT = {
   unite_label: '', tarif_reference: '0', actif: true, notes: '',
 }
 
-export default function TacheCatalogueForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function TacheCatalogueForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({
+    ...INIT,
+    ...(initial || {}),
+    activite: String(initial?.activite ?? ''),
+  })
   const [centres, setCentres] = useState([])
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
@@ -25,10 +30,12 @@ export default function TacheCatalogueForm({ onSuccess, onClose }) {
     if (!form.libelle.trim()) { setError('Le libellé est requis.'); return }
     setSaving(true); setError('')
     try {
-      await api.post('/operations/taches-catalogue/', {
-        ...form,
-        activite: form.activite || null,
-      })
+      const payload = { ...form, activite: form.activite || null }
+      if (isEdit) {
+        await api.patch(`/operations/taches-catalogue/${initial.id}/`, payload)
+      } else {
+        await api.post('/operations/taches-catalogue/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -92,7 +99,7 @@ export default function TacheCatalogueForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer la tâche'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer la tâche')}
         </button>
       </ModalFooter>
     </form>

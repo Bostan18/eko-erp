@@ -8,8 +8,14 @@ const INIT = {
   localisation: '', actif: true, notes: '',
 }
 
-export default function SiteForm({ onSuccess, onClose }) {
-  const [form, setForm]   = useState(INIT)
+export default function SiteForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]   = useState({
+    ...INIT,
+    ...(initial || {}),
+    projet:      String(initial?.projet ?? ''),
+    responsable: String(initial?.responsable ?? ''),
+  })
   const [projets, setProjets]   = useState([])
   const [employes, setEmployes] = useState([])
   const [error, setError] = useState('')
@@ -27,11 +33,16 @@ export default function SiteForm({ onSuccess, onClose }) {
     if (!form.nom.trim()) { setError('Le nom du site est requis.'); return }
     setSaving(true); setError('')
     try {
-      await api.post('/operations/sites/', {
+      const payload = {
         ...form,
         projet:      form.projet      || null,
         responsable: form.responsable || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/operations/sites/${initial.id}/`, payload)
+      } else {
+        await api.post('/operations/sites/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -98,7 +109,7 @@ export default function SiteForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le site'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le site')}
         </button>
       </ModalFooter>
     </form>

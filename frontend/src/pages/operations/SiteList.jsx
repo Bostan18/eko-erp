@@ -1,9 +1,13 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { OPERATIONS_TABS } from '../../components/ui/ModuleTabs'
 import SiteForm from '../../components/forms/SiteForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 const TYPE_TONE = {
   chantier:    'gold',
@@ -20,6 +24,23 @@ export default function SiteList() {
   )
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/operations/sites/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtres = sites.filter((s) =>
     !search ? true
@@ -52,14 +73,21 @@ export default function SiteList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Code', 'Nom', 'Type', 'Projet', 'Responsable', 'Localisation', 'Statut'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Code', 'Nom', 'Type', 'Projet', 'Responsable', 'Localisation', 'Statut'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun site</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun site</td></tr>
               ) : filtres.map((s) => (
                 <tr key={s.id}>
                   <td className="mono-cell text-forest-700">{s.code}</td>
@@ -76,6 +104,12 @@ export default function SiteList() {
                       ? <Badge tone="green">Actif</Badge>
                       : <Badge tone="gray">Inactif</Badge>}
                   </td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(s)}
+                      onDelete={() => setDeleting(s)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -83,10 +117,30 @@ export default function SiteList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau site" sousTitre="Lieu physique d'intervention." onClose={() => setModal(false)}>
-          <SiteForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouveau site'}
+          sousTitre="Lieu physique d'intervention."
+          onClose={fermerDrawer}
+        >
+          <SiteForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce site ?"
+          message={`Le site ${deleting.code} — ${deleting.nom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

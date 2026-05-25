@@ -1,9 +1,13 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { OPERATIONS_TABS } from '../../components/ui/ModuleTabs'
 import TacheCatalogueForm from '../../components/forms/TacheCatalogueForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 export default function TacheCatalogueList() {
   const { items: taches, loading, error, charger } = useFetchList(
@@ -11,6 +15,23 @@ export default function TacheCatalogueList() {
   )
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/operations/taches-catalogue/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtres = taches.filter((t) =>
     !search ? true
@@ -42,14 +63,21 @@ export default function TacheCatalogueList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Code', 'Libellé', 'Activité', 'Type', 'Unité', 'Tarif réf.', 'Statut'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Code', 'Libellé', 'Activité', 'Type', 'Unité', 'Tarif réf.', 'Statut'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucune tâche dans le catalogue</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucune tâche dans le catalogue</td></tr>
               ) : filtres.map((t) => (
                 <tr key={t.id}>
                   <td className="mono-cell text-forest-700">{t.code}</td>
@@ -68,6 +96,12 @@ export default function TacheCatalogueList() {
                     {Number(t.tarif_reference).toLocaleString('fr-FR')} <span className="text-[10px] font-normal text-sand-500">F</span>
                   </td>
                   <td>{t.actif ? <Badge tone="green">Actif</Badge> : <Badge tone="gray">Inactif</Badge>}</td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(t)}
+                      onDelete={() => setDeleting(t)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -75,10 +109,30 @@ export default function TacheCatalogueList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouvelle tâche du catalogue" sousTitre="Modèle réutilisable pour les chantiers." onClose={() => setModal(false)}>
-          <TacheCatalogueForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.libelle}` : 'Nouvelle tâche du catalogue'}
+          sousTitre="Modèle réutilisable pour les chantiers."
+          onClose={fermerDrawer}
+        >
+          <TacheCatalogueForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cette tâche du catalogue ?"
+          message={`La tâche ${deleting.code} — ${deleting.libelle} sera supprimée. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

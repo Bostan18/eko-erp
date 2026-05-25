@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconBox, IconWallet, IconAlert, IconFolder } from '../../components/ui/Icons'
@@ -7,6 +10,7 @@ import ArticleForm from '../../components/forms/ArticleForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { ARTICLE_CAT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
+import { apiErrorMessage } from '../../utils/errors'
 
 export default function StockList() {
   const { items: articles, loading, error, charger } = useFetchList(
@@ -15,6 +19,23 @@ export default function StockList() {
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState('tous')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/stocks/articles/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const alertes = articles.filter((a) => Number(a.stock_actuel) <= Number(a.seuil_minimum))
   const valeurStock = articles.reduce((s, a) => s + Number(a.stock_actuel) * Number(a.prix_unitaire ?? 0), 0)
@@ -120,16 +141,23 @@ export default function StockList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Code', 'Nom', 'Catégorie', 'Stock', 'Seuil', 'Unité', 'Prix unit.', 'Fournisseur'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Code', 'Nom', 'Catégorie', 'Stock', 'Seuil', 'Unité', 'Prix unit.', 'Fournisseur'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun article</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucun article</td></tr>
               ) : filtered.map((a) => {
                 const enAlerte = Number(a.stock_actuel) <= Number(a.seuil_minimum)
                 return (
@@ -145,6 +173,12 @@ export default function StockList() {
                     <td className="text-sand-600">{a.unite}</td>
                     <td className="num">{fmt(a.prix_unitaire)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
                     <td className="text-sand-600">{a.fournisseur || '—'}</td>
+                    <td>
+                      <RowActions
+                        onEdit={() => setEditing(a)}
+                        onDelete={() => setDeleting(a)}
+                      />
+                    </td>
                   </tr>
                 )
               })}
@@ -153,10 +187,30 @@ export default function StockList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouvel article" sousTitre="Code, catégorie, seuil et fournisseur." onClose={() => setModal(false)}>
-          <ArticleForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouvel article'}
+          sousTitre="Code, catégorie, seuil et fournisseur."
+          onClose={fermerDrawer}
+        >
+          <ArticleForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cet article ?"
+          message={`L'article ${deleting.code} — ${deleting.nom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

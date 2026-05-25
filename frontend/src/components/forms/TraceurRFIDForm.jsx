@@ -10,8 +10,14 @@ const INIT = {
   notes: '',
 }
 
-export default function TraceurRFIDForm({ onSuccess, onClose }) {
-  const [form, setForm]   = useState(INIT)
+export default function TraceurRFIDForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]   = useState({
+    ...INIT,
+    ...(initial || {}),
+    article: String(initial?.article ?? ''),
+    site:    String(initial?.site ?? ''),
+  })
   const [articles, setArticles] = useState([])
   const [sites, setSites]       = useState([])
   const [error, setError] = useState('')
@@ -38,10 +44,12 @@ export default function TraceurRFIDForm({ onSuccess, onClose }) {
     }
     setSaving(true); setError('')
     try {
-      await api.post('/stocks/traceurs-rfid/', {
-        ...form,
-        site: form.site || null,
-      })
+      const payload = { ...form, site: form.site || null }
+      if (isEdit) {
+        await api.patch(`/stocks/traceurs-rfid/${initial.id}/`, payload)
+      } else {
+        await api.post('/stocks/traceurs-rfid/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -101,7 +109,7 @@ export default function TraceurRFIDForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer le tag'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer le tag')}
         </button>
       </ModalFooter>
     </form>

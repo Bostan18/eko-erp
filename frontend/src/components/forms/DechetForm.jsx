@@ -10,8 +10,14 @@ const INIT = {
   mode_traitement: 'compost', notes: '',
 }
 
-export default function DechetForm({ onSuccess, onClose }) {
-  const [form, setForm]   = useState(INIT)
+export default function DechetForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]   = useState({
+    ...INIT,
+    ...(initial || {}),
+    origine_projet: String(initial?.origine_projet ?? ''),
+    origine_site:   String(initial?.origine_site ?? ''),
+  })
   const [projets, setProjets] = useState([])
   const [sites, setSites]     = useState([])
   const [error, setError] = useState('')
@@ -29,11 +35,16 @@ export default function DechetForm({ onSuccess, onClose }) {
     if (!form.quantite) { setError('La quantité est requise.'); return }
     setSaving(true); setError('')
     try {
-      await api.post('/stocks/dechets/', {
+      const payload = {
         ...form,
         origine_projet: form.origine_projet || null,
         origine_site:   form.origine_site   || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/stocks/dechets/${initial.id}/`, payload)
+      } else {
+        await api.post('/stocks/dechets/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -114,7 +125,7 @@ export default function DechetForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer le déchet'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer le déchet')}
         </button>
       </ModalFooter>
     </form>

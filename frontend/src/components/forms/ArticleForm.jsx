@@ -18,8 +18,9 @@ function validate(form) {
   return null
 }
 
-export default function ArticleForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function ArticleForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({ ...INIT, ...(initial || {}) })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -32,7 +33,11 @@ export default function ArticleForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/stocks/articles/', form)
+      if (isEdit) {
+        await api.patch(`/stocks/articles/${initial.id}/`, form)
+      } else {
+        await api.post('/stocks/articles/', form)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -112,7 +117,7 @@ export default function ArticleForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : "Créer l'article"}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : "Créer l'article")}
         </button>
       </ModalFooter>
     </form>

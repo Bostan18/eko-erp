@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
 import LotBiologiqueForm from '../../components/forms/LotBiologiqueForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 const ETAT_TONE = {
   excellent: 'green', bon: 'green', moyen: 'gold',
@@ -21,6 +24,23 @@ export default function LotBiologiqueList() {
   const [kpis, setKpis] = useState(null)
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/stocks/lots-biologiques/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   useEffect(() => {
     api.get('/stocks/lots-biologiques/kpis_sante/').then(({ data }) => setKpis(data)).catch(() => {})
@@ -69,14 +89,21 @@ export default function LotBiologiqueList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Code', 'Espèce', 'Article', 'Site', 'Semis', 'Repiquage', 'Qté init.', 'Qté actu.', 'Survie', 'Santé', 'Phase'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Code', 'Espèce', 'Article', 'Site', 'Semis', 'Repiquage', 'Qté init.', 'Qté actu.', 'Survie', 'Santé', 'Phase'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={11} className="px-4 py-10 text-center text-sand-500 font-body">Aucun lot biologique</td></tr>
+                <tr><td colSpan={12} className="px-4 py-10 text-center text-sand-500 font-body">Aucun lot biologique</td></tr>
               ) : filtres.map((l) => (
                 <tr key={l.id}>
                   <td className="mono-cell text-forest-700">{l.code}</td>
@@ -95,6 +122,12 @@ export default function LotBiologiqueList() {
                   </td>
                   <td><Badge tone={ETAT_TONE[l.etat_sante] ?? 'gray'}>{l.etat_sante_display}</Badge></td>
                   <td><Badge tone={PHASE_TONE[l.phase] ?? 'gray'}>{l.phase}</Badge></td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(l)}
+                      onDelete={() => setDeleting(l)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -102,10 +135,30 @@ export default function LotBiologiqueList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau lot biologique" sousTitre="Cohorte de plants suivie sur son cycle." onClose={() => setModal(false)}>
-          <LotBiologiqueForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.espece}` : 'Nouveau lot biologique'}
+          sousTitre="Cohorte de plants suivie sur son cycle."
+          onClose={fermerDrawer}
+        >
+          <LotBiologiqueForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce lot biologique ?"
+          message={`Le lot ${deleting.code} (${deleting.espece}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

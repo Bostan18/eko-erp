@@ -11,8 +11,14 @@ const INIT = {
   etat_sante: 'bon', notes: '',
 }
 
-export default function LotBiologiqueForm({ onSuccess, onClose }) {
-  const [form, setForm]   = useState(INIT)
+export default function LotBiologiqueForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]   = useState({
+    ...INIT,
+    ...(initial || {}),
+    article: String(initial?.article ?? ''),
+    site:    String(initial?.site ?? ''),
+  })
   const [intrants, setIntrants] = useState([])
   const [sites, setSites]       = useState([])
   const [error, setError] = useState('')
@@ -32,12 +38,17 @@ export default function LotBiologiqueForm({ onSuccess, onClose }) {
     }
     setSaving(true); setError('')
     try {
-      await api.post('/stocks/lots-biologiques/', {
+      const payload = {
         ...form,
         site: form.site || null,
         date_repiquage: form.date_repiquage || null,
         quantite_actuelle: form.quantite_actuelle || form.quantite_initiale,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/stocks/lots-biologiques/${initial.id}/`, payload)
+      } else {
+        await api.post('/stocks/lots-biologiques/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -112,7 +123,7 @@ export default function LotBiologiqueForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le lot'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le lot')}
         </button>
       </ModalFooter>
     </form>

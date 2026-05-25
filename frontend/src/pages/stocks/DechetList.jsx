@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
 import DechetForm from '../../components/forms/DechetForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 export default function DechetList() {
   const { items: dechets, loading, error, charger } = useFetchList(
@@ -13,6 +16,23 @@ export default function DechetList() {
   const [synthese, setSynthese] = useState(null)
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/stocks/dechets/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   useEffect(() => {
     api.get('/stocks/dechets/synthese/').then(({ data }) => setSynthese(data)).catch(() => {})
@@ -57,14 +77,21 @@ export default function DechetList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Date', 'Type', 'Quantité', 'Projet', 'Site', 'Traitement', 'Valorisé'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Date', 'Type', 'Quantité', 'Projet', 'Site', 'Traitement', 'Valorisé'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun déchet enregistré</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun déchet enregistré</td></tr>
               ) : filtres.map((d) => (
                 <tr key={d.id}>
                   <td className="mono-cell text-sand-700">{d.date}</td>
@@ -80,6 +107,12 @@ export default function DechetList() {
                       ? <Badge tone="green">Oui</Badge>
                       : <Badge tone="gray">Non</Badge>}
                   </td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(d)}
+                      onDelete={() => setDeleting(d)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -87,10 +120,30 @@ export default function DechetList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau déchet" sousTitre="Suivi pour conformité et indicateurs ESG." onClose={() => setModal(false)}>
-          <DechetForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? 'Modifier le déchet' : 'Nouveau déchet'}
+          sousTitre="Suivi pour conformité et indicateurs ESG."
+          onClose={fermerDrawer}
+        >
+          <DechetForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce déchet ?"
+          message={`L'enregistrement (${deleting.type_dechet_display}, ${deleting.date}) sera supprimé.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

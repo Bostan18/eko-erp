@@ -69,24 +69,48 @@ export default function Login() {
         className="relative md:flex-[3] min-h-[260px] md:min-h-screen bg-forest-950 text-sand-100 overflow-hidden flex flex-col p-8 md:p-12"
         style={{ backgroundImage: `url("${GRAIN_URI}")` }}
       >
-        {/* Courbes de niveau (tracé progressif) */}
+        {/* Plantation en perspective (cascade du fond vers le devant) */}
         <svg
-          className="absolute inset-0 w-full h-full opacity-[0.14] pointer-events-none"
+          className="absolute inset-0 w-full h-full opacity-[0.18] pointer-events-none"
           viewBox="0 0 800 800"
           preserveAspectRatio="xMidYMid slice"
           aria-hidden
         >
-          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <path
-              key={i}
-              d={`M -50 ${110 + i * 95} Q 220 ${60 + i * 80}, 420 ${140 + i * 100} T 870 ${110 + i * 95}`}
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              className="topo-line"
-              style={{ animationDelay: `${i * 110}ms` }}
-            />
-          ))}
+          {(() => {
+            const ROWS = 7
+            const COLS = 10
+            const STEP = (800 - 80) / (COLS - 1)
+            const nodes = []
+            for (let r = 0; r < ROWS; r++) {
+              const t = r / (ROWS - 1)
+              const y = 200 + (820 - 200) * (t * t * 0.8 + t * 0.2)
+              const scale = 0.35 + t * t * 1.55
+              const offsetX = (r % 2) * (STEP / 2)
+              for (let c = 0; c < COLS; c++) {
+                const x = 40 + offsetX + c * STEP
+                const delay = r * 180 + c * 28
+                nodes.push(
+                  <g
+                    key={`${r}-${c}`}
+                    transform={`translate(${x} ${y}) scale(${scale})`}
+                    className="plant"
+                    style={{ animationDelay: `${delay}ms` }}
+                  >
+                    <path
+                      d="M0 0 L0 -10 M-5 -7 L0 -10 L5 -7"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                    <circle cx="0" cy="-11.5" r="1.2" fill="white" />
+                  </g>
+                )
+              }
+            }
+            return nodes
+          })()}
         </svg>
 
         {/* Éphéméride */}
@@ -238,14 +262,13 @@ export default function Login() {
         }
         .reveal { opacity: 0; animation: reveal .7s cubic-bezier(.2,.7,.2,1) forwards; }
 
-        @keyframes draw {
-          from { stroke-dashoffset: 1400; }
-          to   { stroke-dashoffset: 0; }
+        @keyframes plantFade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        .topo-line {
-          stroke-dasharray: 1400;
-          stroke-dashoffset: 1400;
-          animation: draw 2.6s cubic-bezier(.4,.1,.2,1) forwards;
+        .plant {
+          opacity: 0;
+          animation: plantFade .55s cubic-bezier(.2,.7,.2,1) forwards;
         }
 
         @keyframes shake {

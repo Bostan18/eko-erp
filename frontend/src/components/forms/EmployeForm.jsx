@@ -24,8 +24,9 @@ function validate(form) {
   return null
 }
 
-export default function EmployeForm({ onSuccess, onClose }) {
-  const [form, setForm]     = useState(INIT)
+export default function EmployeForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]     = useState({ ...INIT, ...(initial || {}) })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -38,12 +39,17 @@ export default function EmployeForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/rh/employes/', {
+      const payload = {
         ...form,
         salaire_mensuel: form.salaire_mensuel || null,
         taux_journalier: form.taux_journalier || null,
         date_entree: form.date_entree || null,
-      })
+      }
+      if (isEdit) {
+        await api.patch(`/rh/employes/${initial.id}/`, payload)
+      } else {
+        await api.post('/rh/employes/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -136,7 +142,7 @@ export default function EmployeForm({ onSuccess, onClose }) {
           Annuler
         </button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : "Créer l'employé"}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : "Créer l'employé")}
         </button>
       </ModalFooter>
     </form>

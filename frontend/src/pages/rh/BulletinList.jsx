@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconDocument, IconCard, IconWallet, IconCheck } from '../../components/ui/Icons'
@@ -22,8 +24,22 @@ export default function BulletinList() {
   const { items: bulletins, loading, error, charger } = useFetchList(
     endpoint, 'Impossible de charger les bulletins.'
   )
+  const navigate = useNavigate()
   const [generating, setGenerating] = useState(false)
   const [feedback, setFeedback] = useState('')
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true)
+    try {
+      await api.delete(`/rh/bulletins/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setFeedback(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   useEffect(() => { setFeedback('') }, [moisActif])
 
@@ -131,9 +147,10 @@ export default function BulletinList() {
           <table className="table-eko">
             <thead>
               <tr>
-                {['Code', 'Employé', 'Poste', 'Brut', 'Net', 'Statut', 'Payé le', 'Action'].map((h) => (
+                {['Code', 'Employé', 'Poste', 'Brut', 'Net', 'Statut', 'Payé le', 'Workflow'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -164,12 +181,31 @@ export default function BulletinList() {
                       </button>
                     )}
                   </td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/rh/paie/bulletins/${b.id}`)}
+                      onDelete={() => setDeleting(b)}
+                      deleteDisabledReason={b.statut === 'paye' ? 'Bulletin payé — verrouillé' : null}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce bulletin ?"
+          message={`Le bulletin de ${deleting.employe_nom} (${moisLabel(moisActif)}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
     </div>
   )
 }

@@ -9,8 +9,13 @@ const INIT = {
   date_fin: '', motif: '', notes: '',
 }
 
-export default function CongeForm({ employeId, onSuccess, onClose }) {
-  const [form, setForm] = useState({ ...INIT, employe: employeId ?? '' })
+export default function CongeForm({ initial, employeId, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm] = useState({
+    ...INIT,
+    ...(initial || {}),
+    employe: String(initial?.employe ?? employeId ?? ''),
+  })
   const [employes, setEmployes] = useState([])
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
@@ -30,7 +35,11 @@ export default function CongeForm({ employeId, onSuccess, onClose }) {
     }
     setSaving(true); setError('')
     try {
-      await api.post('/rh/conges/', form)
+      if (isEdit) {
+        await api.patch(`/rh/conges/${initial.id}/`, form)
+      } else {
+        await api.post('/rh/conges/', form)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -86,7 +95,7 @@ export default function CongeForm({ employeId, onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Soumettre la demande'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Soumettre la demande')}
         </button>
       </ModalFooter>
     </form>

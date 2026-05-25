@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import CongeForm from '../../components/forms/CongeForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 const STATUT_TONE = {
   demande: 'gold', approuve: 'green', refuse: 'red', annule: 'gray',
@@ -22,6 +25,23 @@ export default function CongesList() {
   const [search, setSearch] = useState('')
   const [modal, setModal]   = useState(false)
   const [actionLoading, setActionLoading] = useState(null)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/rh/conges/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   async function changerStatut(id, action) {
     setActionLoading(id)
@@ -76,14 +96,21 @@ export default function CongesList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Employé', 'Type', 'Période', 'Jours', 'Motif', 'Statut', 'Actions'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Employé', 'Type', 'Période', 'Jours', 'Motif', 'Statut', 'Workflow'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucune demande</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucune demande</td></tr>
               ) : filtres.map((c) => (
                 <tr key={c.id}>
                   <td className="font-display font-medium text-ink">
@@ -111,6 +138,12 @@ export default function CongesList() {
                       <span className="text-[11px] text-sand-500">{c.approuve_par || '—'} {c.approuve_le && `· ${c.approuve_le}`}</span>
                     )}
                   </td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(c)}
+                      onDelete={() => setDeleting(c)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -118,10 +151,30 @@ export default function CongesList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouvelle demande de congé" sousTitre="Workflow d'approbation." onClose={() => setModal(false)}>
-          <CongeForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier le congé de ${editing.employe_nom}` : 'Nouvelle demande de congé'}
+          sousTitre="Workflow d'approbation."
+          onClose={fermerDrawer}
+        >
+          <CongeForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cette demande de congé ?"
+          message={`La demande de ${deleting.employe_nom} (${deleting.date_debut} → ${deleting.date_fin}) sera supprimée.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

@@ -1,6 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
@@ -8,6 +11,7 @@ import { IconUsers, IconBriefcase, IconHardHat, IconTool } from '../../component
 import EmployeForm from '../../components/forms/EmployeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { fmt } from '../../utils/format'
+import { apiErrorMessage } from '../../utils/errors'
 
 const TYPE_TONE  = { permanent: 'green', journalier: 'gold', moo: 'blue' }
 const TYPE_LABEL = { permanent: 'Permanent', journalier: 'Journalier', moo: 'MOO' }
@@ -18,9 +22,27 @@ export default function EmployeList() {
     '/rh/employes/',
     'Impossible de charger les employés.'
   )
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState('tous')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/rh/employes/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtered = employes
     .filter((e) => filtre === 'tous' ? true : e.type_contrat === filtre)
@@ -113,6 +135,13 @@ export default function EmployeList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
@@ -122,12 +151,13 @@ export default function EmployeList() {
                 {['Code', 'Nom', 'Poste', 'Type', 'Statut', 'Taux / jour'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sand-500 font-body">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">
                     Aucun employé trouvé
                   </td>
                 </tr>
@@ -155,6 +185,13 @@ export default function EmployeList() {
                     <td className="mono-cell text-ink">
                       {emp.taux_journalier ? `${fmt(emp.taux_journalier)} F` : '—'}
                     </td>
+                    <td>
+                      <RowActions
+                        onView={() => navigate(`/rh/${emp.id}`)}
+                        onEdit={() => setEditing(emp)}
+                        onDelete={() => setDeleting(emp)}
+                      />
+                    </td>
                   </tr>
                 ))
               )}
@@ -163,17 +200,30 @@ export default function EmployeList() {
         )}
       </div>
 
-      {modal && (
+      {(modal || editing) && (
         <Modal
-          titre="Nouvel employé"
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom} ${editing.prenom}` : 'Nouvel employé'}
           sousTitre="Renseignez les informations personnelles et le contrat."
-          onClose={() => setModal(false)}
+          onClose={fermerDrawer}
         >
           <EmployeForm
-            onClose={() => setModal(false)}
-            onSuccess={() => { setModal(false); charger() }}
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
           />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cet employé ?"
+          message={`L'employé ${deleting.code} — ${deleting.nom} ${deleting.prenom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

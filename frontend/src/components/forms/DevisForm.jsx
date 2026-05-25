@@ -6,9 +6,14 @@ import { ModalFooter } from '../ui/Modal'
 
 const LIGNE_INIT = { designation: '', centre_cout: '', quantite: '1', prix_unitaire: '', remise_pct: '0', taux_tva: '18' }
 
-export default function DevisForm({ onSuccess, onClose }) {
+export default function DevisForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
   const [form, setForm] = useState({
-    client: '', projet: '', date_validite: '', remise_globale_pct: '0', notes: '',
+    client:              String(initial?.client ?? ''),
+    projet:              String(initial?.projet ?? ''),
+    date_validite:       initial?.date_validite ?? '',
+    remise_globale_pct:  String(initial?.remise_globale_pct ?? '0'),
+    notes:               initial?.notes ?? '',
   })
   const [lignes, setLignes] = useState([{ ...LIGNE_INIT }])
   const [clients, setClients] = useState([])
@@ -21,7 +26,24 @@ export default function DevisForm({ onSuccess, onClose }) {
     api.get('/crm/clients/').then(({ data }) => setClients(data.results ?? data))
     api.get('/projets/projets/').then(({ data }) => setProjets(data.results ?? data))
     api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
-  }, [])
+    if (isEdit) {
+      api.get(`/comptabilite/lignes-devis/?devis=${initial.id}`)
+        .then(({ data }) => {
+          const items = data.results ?? data
+          if (items.length > 0) {
+            setLignes(items.map((l) => ({
+              designation: l.designation,
+              centre_cout: String(l.centre_cout ?? ''),
+              quantite: String(l.quantite),
+              prix_unitaire: String(l.prix_unitaire),
+              remise_pct: String(l.remise_pct ?? 0),
+              taux_tva: String(l.taux_tva ?? 18),
+            })))
+          }
+        })
+        .catch(() => {})
+    }
+  }, [isEdit, initial?.id])
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
   function setLigne(idx, field, value) {
@@ -49,29 +71,37 @@ export default function DevisForm({ onSuccess, onClose }) {
     e.preventDefault()
     setError('')
     if (!form.client) { setError('Sélectionnez un client.'); return }
-    const lignesValides = lignes.filter((l) => l.designation && l.prix_unitaire)
-    if (lignesValides.length === 0) { setError('Ajoutez au moins une ligne avec désignation et prix.'); return }
+    if (!isEdit) {
+      const lignesValides = lignes.filter((l) => l.designation && l.prix_unitaire)
+      if (lignesValides.length === 0) { setError('Ajoutez au moins une ligne avec désignation et prix.'); return }
+    }
 
     setSaving(true)
     try {
-      const { data: devis } = await api.post('/comptabilite/devis/', {
+      const payload = {
         client: form.client,
         projet: form.projet || null,
         date_validite: form.date_validite || null,
         remise_globale_pct: form.remise_globale_pct || 0,
         notes: form.notes,
-      })
-      await Promise.all(
-        lignesValides.map((l) => api.post('/comptabilite/lignes-devis/', {
-          devis: devis.id,
-          designation: l.designation,
-          centre_cout: l.centre_cout || null,
-          quantite: l.quantite,
-          prix_unitaire: l.prix_unitaire,
-          remise_pct: l.remise_pct || 0,
-          taux_tva: l.taux_tva || 18,
-        }))
-      )
+      }
+      if (isEdit) {
+        await api.patch(`/comptabilite/devis/${initial.id}/`, payload)
+      } else {
+        const { data: devis } = await api.post('/comptabilite/devis/', payload)
+        const lignesValides = lignes.filter((l) => l.designation && l.prix_unitaire)
+        await Promise.all(
+          lignesValides.map((l) => api.post('/comptabilite/lignes-devis/', {
+            devis: devis.id,
+            designation: l.designation,
+            centre_cout: l.centre_cout || null,
+            quantite: l.quantite,
+            prix_unitaire: l.prix_unitaire,
+            remise_pct: l.remise_pct || 0,
+            taux_tva: l.taux_tva || 18,
+          }))
+        )
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -168,7 +198,7 @@ export default function DevisForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer le devis'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer le devis')}
         </button>
       </ModalFooter>
     </form>

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge, { CenterBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
@@ -8,6 +10,7 @@ import { IconWallet, IconChartBar, IconTrendUp, IconFolder } from '../../compone
 import ChargeForm from '../../components/forms/ChargeForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { CHARGE_CAT_LABEL, CHARGE_CAT_BADGE } from '../../utils/constants'
+import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
 function exportCharges(filtre) {
@@ -38,6 +41,23 @@ export default function ChargeList() {
   )
   const [filtre, setFiltre] = useState('toutes')
   const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/comptabilite/charges/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtrees    = charges.filter((c) => filtre === 'toutes' ? true : c.categorie === filtre)
   const totalFiltre = filtrees.reduce((s, c) => s + Number(c.montant), 0)
@@ -116,16 +136,23 @@ export default function ChargeList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Centre', 'Fournisseur', 'Référence'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Date', 'Libellé', 'Catégorie', 'Montant', 'Projet', 'Centre', 'Fournisseur', 'Référence'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr>
             </thead>
             <tbody>
               {filtrees.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucune charge</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucune charge</td></tr>
               ) : filtrees.map((c) => (
                 <tr key={c.id}>
                   <td className="mono-cell">{c.date}</td>
@@ -136,6 +163,12 @@ export default function ChargeList() {
                   <td>{c.centre_cout_display ? <CenterBadge center={c.centre_cout_display} /> : <span className="text-sand-400">—</span>}</td>
                   <td className="text-sand-600">{c.fournisseur || '—'}</td>
                   <td className="mono-cell text-sand-500">{c.reference || '—'}</td>
+                  <td>
+                    <RowActions
+                      onEdit={() => setEditing(c)}
+                      onDelete={() => setDeleting(c)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -145,17 +178,37 @@ export default function ChargeList() {
                   Total {filtre !== 'toutes' ? CHARGE_CAT_LABEL[filtre] : 'charges'}
                 </td>
                 <td className="px-4 py-3 num text-[14px]">{fmt(totalFiltre)} F</td>
-                <td colSpan={4} />
+                <td colSpan={5} />
               </tr>
             </tfoot>
           </table>
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouvelle charge" sousTitre="Catégorie, montant, projet et fournisseur." onClose={() => setModal(false)}>
-          <ChargeForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.libelle}` : 'Nouvelle charge'}
+          sousTitre="Catégorie, montant, projet et fournisseur."
+          onClose={fermerDrawer}
+        >
+          <ChargeForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cette charge ?"
+          message={`La charge « ${deleting.libelle} » du ${deleting.date} sera supprimée.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

@@ -1,19 +1,38 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import { StatusBadge } from '../../components/ui/Badge'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconCornerUpLeft, IconDocument, IconUsers, IconChartBar } from '../../components/ui/Icons'
 import { useFetchList } from '../../hooks/useFetchList'
 import { FACTURE_STATUT_LABEL } from '../../utils/constants'
+import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
 export default function AvoirList() {
-  const { items: avoirs, loading, error } = useFetchList(
+  const { items: avoirs, loading, error, charger } = useFetchList(
     '/comptabilite/factures/?type_facture=avoir',
     'Impossible de charger les avoirs.'
   )
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/comptabilite/factures/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const filtres = avoirs.filter((a) =>
     !search
@@ -83,16 +102,23 @@ export default function AvoirList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
             <thead>
-              <tr>{['Numéro', 'Client', 'Réf. FNE', 'Facture origine', 'TTC', 'Statut', 'Émis le'].map((h) => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Numéro', 'Client', 'Réf. FNE', 'Facture origine', 'TTC', 'Statut', 'Émis le'].map((h) => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr>
             </thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun avoir</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun avoir</td></tr>
               ) : filtres.map((a) => (
                 <tr key={a.id}>
                   <td>
@@ -114,12 +140,31 @@ export default function AvoirList() {
                   <td className="mono-cell text-sand-500">
                     {a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : '—'}
                   </td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/comptabilite/factures/${a.id}`)}
+                      onDelete={() => setDeleting(a)}
+                      deleteDisabledReason={a.fne_reference ? 'Avoir certifié FNE — verrouillé' : null}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cet avoir ?"
+          message={`L'avoir ${deleting.numero_local} (${deleting.client_nom}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
     </div>
   )
 }

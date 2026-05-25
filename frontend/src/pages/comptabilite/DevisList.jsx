@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
 import KpiCard from '../../components/ui/KpiCard'
 import { IconDocument, IconCheck, IconHourglass, IconClock } from '../../components/ui/Icons'
@@ -9,6 +12,7 @@ import { useFetchList } from '../../hooks/useFetchList'
 import { useConvertirDevis } from '../../hooks/useConvertirDevis'
 import { ConvertirDevisModal, ConvertirDevisToast } from '../../components/comptabilite/ConvertirDevisDialog'
 import { DEVIS_STATUT_BADGE, DEVIS_STATUT_LABEL } from '../../utils/constants'
+import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
 const STATUTS = [
@@ -28,6 +32,23 @@ export default function DevisList() {
   const [confirmDevis, setConfirmDevis] = useState(null)
   const [toast, setToast] = useState(null)
   const [conversionError, setConversionError] = useState('')
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/comptabilite/devis/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const { convertir } = useConvertirDevis({
     onSuccess: (data) => {
@@ -118,21 +139,34 @@ export default function DevisList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
             <thead>
               <tr>
-                {['Numéro', 'Client', 'Projet', 'Total TTC', 'Statut', 'Validité', 'Actions'].map((h) => (
+                {['Numéro', 'Client', 'Projet', 'Total TTC', 'Statut', 'Validité', 'Conversion'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">Aucun devis</td></tr>
-              ) : filtres.map((d) => (
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun devis</td></tr>
+              ) : filtres.map((d) => {
+                const verrouille = !!d.facture_liee_id
+                const lockReason = verrouille
+                  ? `Devis converti en facture ${d.facture_liee_numero}`
+                  : null
+                return (
                 <tr key={d.id}>
                   <td>
                     <Link to={`/comptabilite/devis/${d.id}`} className="mono-cell text-forest-700 hover:text-forest-900 font-medium">
@@ -166,17 +200,45 @@ export default function DevisList() {
                       </button>
                     ) : null}
                   </td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/comptabilite/devis/${d.id}`)}
+                      onEdit={() => setEditing(d)}
+                      onDelete={() => setDeleting(d)}
+                      editDisabledReason={lockReason}
+                      deleteDisabledReason={lockReason}
+                    />
+                  </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau devis" onClose={() => setModal(false)}>
-          <DevisForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.numero}` : 'Nouveau devis'}
+          onClose={fermerDrawer}
+        >
+          <DevisForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce devis ?"
+          message={`Le devis ${deleting.numero} (${deleting.client_nom}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
 
       {confirmDevis && (

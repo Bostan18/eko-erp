@@ -17,8 +17,14 @@ function validate(form) {
   return null
 }
 
-export default function ChargeForm({ onSuccess, onClose }) {
-  const [form, setForm]       = useState(INIT)
+export default function ChargeForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]       = useState({
+    ...INIT,
+    ...(initial || {}),
+    projet:      String(initial?.projet ?? ''),
+    centre_cout: String(initial?.centre_cout ?? ''),
+  })
   const [projets, setProjets] = useState([])
   const [centres, setCentres] = useState([])
   const [error, setError]     = useState('')
@@ -38,9 +44,12 @@ export default function ChargeForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/comptabilite/charges/', {
-        ...form, projet: form.projet || null, centre_cout: form.centre_cout || null,
-      })
+      const payload = { ...form, projet: form.projet || null, centre_cout: form.centre_cout || null }
+      if (isEdit) {
+        await api.patch(`/comptabilite/charges/${initial.id}/`, payload)
+      } else {
+        await api.post('/comptabilite/charges/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -119,7 +128,7 @@ export default function ChargeForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer la charge'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer la charge')}
         </button>
       </ModalFooter>
     </form>

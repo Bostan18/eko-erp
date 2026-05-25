@@ -1,13 +1,8 @@
-import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-// Cible portal du <ModalFooter> : permet au consommateur d'écrire ses boutons
-// (y compris un type="submit") dans son <form>, tout en les rendant dans la
-// zone footer sticky du drawer.
-const FooterSlotContext = createContext(null)
 
 /**
  * Modal latéral type « drawer » — coulisse depuis la droite.
@@ -19,15 +14,16 @@ const FooterSlotContext = createContext(null)
  * Props :
  *   titre, sous-titre, onClose, footer, children, width (px ou tailwind)
  *
- * Footer : deux APIs supportées —
- *   • prop `footer` (legacy) : pour des actions hors <form> (ex : exports, fermeture seule).
- *   • <ModalFooter> (recommandé pour les forms) : portal dans la zone sticky,
- *     conserve le lien type="submit" → <form> du consommateur.
+ * Footer : deux APIs —
+ *   • prop `footer` (legacy) : actions hors <form> (ex : exports, fermeture seule).
+ *     Rendu dans une barre fixe en bas du drawer.
+ *   • <ModalFooter> (recommandé pour les forms) : rend les boutons en sticky
+ *     bottom à l'intérieur du body scrollable, donc DOM-enfants du <form> —
+ *     `type="submit"` déclenche bien le submit HTML natif.
  */
 export default function Modal({ titre, sousTitre, onClose, footer, children, width = 530 }) {
   const titleId = useId()
   const asideRef = useRef(null)
-  const [footerEl, setFooterEl] = useState(null)
   // Animation de sortie : on bascule sur les keyframes inverses, puis on
   // remonte `onClose` au parent (= démontage réel) une fois l'animation finie.
   const [closing, setClosing] = useState(false)
@@ -138,23 +134,18 @@ export default function Modal({ titre, sousTitre, onClose, footer, children, wid
           </button>
         </div>
 
-        {/* Body — scrollable, padding direct. */}
+        {/* Body — scrollable, padding direct. Les <ModalFooter> à l'intérieur
+            d'un <form> ici se positionnent en sticky bottom (voir plus bas). */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-          <FooterSlotContext.Provider value={footerEl}>
-            {children}
-          </FooterSlotContext.Provider>
+          {children}
         </div>
 
-        {/* Footer area — toujours montée pour servir de cible portal au
-            <ModalFooter>. `empty:hidden` la masque quand ni la prop `footer`
-            ni un <ModalFooter> ne fournit de contenu (rétro-compatibilité
-            avec les drawers actuels sans footer). */}
-        <div
-          ref={setFooterEl}
-          className="px-6 py-3 border-t border-sand-200 flex gap-2 justify-end shrink-0 empty:hidden"
-        >
-          {footer}
-        </div>
+        {/* Footer legacy (prop `footer` uniquement) — actions hors form. */}
+        {footer && (
+          <div className="px-6 py-3 border-t border-sand-200 flex gap-2 justify-end shrink-0">
+            {footer}
+          </div>
+        )}
       </aside>
 
       <style>{`
@@ -171,9 +162,12 @@ export default function Modal({ titre, sousTitre, onClose, footer, children, wid
 /* ─── Sous-composants utilitaires pour les formulaires ───── */
 
 /**
- * Footer du drawer — rendu via portal dans la zone sticky du Modal parent.
+ * Footer pour les formulaires dans un Modal — rendu en sticky bottom à
+ * l'intérieur du body scrollable du drawer. Les boutons restent donc
+ * DOM-enfants du <form> parent, ce qui permet à `type="submit"` de
+ * déclencher le submit HTML natif (un portal hors du form l'aurait cassé).
  *
- * Usage typique depuis un form :
+ * Usage typique :
  *   <Modal titre="...">
  *     <form onSubmit={handleSubmit}>
  *       {sections}
@@ -184,13 +178,15 @@ export default function Modal({ titre, sousTitre, onClose, footer, children, wid
  *     </form>
  *   </Modal>
  *
- * Les boutons restent dans la hiérarchie React du <form> (le submit est lié),
- * mais le DOM les place dans la barre footer sticky du drawer.
+ * Les marges négatives (-mx-6 / -mb-5) annulent la padding du body parent
+ * pour que la barre aille bord à bord et colle pile au fond visible.
  */
 export function ModalFooter({ children }) {
-  const target = useContext(FooterSlotContext)
-  if (!target) return null
-  return createPortal(children, target)
+  return (
+    <div className="sticky bottom-0 -mx-6 -mb-5 mt-6 px-6 py-3 bg-white border-t border-sand-200 flex gap-2 justify-end">
+      {children}
+    </div>
+  )
 }
 
 export function FormSection({ titre, children }) {

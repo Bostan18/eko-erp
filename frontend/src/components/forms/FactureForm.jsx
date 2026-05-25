@@ -16,11 +16,19 @@ function validate(form, lignes) {
   return null
 }
 
-export default function FactureForm({ onSuccess, onClose }) {
+export default function FactureForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
   const [form, setForm]       = useState({
-    numero: '', client: '', projet: '', taux_tva: '18',
-    date_emission: today(), date_echeance: '', notes: '',
-    mode_reglement: 'cash', template_fne: 'B2B', centre_cout: '',
+    numero:         initial?.numero_local ?? initial?.numero ?? '',
+    client:         String(initial?.client ?? ''),
+    projet:         String(initial?.projet ?? ''),
+    taux_tva:       String(initial?.taux_tva ?? '18'),
+    date_emission:  initial?.date_emission ?? today(),
+    date_echeance:  initial?.date_echeance ?? '',
+    notes:          initial?.notes ?? '',
+    mode_reglement: initial?.mode_reglement ?? 'cash',
+    template_fne:   initial?.template_fne ?? 'B2B',
+    centre_cout:    String(initial?.centre_cout ?? ''),
   })
   const [lignes, setLignes]   = useState([{ ...LIGNE_INIT }])
   const [clients, setClients] = useState([])
@@ -33,7 +41,23 @@ export default function FactureForm({ onSuccess, onClose }) {
     api.get('/crm/clients/').then(({ data }) => setClients(data.results ?? data))
     api.get('/projets/projets/').then(({ data }) => setProjets(data.results ?? data))
     api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
-  }, [])
+    if (isEdit) {
+      // Charge les lignes existantes pour les afficher en lecture seule.
+      // L'édition fine des lignes se fait depuis FactureDetail (TODO).
+      api.get(`/comptabilite/lignes/?facture=${initial.id}`)
+        .then(({ data }) => {
+          const items = data.results ?? data
+          if (items.length > 0) {
+            setLignes(items.map((l) => ({
+              designation: l.designation,
+              quantite: String(l.quantite),
+              prix_unitaire: String(l.prix_unitaire),
+            })))
+          }
+        })
+        .catch(() => {})
+    }
+  }, [isEdit, initial?.id])
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
   function setLigne(idx, field, value) {
@@ -49,12 +73,14 @@ export default function FactureForm({ onSuccess, onClose }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const validErr = validate(form, lignes)
+    // En mode édition, les lignes sont en lecture seule — on ne valide
+    // que les champs de la facture.
+    const validErr = isEdit ? validate(form, [{ designation: 'ok', prix_unitaire: '1' }]) : validate(form, lignes)
     if (validErr) { setError(validErr); return }
     setSaving(true)
     setError('')
     try {
-      const { data: facture } = await api.post('/comptabilite/factures/', {
+      const payload = {
         ...form,
         client: form.client || null,
         projet: form.projet || null,
@@ -63,17 +89,23 @@ export default function FactureForm({ onSuccess, onClose }) {
         montant_tva: montantTVA,
         montant_ttc: montantTTC,
         date_echeance: form.date_echeance || null,
-      })
-      await Promise.all(
-        lignes
-          .filter((l) => l.designation && l.prix_unitaire)
-          .map((l) => api.post('/comptabilite/lignes/', {
-            facture: facture.id,
-            designation: l.designation,
-            quantite: l.quantite,
-            prix_unitaire: l.prix_unitaire,
-          }))
-      )
+      }
+      if (isEdit) {
+        // PATCH la facture — les lignes ne sont pas touchées ici.
+        await api.patch(`/comptabilite/factures/${initial.id}/`, payload)
+      } else {
+        const { data: facture } = await api.post('/comptabilite/factures/', payload)
+        await Promise.all(
+          lignes
+            .filter((l) => l.designation && l.prix_unitaire)
+            .map((l) => api.post('/comptabilite/lignes/', {
+              facture: facture.id,
+              designation: l.designation,
+              quantite: l.quantite,
+              prix_unitaire: l.prix_unitaire,
+            }))
+        )
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -93,9 +125,11 @@ export default function FactureForm({ onSuccess, onClose }) {
 
       <FormSection titre="Identification">
         <FormRow cols={2}>
-          <Field label="Numéro" required>
+          <Field label="Numéro" required hint={isEdit ? 'Le numéro ne peut pas être modifié après création.' : null}>
             <input className="input" placeholder="FAC-001" value={form.numero}
-              onChange={(e) => set('numero', e.target.value.toUpperCase())} />
+              onChange={(e) => set('numero', e.target.value.toUpperCase())}
+              readOnly={isEdit}
+              disabled={isEdit} />
           </Field>
           <Field label="TVA (%)" hint="Par défaut : 18 % en CI">
             <input type="number" min="0" max="100" step="0.5" className="input" value={form.taux_tva}
@@ -168,6 +202,11 @@ export default function FactureForm({ onSuccess, onClose }) {
 
       {/* Lignes de facturation — pattern « line table » de la maquette */}
       <FormSection titre="Lignes de facturation">
+        {isEdit && (
+          <div className="mb-3 px-3 py-2 rounded-lg bg-sand-50 border border-sand-200 text-[11.5px] text-sand-700 font-body">
+            ℹ Les lignes ne sont pas modifiables ici. Utilisez la page « Détail » de la facture pour les ajuster.
+          </div>
+        )}
         <div className="rounded-lg border border-sand-200 overflow-hidden bg-white">
           <div
             className="grid gap-2 px-3 py-2 bg-sand-50 border-b border-sand-200
@@ -192,6 +231,8 @@ export default function FactureForm({ onSuccess, onClose }) {
                   placeholder="Désignation…"
                   value={ligne.designation}
                   onChange={(e) => setLigne(idx, 'designation', e.target.value)}
+                  readOnly={isEdit}
+                  disabled={isEdit}
                 />
                 <input
                   type="number" min="0.01" step="0.01"
@@ -199,6 +240,8 @@ export default function FactureForm({ onSuccess, onClose }) {
                   placeholder="Qté"
                   value={ligne.quantite}
                   onChange={(e) => setLigne(idx, 'quantite', e.target.value)}
+                  readOnly={isEdit}
+                  disabled={isEdit}
                 />
                 <input
                   type="number" min="0" step="1"
@@ -206,11 +249,13 @@ export default function FactureForm({ onSuccess, onClose }) {
                   placeholder="Prix"
                   value={ligne.prix_unitaire}
                   onChange={(e) => setLigne(idx, 'prix_unitaire', e.target.value)}
+                  readOnly={isEdit}
+                  disabled={isEdit}
                 />
                 <span className="font-display text-[12.5px] font-semibold text-ink text-right">
                   {fmt(Number(ligne.quantite) * Number(ligne.prix_unitaire || 0))} <span className="text-[10px] font-normal text-sand-500">F</span>
                 </span>
-                {lignes.length > 1 ? (
+                {!isEdit && lignes.length > 1 ? (
                   <button
                     type="button" onClick={() => supprimerLigne(idx)}
                     className="w-[22px] h-[22px] rounded text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 flex items-center justify-center transition"
@@ -225,10 +270,12 @@ export default function FactureForm({ onSuccess, onClose }) {
             ))}
           </div>
         </div>
-        <button
-          type="button" onClick={ajouterLigne}
-          className="mt-2 text-[12px] font-display font-medium text-forest-700 hover:text-forest-900"
-        >+ Ajouter une ligne</button>
+        {!isEdit && (
+          <button
+            type="button" onClick={ajouterLigne}
+            className="mt-2 text-[12px] font-display font-medium text-forest-700 hover:text-forest-900"
+          >+ Ajouter une ligne</button>
+        )}
       </FormSection>
 
       {/* Totaux — bandeau sombre comme dans la maquette */}
@@ -257,7 +304,7 @@ export default function FactureForm({ onSuccess, onClose }) {
       <ModalFooter>
         <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Créer la facture'}
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Créer la facture')}
         </button>
       </ModalFooter>
     </form>

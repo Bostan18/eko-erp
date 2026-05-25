@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
 import Badge from '../../components/ui/Badge'
 import EnginForm from '../../components/forms/EnginForm'
 import { useFetchList } from '../../hooks/useFetchList'
+import { apiErrorMessage } from '../../utils/errors'
 
 const STATUT_TONE = {
   disponible:     'green',
@@ -18,10 +21,28 @@ export default function EnginList() {
   const { items: engins, loading, error, charger } = useFetchList(
     '/parc/engins/', 'Impossible de charger le parc.'
   )
+  const navigate = useNavigate()
   const [kpis, setKpis]   = useState(null)
   const [search, setSearch] = useState('')
   const [filtreStatut, setFiltreStatut] = useState('tous')
   const [modal, setModal] = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/parc/engins/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   useEffect(() => {
     api.get('/parc/engins/kpis/').then(({ data }) => setKpis(data)).catch(() => {})
@@ -78,14 +99,21 @@ export default function EnginList() {
         </div>
 
         {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
           <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
           <table className="table-eko">
-            <thead><tr>{['Code', 'Engin', 'Marque / Modèle', 'Statut', 'Compteur', 'Usure', 'Site', 'Tarif/j'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Code', 'Engin', 'Marque / Modèle', 'Statut', 'Compteur', 'Usure', 'Site', 'Tarif/j'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr></thead>
             <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun engin</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucun engin</td></tr>
               ) : filtres.map((e) => (
                 <tr key={e.id}>
                   <td className="mono-cell text-forest-700">
@@ -117,6 +145,13 @@ export default function EnginList() {
                   <td className="num">
                     {Number(e.tarif_location_jour).toLocaleString('fr-FR')} <span className="text-[10px] font-normal text-sand-500">F</span>
                   </td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/parc/${e.id}`)}
+                      onEdit={() => setEditing(e)}
+                      onDelete={() => setDeleting(e)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -124,10 +159,30 @@ export default function EnginList() {
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouvel engin" sousTitre="Ajoute une machine au parc." onClose={() => setModal(false)}>
-          <EnginForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouvel engin'}
+          sousTitre="Ajoute une machine au parc."
+          onClose={fermerDrawer}
+        >
+          <EnginForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer cet engin ?"
+          message={`L'engin ${deleting.code} — ${deleting.nom} sera retiré du parc. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
     </div>
   )

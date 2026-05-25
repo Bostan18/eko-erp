@@ -113,43 +113,19 @@ export default function Login() {
           <div className="mt-5 flex items-center gap-3 reveal" style={{ animationDelay: '320ms' }}>
             <span className="h-px w-8 bg-gold-500" />
             <p className="font-mono text-[10.5px] md:text-[11px] uppercase tracking-[0.22em] text-sand-100/70">
-              Système terrain · Côte d'Ivoire
+              SARL · Côte d'Ivoire
             </p>
           </div>
         </div>
 
-        {/* Coordonnées + tampon FNE (md+ uniquement) */}
+        {/* Coordonnées (md+ uniquement) */}
         <footer
-          className="relative z-10 hidden md:flex items-end justify-between gap-6 reveal"
+          className="relative z-10 hidden md:block reveal"
           style={{ animationDelay: '460ms' }}
         >
           <div className="font-mono text-[10px] leading-[1.8] text-sand-100/55 uppercase tracking-[0.14em]">
             <p>Lat 5°20′N · Lon 4°02′W · Alt 18m</p>
             <p>Abidjan · CI</p>
-            <p className="text-gold-500/80">DGI · FNE-CI · Autorisé</p>
-          </div>
-
-          {/* Tampon FNE rond */}
-          <div className="relative w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] shrink-0 stamp">
-            <svg viewBox="0 0 200 200" className="w-full h-full">
-              <defs>
-                <path
-                  id="stamp-arc"
-                  d="M 100,100 m -76,0 a 76,76 0 1,1 152,0 a 76,76 0 1,1 -152,0"
-                />
-              </defs>
-              <circle cx="100" cy="100" r="92" fill="none" stroke="#c89a1d" strokeWidth="1" opacity="0.45" />
-              <circle cx="100" cy="100" r="78" fill="none" stroke="#c89a1d" strokeWidth="1.5" opacity="0.6" />
-              <text fill="#c89a1d" fontFamily="ui-monospace, monospace" fontSize="9.5" fontWeight="600" opacity="0.75" letterSpacing="2.5">
-                <textPath href="#stamp-arc" startOffset="0">
-                  FACTURE NORMALISÉE · CÔTE D IVOIRE · FNE ·
-                </textPath>
-              </text>
-              <g transform="translate(100 100)" opacity="0.85">
-                <text fill="#c89a1d" fontFamily="Sora, sans-serif" fontSize="26" fontWeight="800" textAnchor="middle" y="2">FNE</text>
-                <text fill="#c89a1d" fontFamily="ui-monospace, monospace" fontSize="8" textAnchor="middle" y="18" letterSpacing="2.5">CERTIFIÉ</text>
-              </g>
-            </svg>
           </div>
         </footer>
       </section>
@@ -177,7 +153,7 @@ export default function Login() {
               className="font-body text-[12.5px] text-sand-600 mt-2 reveal"
               style={{ animationDelay: '500ms' }}
             >
-              Connectez-vous à votre brigade pour reprendre vos chantiers.
+              Connectez-vous à votre espace pour reprendre vos chantiers.
             </p>
 
             {error && (
@@ -240,7 +216,7 @@ export default function Login() {
                             active:translate-y-px
                             ${loading ? 'animate-pulse-soft' : ''}`}
               >
-                <span>{loading ? 'Authentification…' : 'Entrer dans la brigade'}</span>
+                <span>{loading ? 'Authentification…' : 'Se connecter'}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-4 h-4 transition-transform group-hover:translate-x-1">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
@@ -249,7 +225,7 @@ export default function Login() {
           </div>
 
           <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-sand-400 mt-12 pl-6">
-            EKO SARL · v2026.5 · <span className="text-gold-600">Bâti pour le terrain</span>
+            EKO SARL · v2026.5 · <span className="text-gold-600">Système de gestion</span>
           </p>
         </div>
       </section>

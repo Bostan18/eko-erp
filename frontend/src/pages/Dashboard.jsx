@@ -139,7 +139,7 @@ function HeroBand({ date, saison, ca, evolPct, mois }) {
             </p>
           </div>
           <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-sand-100/40 hidden md:block">
-            Cockpit · Brigade EKO
+            Cockpit EKO
           </p>
         </div>
 
@@ -232,7 +232,7 @@ function AlertsStrip({ kpis }) {
     return (
       <div className="card px-4 py-2.5 flex items-center gap-2 text-[12px] text-sand-600">
         <span className="w-1.5 h-1.5 rounded-full bg-forest-500" />
-        Aucune alerte opérationnelle — la brigade est sereine.
+        Aucune alerte opérationnelle — situation nominale.
       </div>
     )
   }
@@ -502,7 +502,7 @@ function FeedEquipe({ events }) {
       <div className="th-row">
         <div>
           <p className="th-title">Activité récente</p>
-          <p className="text-[11px] text-sand-500 mt-0.5">Derniers événements ERP — toutes brigades</p>
+          <p className="text-[11px] text-sand-500 mt-0.5">Derniers événements ERP — tous services</p>
         </div>
         <Link to="/comptabilite/factures" className="text-[12px] font-display font-medium text-forest-700 hover:underline">
           Tout l'historique →

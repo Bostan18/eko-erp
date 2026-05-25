@@ -340,3 +340,24 @@ export const IconLogout = (p) => base(
   <>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
   </>, p)
+
+/* ─── Actions CRUD sur lignes de tableau ─────────────────── */
+
+export const IconEye = (p) => base(
+  <>
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </>, p)
+
+export const IconPencil = (p) => base(
+  <>
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5Z" />
+  </>, p)
+
+export const IconTrash = (p) => base(
+  <>
+    <path d="M3 6h18" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </>, p)

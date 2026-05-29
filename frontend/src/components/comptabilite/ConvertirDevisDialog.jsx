@@ -32,12 +32,12 @@ export function ConvertirDevisModal({ devis, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#212121]/60 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl ring-1 ring-[#ece2d3] p-6 max-w-md w-full shadow-2xl">
-        <h2 className="font-display font-bold text-[#1C1817] text-[18px]">
+      <div className="relative bg-white rounded-xl ring-1 ring-sand-200 p-6 max-w-md w-full shadow-2xl">
+        <h2 className="font-display font-bold text-ink text-[18px]">
           Convertir ce devis en facture ?
         </h2>
-        <p className="font-body text-[14px] text-[#A59F9B] mt-2">
-          Le devis <span className="font-mono text-[#1C1817]">{devis.numero}</span>{' '}
+        <p className="font-body text-[14px] text-sand-500 mt-2">
+          Le devis <span className="font-mono text-ink">{devis.numero}</span>{' '}
           ({fmt(devis.total_ttc)} FCFA) sera converti en facture brouillon.
           Les lignes, le client et le projet seront copiés automatiquement.
         </p>
@@ -45,7 +45,7 @@ export function ConvertirDevisModal({ devis, onConfirm, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="bg-[#f4ebe0] text-[#5d4f3a] rounded-lg px-4 py-2 font-display font-medium text-[14px] hover:bg-[#ece2d3] transition-colors flex-1"
+            className="bg-sand-100 text-sand-700 rounded-lg px-4 py-2 font-display font-medium text-[14px] hover:bg-sand-200 transition-colors flex-1"
           >
             Annuler
           </button>

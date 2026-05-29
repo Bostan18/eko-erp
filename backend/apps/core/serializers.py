@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import EntrepriseConfig
+from .models import EntrepriseConfig, Document, CentreCout
+
+
+class CentreCoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = CentreCout
+        fields = ["id", "code", "nom", "couleur", "actif", "ordre"]
+        read_only_fields = ["id"]
 
 
 class EntrepriseConfigSerializer(serializers.ModelSerializer):
@@ -16,3 +23,17 @@ class EntrepriseConfigSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "fne_client_secret": {"write_only": False},
         }
+
+
+class DocumentSerializer(serializers.ModelSerializer):
+    statut = serializers.ReadOnlyField()
+
+    class Meta:
+        model  = Document
+        fields = [
+            "id", "id_doc", "titre", "type_doc",
+            "entite_type", "entite_id",
+            "date_emission", "date_expiration",
+            "fichier_url", "notes", "statut",
+        ]
+        read_only_fields = ["id", "statut"]

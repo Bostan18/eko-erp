@@ -1,94 +1,226 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
+import Badge, { CenterBadge } from '../../components/ui/Badge'
+import ModuleTabs, { PROJETS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconBuilding, IconRefresh, IconCheck, IconWallet } from '../../components/ui/Icons'
 import ProjetForm from '../../components/forms/ProjetForm'
 import { useFetchList } from '../../hooks/useFetchList'
-import { PROJET_STATUT_BADGE, PROJET_TYPE_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
+import { apiErrorMessage } from '../../utils/errors'
 
-export default function ProjetList({ typeProjet = null }) {
-  const endpoint = typeProjet ? `/projets/projets/?type_projet=${typeProjet}` : '/projets/projets/'
-  const { items: projets, loading, error, charger } = useFetchList(endpoint, 'Impossible de charger les projets.')
-  const [modal, setModal] = useState(false)
-  const typeLabel = typeProjet ? PROJET_TYPE_LABEL[typeProjet] ?? typeProjet : null
+const TYPE_LABEL = {
+  btp: 'BTP', agriculture: 'Agriculture', pepiniere: 'Pépinière',
+  location: 'Location', espaces_verts: 'Espaces verts',
+}
+const TYPE_TONE = {
+  btp: 'blue', agriculture: 'green', pepiniere: 'green',
+  location: 'gold', espaces_verts: 'green',
+}
+const STATUT_TONE = {
+  planifie: 'gray', en_cours: 'blue', suspendu: 'gold',
+  termine: 'green', annule: 'red',
+}
+const STATUT_LABEL = {
+  planifie: 'Planifié', en_cours: 'En cours', suspendu: 'Suspendu',
+  termine: 'Terminé', annule: 'Annulé',
+}
+
+export default function ProjetList() {
+  const { items: projets, loading, error, charger } = useFetchList(
+    '/projets/projets/', 'Impossible de charger les projets.'
+  )
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const [filtre, setFiltre] = useState('tous')
+  const [modal, setModal]   = useState(false)
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/projets/projets/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
+
+  const filtered = projets
+    .filter((p) => filtre === 'tous' ? true : p.type_projet === filtre)
+    .filter((p) =>
+      !search ? true :
+      p.nom.toLowerCase().includes(search.toLowerCase()) ||
+      p.code.toLowerCase().includes(search.toLowerCase())
+    )
+
+  const nbEnCours = projets.filter((p) => p.statut === 'en_cours').length
+  const nbTermines = projets.filter((p) => p.statut === 'termine').length
+  const budgetTotal = projets.reduce((s, p) => s + Number(p.budget_estime ?? 0), 0)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className="font-body text-[#A59F9B] text-sm">
-          {loading
-            ? '…'
-            : `${projets.length} projet${projets.length !== 1 ? 's' : ''}${typeLabel ? ` — ${typeLabel}` : ''}`}
-        </p>
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg bg-white border border-[#ece2d3] p-0.5">
-            <span className="px-3 py-1.5 rounded-md text-xs font-display font-medium bg-forest-700 text-white">
-              Vue liste
-            </span>
-            <Link
-              to="/projets/planning"
-              className="px-3 py-1.5 rounded-md text-xs font-display font-medium text-[#A59F9B] hover:text-[#1C1817]"
-            >
-              Vue Gantt
-            </Link>
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
+        <div>
+          <div className="sec-title">Projets</div>
+          <div className="sec-sub">
+            Chantiers BTP, agricoles & locations ·{' '}
+            {loading ? '…' : `${projets.length} projet${projets.length !== 1 ? 's' : ''}`}
           </div>
-          <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau projet</button>
         </div>
+        <button className="btn-primary" onClick={() => setModal(true)}>
+          <IconPlus className="w-3.5 h-3.5" /> Nouveau projet
+        </button>
       </div>
 
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <KpiCard
+          icon={<IconBuilding />} tone="sand"
+          label="Projets"
+          value={projets.length}
+          sub="Tous statuts"
+        />
+        <KpiCard
+          icon={<IconRefresh />} tone="blue"
+          label="En cours"
+          value={nbEnCours}
+          sub="Projets actifs"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest"
+          label="Terminés"
+          value={nbTermines}
+          sub="Cumul"
+        />
+        <KpiCard
+          icon={<IconWallet />} tone="sand"
+          label="Budget cumulé"
+          value={<>{fmt(budgetTotal)} <span className="kpi-unit">FCFA</span></>}
+          sub="Tous projets confondus"
+        />
+      </div>
+
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        <ModuleTabs items={PROJETS_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Liste des projets ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              className="input input-sm w-auto"
+              value={filtre}
+              onChange={(e) => setFiltre(e.target.value)}
+            >
+              <option value="tous">Tous les types</option>
+              {Object.entries(TYPE_LABEL).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              className="input input-sm w-[210px]"
+              placeholder="Rechercher nom ou code…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
-              <tr>
-                {['Code', 'Nom', 'Type', 'Statut', 'Client', 'Début', 'Budget'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
-                    {h}
-                  </th>
-                ))}
-              </tr>
+          <table className="table-eko">
+            <thead>
+              <tr>{['Code','Nom','Type','Centre','Statut','Client','Début','Budget'].map(h => <th key={h}>{h}</th>)}<th className="text-right">Actions</th></tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
-              {projets.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">
-                    {typeLabel ? `Aucun projet ${typeLabel.toLowerCase()}` : 'Aucun projet enregistré'}
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-sand-500 font-body">Aucun projet</td></tr>
+              ) : filtered.map((p) => (
+                <tr key={p.id}>
+                  <td className="mono-cell text-forest-700">{p.code}</td>
+                  <td>
+                    <Link to={`/projets/${p.id}`} className="font-display font-medium text-ink hover:text-forest-700 transition-colors">
+                      {p.nom}
+                    </Link>
+                  </td>
+                  <td><Badge tone={TYPE_TONE[p.type_projet] ?? 'gray'}>{TYPE_LABEL[p.type_projet] ?? p.type_projet}</Badge></td>
+                  <td>{p.centre_cout_display ? <CenterBadge center={p.centre_cout_display} /> : <span className="text-sand-400">—</span>}</td>
+                  <td><Badge tone={STATUT_TONE[p.statut] ?? 'gray'}>{STATUT_LABEL[p.statut] ?? p.statut}</Badge></td>
+                  <td className="text-sand-600">{p.client_nom ?? '—'}</td>
+                  <td className="mono-cell">{p.date_debut ?? '—'}</td>
+                  <td className="num">{p.budget_estime ? `${fmt(p.budget_estime)} F` : '—'}</td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/projets/${p.id}`)}
+                      onEdit={() => setEditing(p)}
+                      onDelete={() => setDeleting(p)}
+                    />
                   </td>
                 </tr>
-              ) : (
-                projets.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#fbf7f0] transition-colors">
-                    <td className="px-4 py-3 font-display font-medium text-forest-700">{p.code}</td>
-                    <td className="px-4 py-3">
-                      <Link to={`/projets/${p.id}`} className="font-body font-medium text-[#1C1817] hover:text-forest-700 transition-colors">
-                        {p.nom}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B]">{PROJET_TYPE_LABEL[p.type_projet] ?? p.type_projet}</td>
-                    <td className="px-4 py-3">
-                      <span className={PROJET_STATUT_BADGE[p.statut] ?? 'badge-gray'}>{p.statut}</span>
-                    </td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B]">{p.client_nom ?? '—'}</td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B]">{p.date_debut ?? '—'}</td>
-                    <td className="px-4 py-3 font-body text-[#1C1817]">
-                      {p.budget_estime ? `${fmt(p.budget_estime)} F` : '—'}
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau projet" onClose={() => setModal(false)}>
-          <ProjetForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.code} — ${editing.nom}` : 'Nouveau projet'}
+          sousTitre="Définir le projet, client, planning et budget."
+          onClose={fermerDrawer}
+        >
+          <ProjetForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
       )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce projet ?"
+          message={`Le projet ${deleting.code} — ${deleting.nom} sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
     </div>
+  )
+}
+
+function IconPlus({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   )
 }

@@ -78,3 +78,9 @@ ROADMAP.md
 
 # ─── WSL / Windows artifacts ───────────────────────────────────────
 *:Zone.Identifier
+
+# ─── Brouillons & exports locaux ───────────────────────────────────
+EKO ERP.html
+eko-erp-frontend/
+session.txt
+docs/sessions.txt

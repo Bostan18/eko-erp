@@ -1,11 +1,20 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useGantt } from '../../hooks/useGantt'
+import ModuleTabs, { PROJETS_TABS } from '../../components/ui/ModuleTabs'
 import GanttView from '../../components/gantt/GanttView'
 import GanttFilters, { PERIODES } from '../../components/gantt/GanttFilters'
 import { toISO } from '../../utils/dateHelpers'
 
 const STATUTS_DEFAUT = ['planifie', 'en_cours', 'suspendu']
+
+function IconPlus({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
 
 export default function PlanningGantt() {
   const navigate = useNavigate()
@@ -26,27 +35,24 @@ export default function PlanningGantt() {
   const { data, loading, error } = useGantt({ dateDebut, dateFin, statuts, chefId })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="font-body text-[#A59F9B] text-sm">
-            {loading ? '…' : `${data?.projets?.length ?? 0} projets sur ${data?.periode?.jours ?? 0} jours`}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg bg-white border border-[#ece2d3] p-0.5">
-            <Link
-              to="/projets"
-              className="px-3 py-1.5 rounded-md text-xs font-display font-medium text-[#A59F9B] hover:text-[#1C1817]"
-            >
-              Vue liste
-            </Link>
-            <span className="px-3 py-1.5 rounded-md text-xs font-display font-medium bg-forest-700 text-white">
-              Vue Gantt
-            </span>
+          <div className="sec-title">Planning Gantt</div>
+          <div className="sec-sub">
+            Vue calendaire des projets ·{' '}
+            {loading ? '…' : `${data?.projets?.length ?? 0} projet${(data?.projets?.length ?? 0) !== 1 ? 's' : ''} sur ${data?.periode?.jours ?? 0} jours`}
           </div>
-          <button className="btn-primary" onClick={() => navigate('/projets')}>+ Nouveau projet</button>
         </div>
+        <button className="btn-primary" onClick={() => navigate('/projets')}>
+          <IconPlus className="w-3.5 h-3.5" /> Nouveau projet
+        </button>
+      </div>
+
+      {/* ─── Onglets module ─────────────────────────────── */}
+      <div className="card">
+        <ModuleTabs items={PROJETS_TABS} />
       </div>
 
       <GanttFilters
@@ -66,7 +72,7 @@ export default function PlanningGantt() {
       )}
 
       {loading && !data && (
-        <div className="card p-12 text-center text-[#A59F9B] font-body">Chargement du planning…</div>
+        <div className="card p-12 text-center text-sand-500 font-body">Chargement du planning…</div>
       )}
 
       {data && (

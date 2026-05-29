@@ -40,7 +40,7 @@ export default function GanttFilters({
     <div className="card p-4 flex items-end gap-4 flex-wrap">
       {/* Période */}
       <div>
-        <p className="font-display text-[11px] uppercase tracking-wide text-[#A59F9B] mb-1">Période</p>
+        <p className="font-display text-[11px] uppercase tracking-wide text-sand-500 mb-1">Période</p>
         <div className="flex gap-1">
           {PERIODES.map((p) => (
             <button
@@ -49,7 +49,7 @@ export default function GanttFilters({
               className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
                 periodePreset === p.value
                   ? 'bg-forest-700 text-white'
-                  : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
+                  : 'bg-white border border-sand-200 text-ink hover:border-forest-300'
               }`}
             >
               {p.label}
@@ -60,7 +60,7 @@ export default function GanttFilters({
 
       {/* Statuts */}
       <div>
-        <p className="font-display text-[11px] uppercase tracking-wide text-[#A59F9B] mb-1">Statuts</p>
+        <p className="font-display text-[11px] uppercase tracking-wide text-sand-500 mb-1">Statuts</p>
         <div className="flex gap-1">
           {STATUTS.map((s) => {
             const actif = statuts.includes(s.value)
@@ -71,7 +71,7 @@ export default function GanttFilters({
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
                   actif
                     ? 'bg-forest-700 text-white'
-                    : 'bg-white border border-[#ece2d3] text-[#A59F9B] hover:text-[#1C1817]'
+                    : 'bg-white border border-sand-200 text-sand-500 hover:text-ink'
                 }`}
               >
                 {s.label}
@@ -83,7 +83,7 @@ export default function GanttFilters({
 
       {/* Chef de chantier */}
       <div className="min-w-[200px]">
-        <p className="font-display text-[11px] uppercase tracking-wide text-[#A59F9B] mb-1">Chef de chantier</p>
+        <p className="font-display text-[11px] uppercase tracking-wide text-sand-500 mb-1">Chef de chantier</p>
         <select
           value={chefId ?? ''}
           onChange={(e) => onChefChange(e.target.value || null)}

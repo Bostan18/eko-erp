@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
 import { today } from '../../utils/format'
+import { FormSection, FormRow, Field, ModalFooter } from '../ui/Modal'
 
 const INIT = {
   libelle: '', categorie: 'materiel', montant: '',
-  date: today(), projet: '', fournisseur: '', reference: '', notes: '',
+  date: today(), projet: '', centre_cout: '', fournisseur: '', reference: '', notes: '',
 }
 
 function validate(form) {
@@ -16,14 +17,22 @@ function validate(form) {
   return null
 }
 
-export default function ChargeForm({ onSuccess, onClose }) {
-  const [form, setForm]       = useState(INIT)
+export default function ChargeForm({ initial, onSuccess, onClose }) {
+  const isEdit = !!initial?.id
+  const [form, setForm]       = useState({
+    ...INIT,
+    ...(initial || {}),
+    projet:      String(initial?.projet ?? ''),
+    centre_cout: String(initial?.centre_cout ?? ''),
+  })
   const [projets, setProjets] = useState([])
+  const [centres, setCentres] = useState([])
   const [error, setError]     = useState('')
   const [saving, setSaving]   = useState(false)
 
   useEffect(() => {
     api.get('/projets/projets/').then(({ data }) => setProjets(data.results ?? data))
+    api.get('/core/centres-cout/?actif=true').then(({ data }) => setCentres(data.results ?? data))
   }, [])
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
@@ -35,7 +44,12 @@ export default function ChargeForm({ onSuccess, onClose }) {
     setSaving(true)
     setError('')
     try {
-      await api.post('/comptabilite/charges/', { ...form, projet: form.projet || null })
+      const payload = { ...form, projet: form.projet || null, centre_cout: form.centre_cout || null }
+      if (isEdit) {
+        await api.patch(`/comptabilite/charges/${initial.id}/`, payload)
+      } else {
+        await api.post('/comptabilite/charges/', payload)
+      }
       onSuccess()
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -45,71 +59,78 @@ export default function ChargeForm({ onSuccess, onClose }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
-      )}
+    <form onSubmit={handleSubmit}>
+        {error && (
+          <div className="alert-red mb-5">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+            {error}
+          </div>
+        )}
 
-      <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Libellé *</label>
-        <input className="input" placeholder="Achat ciment — 50 sacs" value={form.libelle}
-          onChange={(e) => set('libelle', e.target.value)} />
-      </div>
+        <FormSection titre="Charge">
+          <Field label="Libellé" required>
+            <input className="input" placeholder="Achat ciment — 50 sacs" value={form.libelle}
+              onChange={(e) => set('libelle', e.target.value)} />
+          </Field>
+          <FormRow cols={2}>
+            <Field label="Catégorie" required>
+              <select className="input" value={form.categorie} onChange={(e) => set('categorie', e.target.value)}>
+                <option value="salaire">Salaires & charges sociales</option>
+                <option value="materiel">Matériel & équipement</option>
+                <option value="carburant">Carburant & transport</option>
+                <option value="sous_traitance">Sous-traitance</option>
+                <option value="location">Location engins</option>
+                <option value="fourniture">Fournitures</option>
+                <option value="autre">Autre</option>
+              </select>
+            </Field>
+            <Field label="Montant (F)" required>
+              <input type="number" min="0" step="1" className="input" placeholder="0" value={form.montant}
+                onChange={(e) => set('montant', e.target.value)} />
+            </Field>
+          </FormRow>
+        </FormSection>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Catégorie *</label>
-          <select className="input" value={form.categorie} onChange={(e) => set('categorie', e.target.value)}>
-            <option value="salaire">Salaires & charges sociales</option>
-            <option value="materiel">Matériel & équipement</option>
-            <option value="carburant">Carburant & transport</option>
-            <option value="sous_traitance">Sous-traitance</option>
-            <option value="location">Location engins</option>
-            <option value="fourniture">Fournitures</option>
-            <option value="autre">Autre</option>
-          </select>
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Montant (F) *</label>
-          <input type="number" min="0" step="1" className="input" placeholder="0" value={form.montant}
-            onChange={(e) => set('montant', e.target.value)} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date *</label>
-          <input type="date" className="input" value={form.date}
-            onChange={(e) => set('date', e.target.value)} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Projet lié</label>
-          <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
-            <option value="">— Sans projet —</option>
-            {projets.map((p) => <option key={p.id} value={p.id}>{p.code} — {p.nom}</option>)}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Fournisseur</label>
-          <input className="input" placeholder="Société ABC" value={form.fournisseur}
-            onChange={(e) => set('fournisseur', e.target.value)} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Référence</label>
-          <input className="input" placeholder="N° bon de livraison" value={form.reference}
-            onChange={(e) => set('reference', e.target.value)} />
-        </div>
-      </div>
-
-      <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
-        <button type="submit" className="btn-primary flex-1" disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer la charge'}
+        <FormSection titre="Affectation">
+          <FormRow cols={2}>
+            <Field label="Date" required>
+              <input type="date" className="input" value={form.date}
+                onChange={(e) => set('date', e.target.value)} />
+            </Field>
+            <Field label="Projet lié">
+              <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
+                <option value="">— Sans projet —</option>
+                {projets.map((p) => <option key={p.id} value={p.id}>{p.code} — {p.nom}</option>)}
+              </select>
+            </Field>
+          </FormRow>
+          <Field label="Centre de coût" hint="Ventilation analytique (optionnel)">
+            <select className="input" value={form.centre_cout} onChange={(e) => set('centre_cout', e.target.value)}>
+              <option value="">— Aucun —</option>
+              {centres.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
+            </select>
+          </Field>
+          <FormRow cols={2}>
+            <Field label="Fournisseur">
+              <input className="input" placeholder="Société ABC" value={form.fournisseur}
+                onChange={(e) => set('fournisseur', e.target.value)} />
+            </Field>
+            <Field label="Référence" hint="N° bon de livraison, ticket…">
+              <input className="input" placeholder="BL-2026-0044" value={form.reference}
+                onChange={(e) => set('reference', e.target.value)} />
+            </Field>
+          </FormRow>
+          <Field label="Notes">
+            <textarea className="input resize-none" rows={2} value={form.notes}
+              onChange={(e) => set('notes', e.target.value)} />
+          </Field>
+        </FormSection>
+      <ModalFooter>
+        <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
+          {saving ? 'Enregistrement…' : (isEdit ? 'Mettre à jour' : 'Enregistrer la charge')}
         </button>
-      </div>
+      </ModalFooter>
     </form>
   )
 }

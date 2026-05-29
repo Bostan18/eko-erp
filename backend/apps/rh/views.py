@@ -4,10 +4,15 @@ from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Employe, PresenceJournaliere, BulletinPaie, MissionMoo
+from .models import (
+    Employe, PresenceJournaliere, BulletinPaie, MissionMoo,
+    Conge, Competence, CompetenceEmploye, Certification, HistoriqueContrat,
+)
 from .serializers import (
     EmployeSerializer, PresenceJournaliereSerializer,
     BulletinPaieSerializer, MissionMooSerializer,
+    CongeSerializer, CompetenceSerializer, CompetenceEmployeSerializer,
+    CertificationSerializer, HistoriqueContratSerializer,
 )
 from .exports import paie_excel
 
@@ -296,3 +301,66 @@ class MissionMooViewSet(viewsets.ModelViewSet):
         mission.paye_le = request.data.get("paye_le") or timezone.now().date()
         mission.save()
         return Response(MissionMooSerializer(mission).data)
+
+
+# ── Sprint 8 ─────────────────────────────────────────────────────────────────
+
+class CongeViewSet(viewsets.ModelViewSet):
+    queryset         = Conge.objects.select_related("employe")
+    serializer_class = CongeSerializer
+    filterset_fields = ["employe", "statut", "type_conge"]
+    search_fields    = ["employe__nom", "employe__prenom", "motif"]
+
+    @action(detail=True, methods=["post"])
+    def approuver(self, request, pk=None):
+        conge = self.get_object()
+        if conge.statut not in ("demande",):
+            return Response(
+                {"detail": "Seuls les congés au statut 'Demandé' peuvent être approuvés."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        conge.statut = "approuve"
+        conge.approuve_par = request.data.get("approuve_par", "")
+        conge.approuve_le  = timezone.now().date()
+        conge.save()
+        return Response(CongeSerializer(conge).data)
+
+    @action(detail=True, methods=["post"])
+    def refuser(self, request, pk=None):
+        conge = self.get_object()
+        if conge.statut not in ("demande",):
+            return Response(
+                {"detail": "Seuls les congés au statut 'Demandé' peuvent être refusés."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        conge.statut = "refuse"
+        conge.approuve_par = request.data.get("approuve_par", "")
+        conge.approuve_le  = timezone.now().date()
+        conge.save()
+        return Response(CongeSerializer(conge).data)
+
+
+class CompetenceViewSet(viewsets.ModelViewSet):
+    queryset         = Competence.objects.filter(is_deleted=False).prefetch_related("acquisitions")
+    serializer_class = CompetenceSerializer
+    filterset_fields = ["categorie", "actif"]
+    search_fields    = ["code", "libelle"]
+
+
+class CompetenceEmployeViewSet(viewsets.ModelViewSet):
+    queryset         = CompetenceEmploye.objects.select_related("employe", "competence")
+    serializer_class = CompetenceEmployeSerializer
+    filterset_fields = ["employe", "competence"]
+
+
+class CertificationViewSet(viewsets.ModelViewSet):
+    queryset         = Certification.objects.select_related("employe")
+    serializer_class = CertificationSerializer
+    filterset_fields = ["employe"]
+    search_fields    = ["libelle", "organisme", "numero"]
+
+
+class HistoriqueContratViewSet(viewsets.ModelViewSet):
+    queryset         = HistoriqueContrat.objects.select_related("employe")
+    serializer_class = HistoriqueContratSerializer
+    filterset_fields = ["employe", "type_contrat"]

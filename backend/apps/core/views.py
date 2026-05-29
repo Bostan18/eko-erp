@@ -1,8 +1,21 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .models import EntrepriseConfig
-from .serializers import EntrepriseConfigSerializer
+from rest_framework import status, viewsets, filters
+from .models import EntrepriseConfig, Document, CentreCout
+from .serializers import EntrepriseConfigSerializer, DocumentSerializer, CentreCoutSerializer
+
+
+class DocumentViewSet(viewsets.ModelViewSet):
+    queryset = Document.objects.filter(is_deleted=False)
+    serializer_class = DocumentSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["id_doc", "titre", "entite_id", "notes"]
+
+
+class CentreCoutViewSet(viewsets.ModelViewSet):
+    queryset = CentreCout.objects.all()
+    serializer_class = CentreCoutSerializer
+    filterset_fields = ["actif"]
 
 
 class EntrepriseConfigView(APIView):

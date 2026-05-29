@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import ModuleTabs, { STOCKS_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconAlert, IconTrendDown, IconTruck } from '../../components/ui/Icons'
 import { useFetchList } from '../../hooks/useFetchList'
 import { ARTICLE_CAT_LABEL } from '../../utils/constants'
 import { fmt } from '../../utils/format'
@@ -16,59 +19,98 @@ export default function StockAlertes() {
       a.code.toLowerCase().includes(search.toLowerCase())
   )
 
+  const manqueTotal = articles.reduce(
+    (s, a) => s + Math.max(0, Number(a.seuil_minimum) - Number(a.stock_actuel)),
+    0
+  )
+  const nbFournisseurs = new Set(articles.map((a) => a.fournisseur).filter(Boolean)).size
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <p className="font-body text-[#A59F9B] text-sm">
-          {loading ? '…' : `${articles.length} article${articles.length !== 1 ? 's' : ''} sous le seuil`}
-        </p>
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
+        <div>
+          <div className="sec-title">Alertes de stock</div>
+          <div className="sec-sub">
+            Articles sous le seuil minimum ·{' '}
+            {loading ? '…' : `${articles.length} article${articles.length !== 1 ? 's' : ''}`}
+          </div>
+        </div>
       </div>
 
-      <input
-        type="text"
-        className="input max-w-xs"
-        placeholder="Rechercher par nom ou code…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      {/* ─── KPI ────────────────────────────────────────── */}
+      <div className="three-col">
+        <KpiCard
+          icon={<IconAlert />} tone="red"
+          label="Articles en alerte"
+          value={articles.length}
+          sub={articles.length > 0 ? 'Sous le seuil minimum' : 'Tout est à niveau'}
+        />
+        <KpiCard
+          icon={<IconTrendDown />} tone="red"
+          label="Manque cumulé"
+          value={fmt(manqueTotal)}
+          sub="Unités à réapprovisionner"
+        />
+        <KpiCard
+          icon={<IconTruck />} tone="blue"
+          label="Fournisseurs"
+          value={nbFournisseurs}
+          sub="À solliciter"
+        />
+      </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        <ModuleTabs items={STOCKS_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Articles sous seuil ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <input
+            type="text"
+            className="input input-sm w-[210px]"
+            placeholder="Rechercher par nom ou code…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">
+          <div className="p-12 text-center text-sand-500 font-body text-sm">
             {articles.length === 0
               ? 'Aucun article en alerte — tous les stocks sont au-dessus du seuil.'
               : 'Aucun article ne correspond à la recherche.'}
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
+          <table className="table-eko">
+            <thead>
               <tr>
                 {['Code', 'Nom', 'Catégorie', 'Stock', 'Seuil', 'Manque', 'Unité', 'Fournisseur'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">
-                    {h}
-                  </th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {filtered.map((a) => {
                 const manque = Number(a.seuil_minimum) - Number(a.stock_actuel)
                 return (
-                  <tr key={a.id} className="bg-red-50 hover:bg-red-100 transition-colors">
-                    <td className="px-4 py-3 font-display font-medium text-forest-700">{a.code}</td>
-                    <td className="px-4 py-3 font-body font-medium text-[#1C1817]">{a.nom}</td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{ARTICLE_CAT_LABEL[a.categorie] ?? a.categorie}</td>
-                    <td className="px-4 py-3">
-                      <span className="font-display font-bold text-red-600">{fmt(a.stock_actuel)}</span>
-                      <span className="ml-1 text-red-500" title="Stock sous le seuil minimum">⚠</span>
+                  <tr key={a.id} className="bg-red-50/40 hover:bg-red-50">
+                    <td className="mono-cell text-forest-700">{a.code}</td>
+                    <td className="font-display font-medium text-ink">{a.nom}</td>
+                    <td className="text-[12px] text-sand-500">{ARTICLE_CAT_LABEL[a.categorie] ?? a.categorie}</td>
+                    <td className="num text-red-600">
+                      {fmt(a.stock_actuel)}<span className="ml-1 text-red-500" title="Stock sous le seuil minimum">⚠</span>
                     </td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B]">{fmt(a.seuil_minimum)}</td>
-                    <td className="px-4 py-3 font-display font-semibold text-red-600">{fmt(manque)}</td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B]">{a.unite}</td>
-                    <td className="px-4 py-3 font-body text-[#A59F9B]">{a.fournisseur || '—'}</td>
+                    <td className="mono-cell">{fmt(a.seuil_minimum)}</td>
+                    <td className="num text-red-600">{fmt(manque)}</td>
+                    <td className="text-sand-600">{a.unite}</td>
+                    <td className="text-sand-600">{a.fournisseur || '—'}</td>
                   </tr>
                 )
               })}

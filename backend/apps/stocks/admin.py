@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Article, MouvementStock
+from .models import Article, MouvementStock, LotBiologique, TraceurRFID, Dechet
+
+admin.site.register(LotBiologique)
+admin.site.register(TraceurRFID)
+admin.site.register(Dechet)
 
 
 @admin.register(Article)

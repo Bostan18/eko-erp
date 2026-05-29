@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
+import { FormSection, FormRow, Field, ModalFooter } from '../ui/Modal'
 
 const INIT = {
   nom: '', description: '', type_objectif: 'unite', unite_label: '',
@@ -55,89 +56,84 @@ export default function TacheForm({ projetId, onSuccess, onClose }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>
-      )}
+    <form onSubmit={handleSubmit}>
+        {error && (
+          <div className="alert-red mb-5">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+            {error}
+          </div>
+        )}
 
-      <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Nom de la tâche *</label>
-        <input className="input" placeholder="Coulage fondation" value={form.nom}
-          onChange={(e) => set('nom', e.target.value)} />
-      </div>
+        <FormSection titre="Identification">
+          <Field label="Nom de la tâche" required>
+            <input className="input" placeholder="Coulage fondation" value={form.nom}
+              onChange={(e) => set('nom', e.target.value)} />
+          </Field>
+          <Field label="Description">
+            <textarea className="input resize-none" rows={2} placeholder="Détails de la tâche…"
+              value={form.description} onChange={(e) => set('description', e.target.value)} />
+          </Field>
+        </FormSection>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type d'objectif *</label>
-          <select className="input" value={form.type_objectif} onChange={(e) => set('type_objectif', e.target.value)}>
-            {Object.entries(TYPE_OBJECTIF_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Unité (libellé)</label>
-          <input className="input" placeholder="m², sacs, ml…" value={form.unite_label}
-            onChange={(e) => set('unite_label', e.target.value)} />
-        </div>
-      </div>
+        <FormSection titre="Objectif & rémunération">
+          <FormRow cols={2}>
+            <Field label="Type d'objectif" required>
+              <select className="input" value={form.type_objectif} onChange={(e) => set('type_objectif', e.target.value)}>
+                {Object.entries(TYPE_OBJECTIF_LABELS).map(([v, l]) => (
+                  <option key={v} value={v}>{l}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Unité (libellé)" hint="ex : m², sacs, ml">
+              <input className="input" placeholder="m², sacs, ml…" value={form.unite_label}
+                onChange={(e) => set('unite_label', e.target.value)} />
+            </Field>
+          </FormRow>
+          <FormRow cols={2}>
+            <Field label="Objectif cible" required>
+              <input type="number" min="0.01" step="0.01" className="input" placeholder="50"
+                value={form.objectif_cible} onChange={(e) => set('objectif_cible', e.target.value)} />
+            </Field>
+            <Field label="Tarif unitaire (F)">
+              <input type="number" min="0" step="1" className="input" placeholder="10000"
+                value={form.tarif_unitaire} onChange={(e) => set('tarif_unitaire', e.target.value)} />
+            </Field>
+          </FormRow>
+          <FormRow cols={2}>
+            <Field label="Bonus objectif (%)" hint="Prime sur dépassement">
+              <input type="number" min="0" max="100" step="0.5" className="input" placeholder="0"
+                value={form.bonus_objectif_pct} onChange={(e) => set('bonus_objectif_pct', e.target.value)} />
+            </Field>
+            <Field label="Statut">
+              <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
+                <option value="a_faire">À faire</option>
+                <option value="en_cours">En cours</option>
+                <option value="terminee">Terminée</option>
+                <option value="annulee">Annulée</option>
+              </select>
+            </Field>
+          </FormRow>
+        </FormSection>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Objectif cible *</label>
-          <input type="number" min="0.01" step="0.01" className="input" placeholder="50"
-            value={form.objectif_cible} onChange={(e) => set('objectif_cible', e.target.value)} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Tarif unitaire (F)</label>
-          <input type="number" min="0" step="1" className="input" placeholder="10000"
-            value={form.tarif_unitaire} onChange={(e) => set('tarif_unitaire', e.target.value)} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Bonus objectif (%)</label>
-          <input type="number" min="0" max="100" step="0.5" className="input" placeholder="0"
-            value={form.bonus_objectif_pct} onChange={(e) => set('bonus_objectif_pct', e.target.value)} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Statut</label>
-          <select className="input" value={form.statut} onChange={(e) => set('statut', e.target.value)}>
-            <option value="a_faire">À faire</option>
-            <option value="en_cours">En cours</option>
-            <option value="terminee">Terminée</option>
-            <option value="annulee">Annulée</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date début</label>
-          <input type="date" className="input" value={form.date_debut}
-            onChange={(e) => set('date_debut', e.target.value)} />
-        </div>
-        <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date fin prévue</label>
-          <input type="date" className="input" value={form.date_fin_prevue}
-            min={form.date_debut || undefined}
-            onChange={(e) => set('date_fin_prevue', e.target.value)} />
-        </div>
-      </div>
-
-      <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Description</label>
-        <textarea className="input resize-none" rows={2} placeholder="Détails de la tâche…"
-          value={form.description} onChange={(e) => set('description', e.target.value)} />
-      </div>
-
-      <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
-        <button type="submit" className="btn-primary flex-1" disabled={saving}>
+        <FormSection titre="Planning">
+          <FormRow cols={2}>
+            <Field label="Date début">
+              <input type="date" className="input" value={form.date_debut}
+                onChange={(e) => set('date_debut', e.target.value)} />
+            </Field>
+            <Field label="Date fin prévue">
+              <input type="date" className="input" value={form.date_fin_prevue}
+                min={form.date_debut || undefined}
+                onChange={(e) => set('date_fin_prevue', e.target.value)} />
+            </Field>
+          </FormRow>
+        </FormSection>
+      <ModalFooter>
+        <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? 'Enregistrement…' : 'Créer la tâche'}
         </button>
-      </div>
+      </ModalFooter>
     </form>
   )
 }

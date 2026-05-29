@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
+import Badge from '../../components/ui/Badge'
+import ModuleTabs, { RH_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconTool, IconHourglass, IconCheck } from '../../components/ui/Icons'
 import MissionMooForm from '../../components/forms/MissionMooForm'
 import api from '../../services/api'
 import { useFetchList } from '../../hooks/useFetchList'
@@ -15,7 +19,6 @@ export default function MissionsMoo() {
   const [feedback, setFeedback] = useState('')
 
   const filtered = missions.filter((m) => {
-    if (filtre === 'toutes') return true
     if (filtre === 'a_payer') return !m.paye_le
     if (filtre === 'payees') return !!m.paye_le
     return true
@@ -38,97 +41,122 @@ export default function MissionsMoo() {
     }
   }
 
+  const FILTRES = [
+    { key: 'toutes',  label: 'Toutes' },
+    { key: 'a_payer', label: 'À payer' },
+    { key: 'payees',  label: 'Payées' },
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
         <div>
-          <p className="font-body text-[#A59F9B] text-sm">
-            {loading ? '…' : `${missions.length} mission${missions.length !== 1 ? 's' : ''} MOO`}
-          </p>
-          {feedback && <p className="text-xs text-red-500 mt-1">{feedback}</p>}
+          <div className="sec-title">Missions MOO</div>
+          <div className="sec-sub">
+            Main d'œuvre occasionnelle · forfaits ·{' '}
+            {loading ? '…' : `${missions.length} mission${missions.length !== 1 ? 's' : ''}`}
+          </div>
+          {feedback && <p className="text-[12px] text-red-600 mt-1">{feedback}</p>}
         </div>
-        <button className="btn-primary" onClick={() => setModal(true)}>+ Nouvelle mission</button>
+        <button className="btn-primary" onClick={() => setModal(true)}>
+          <IconPlus className="w-3.5 h-3.5" /> Nouvelle mission
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="card p-4 ring-amber-100 bg-amber-50">
-          <p className="font-display text-xs text-amber-600 uppercase tracking-wide mb-1">À payer</p>
-          <p className="font-display font-bold text-amber-700 text-2xl">{fmt(totalAPayer)} F</p>
-        </div>
-        <div className="card p-4 ring-forest-100 bg-forest-50">
-          <p className="font-display text-xs text-forest-600 uppercase tracking-wide mb-1">Payées</p>
-          <p className="font-display font-bold text-forest-700 text-2xl">{fmt(totalPayees)} F</p>
-        </div>
+      {/* ─── KPI ────────────────────────────────────────── */}
+      <div className="three-col">
+        <KpiCard
+          icon={<IconTool />} tone="sand"
+          label="Missions"
+          value={missions.length}
+          sub="Forfaits enregistrés"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone="gold"
+          label="À payer"
+          value={<>{fmt(totalAPayer)} <span className="kpi-unit">FCFA</span></>}
+          sub="Missions non réglées"
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest"
+          label="Payées"
+          value={<>{fmt(totalPayees)} <span className="kpi-unit">FCFA</span></>}
+          sub="Cumul réglé"
+        />
       </div>
 
-      <div className="flex gap-1 flex-wrap">
-        {[
-          { key: 'toutes',  label: 'Toutes' },
-          { key: 'a_payer', label: 'À payer' },
-          { key: 'payees',  label: 'Payées' },
-        ].map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFiltre(key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-              filtre === key
-                ? 'bg-forest-700 text-white'
-                : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        <ModuleTabs items={RH_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Missions ·{' '}
+            <span className="text-sand-500 font-normal">{filtered.length}</span>
+          </div>
+          <select
+            className="input input-sm w-auto"
+            value={filtre}
+            onChange={(e) => setFiltre(e.target.value)}
+          >
+            {FILTRES.map(({ key, label }) => (
+              <option key={key} value={key}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        {error && <p className="alert-red m-5">{error}</p>}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
+          <table className="table-eko">
+            <thead>
               <tr>
-                {['Employé', 'Description', 'Période', 'Projet', 'Montant', 'Statut', 'Action'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
+                {['Employé', 'Description', 'Période', 'Projet', 'Montant', 'Statut', ''].map((h, i) => (
+                  <th key={i}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucune mission</td></tr>
-              ) : filtered.map((m) => (
-                <tr key={m.id} className="hover:bg-[#fbf7f0] transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="font-display font-medium text-forest-700 text-xs">{m.employe_code}</div>
-                    <div className="font-body text-[#1C1817]">{m.employe_nom}</div>
-                  </td>
-                  <td className="px-4 py-3 font-body text-[#1C1817]">{m.description}</td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs tabular-nums">
-                    {m.date_debut} → {m.date_fin}
-                  </td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{m.projet_nom || '—'}</td>
-                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817] tabular-nums">{fmt(m.montant_forfaitaire)} F</td>
-                  <td className="px-4 py-3">
-                    {m.paye_le ? (
-                      <span className="badge-green">Payée</span>
-                    ) : (
-                      <span className="badge-yellow">À payer</span>
-                    )}
-                    {m.paye_le && <div className="text-[10.5px] text-[#A59F9B] mt-0.5">{m.paye_le}</div>}
-                  </td>
-                  <td className="px-4 py-3">
-                    {!m.paye_le && (
-                      <button
-                        className="text-xs font-display text-forest-700 hover:text-forest-900"
-                        onClick={() => marquerPayee(m.id)}
-                      >
-                        Marquer payée
-                      </button>
-                    )}
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-sand-500 font-body">
+                    Aucune mission
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map((m) => (
+                  <tr key={m.id}>
+                    <td>
+                      <div className="mono-cell text-forest-700 font-medium">{m.employe_code}</div>
+                      <div className="font-display font-medium text-ink">{m.employe_nom}</div>
+                    </td>
+                    <td className="text-[12px] text-ink">{m.description}</td>
+                    <td className="text-[12px] text-sand-500 tabular-nums">
+                      {m.date_debut} → {m.date_fin}
+                    </td>
+                    <td className="text-[12px] text-sand-500">{m.projet_nom || '—'}</td>
+                    <td className="num">
+                      {fmt(m.montant_forfaitaire)} <span className="text-[10px] font-normal text-sand-500">F</span>
+                    </td>
+                    <td>
+                      {m.paye_le ? <Badge tone="green">Payée</Badge> : <Badge tone="gold">À payer</Badge>}
+                      {m.paye_le && <div className="text-[10.5px] text-sand-500 mt-0.5">{m.paye_le}</div>}
+                    </td>
+                    <td>
+                      {!m.paye_le && (
+                        <button
+                          className="text-[12px] font-display font-medium text-forest-700 hover:text-forest-900"
+                          onClick={() => marquerPayee(m.id)}
+                        >
+                          Marquer payée
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         )}
@@ -140,5 +168,13 @@ export default function MissionsMoo() {
         </Modal>
       )}
     </div>
+  )
+}
+
+function IconPlus({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   )
 }

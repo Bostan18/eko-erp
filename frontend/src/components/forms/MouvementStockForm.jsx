@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import { apiErrorMessage } from '../../utils/errors'
+import { ModalFooter } from '../ui/Modal'
 
 const INIT = {
   article: '',
@@ -65,7 +66,7 @@ export default function MouvementStockForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Article *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Article *</label>
           <select className="input" value={form.article} onChange={(e) => set('article', e.target.value)}>
             <option value="">— Choisir un article —</option>
             {articles.map((a) => (
@@ -74,7 +75,7 @@ export default function MouvementStockForm({ onSuccess, onClose }) {
           </select>
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Type *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Type *</label>
           <select className="input" value={form.type_mouvement} onChange={(e) => set('type_mouvement', e.target.value)}>
             <option value="entree">Entrée</option>
             <option value="sortie">Sortie</option>
@@ -84,20 +85,20 @@ export default function MouvementStockForm({ onSuccess, onClose }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">
+          <label className="block font-display text-xs font-medium text-ink mb-1">
             Quantité *{articleSelectionne ? ` (${articleSelectionne.unite})` : ''}
           </label>
           <input className="input" type="number" step="0.01" min="0" placeholder="0"
             value={form.quantite} onChange={(e) => set('quantite', e.target.value)} />
         </div>
         <div>
-          <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Date *</label>
+          <label className="block font-display text-xs font-medium text-ink mb-1">Date *</label>
           <input className="input" type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Projet (optionnel)</label>
+        <label className="block font-display text-xs font-medium text-ink mb-1">Projet (optionnel)</label>
         <select className="input" value={form.projet} onChange={(e) => set('projet', e.target.value)}>
           <option value="">— Aucun projet rattaché —</option>
           {projets.map((p) => (
@@ -107,25 +108,25 @@ export default function MouvementStockForm({ onSuccess, onClose }) {
       </div>
 
       <div>
-        <label className="block font-display text-xs font-medium text-[#1C1817] mb-1">Notes</label>
+        <label className="block font-display text-xs font-medium text-ink mb-1">Notes</label>
         <textarea className="input resize-none" rows={2} placeholder="Référence BL, motif…"
           value={form.notes} onChange={(e) => set('notes', e.target.value)} />
       </div>
 
       {articleSelectionne && form.type_mouvement === 'sortie' && form.quantite && (
         Number(form.quantite) > Number(articleSelectionne.stock_actuel) && (
-          <div className="px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-xs">
+          <div className="px-4 py-2 bg-gold-50 border border-gold-200 rounded-lg text-gold-700 text-xs">
             ⚠ Cette sortie ({form.quantite}) dépasse le stock actuel ({articleSelectionne.stock_actuel} {articleSelectionne.unite}).
           </div>
         )
       )}
 
-      <div className="flex gap-3 pt-2">
-        <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={saving}>Annuler</button>
-        <button type="submit" className="btn-primary flex-1" disabled={saving}>
+      <ModalFooter>
+        <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>Annuler</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? 'Enregistrement…' : 'Enregistrer le mouvement'}
         </button>
-      </div>
+      </ModalFooter>
     </form>
   )
 }

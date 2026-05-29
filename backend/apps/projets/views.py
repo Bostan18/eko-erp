@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 from django.db.models import Prefetch
@@ -14,9 +15,9 @@ from .serializers import (
 
 
 class ProjetViewSet(viewsets.ModelViewSet):
-    queryset = Projet.objects.filter(is_deleted=False).select_related("client", "chef_projet")
+    queryset = Projet.objects.filter(is_deleted=False).select_related("client", "chef_projet", "centre_cout")
     serializer_class = ProjetSerializer
-    filterset_fields = ["type_projet", "statut", "client"]
+    filterset_fields = ["type_projet", "statut", "client", "centre_cout"]
     search_fields = ["code", "nom", "localisation"]
 
     @action(detail=False, methods=["get"])
@@ -151,9 +152,53 @@ class AffectationTacheViewSet(viewsets.ModelViewSet):
 
 
 class RealisationTacheViewSet(viewsets.ModelViewSet):
-    queryset = RealisationTache.objects.select_related("affectation__tache", "affectation__employe")
+    queryset = RealisationTache.objects.select_related(
+        "affectation__tache", "affectation__employe", "site",
+    )
     serializer_class = RealisationTacheSerializer
-    filterset_fields = ["affectation", "date"]
+    filterset_fields = ["affectation", "date", "site", "affectation__tache", "affectation__employe"]
+
+    @action(detail=False, methods=["post"])
+    def saisie_log(self, request):
+        """Log de travail à la tâche : crée/récupère l'affectation puis la réalisation."""
+        tache_id  = request.data.get("tache")
+        employe_id = request.data.get("employe")
+        date_val  = request.data.get("date")
+        quantite  = request.data.get("quantite")
+        site_id   = request.data.get("site") or None
+        notes     = request.data.get("notes", "")
+
+        if not all([tache_id, employe_id, date_val, quantite is not None]):
+            return Response(
+                {"detail": "tache, employe, date et quantite sont requis."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            quantite = Decimal(str(quantite))
+        except (InvalidOperation, TypeError):
+            return Response({"detail": "quantite invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            try:
+                tache = TacheProjet.objects.get(pk=tache_id, is_deleted=False)
+            except TacheProjet.DoesNotExist:
+                return Response({"detail": "Tâche introuvable."}, status=status.HTTP_404_NOT_FOUND)
+
+            aff, _ = AffectationTache.objects.get_or_create(
+                tache=tache, employe_id=employe_id, date_affectation=date_val,
+                defaults={"objectif_individuel": 0},
+            )
+            rea, _ = RealisationTache.objects.update_or_create(
+                affectation=aff, date=date_val,
+                defaults={
+                    "quantite_realisee": quantite,
+                    "site_id": site_id,
+                    "notes": notes,
+                },
+            )
+            rea.save()
+
+        return Response(RealisationTacheSerializer(rea).data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=["post"])
     def saisie_multiple(self, request):

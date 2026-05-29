@@ -2,15 +2,35 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import axios from 'axios'
 import useAuthStore from '../store/authStore'
+import api from '../services/api'
+
+const DATE_FMT = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+})
+
+function getSaison(month) {
+  if (month >= 3 && month <= 6)  return ['Saison des pluies', 'Cycle 1 · grande saison']
+  if (month >= 7 && month <= 8)  return ['Saison sèche',      'Intersaison courte']
+  if (month >= 9 && month <= 10) return ['Saison des pluies', 'Cycle 2 · petite saison']
+  return ['Saison sèche', 'Harmattan']
+}
+
+const GRAIN_URI =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"
 
 export default function Login() {
-  const { token, login } = useAuthStore()
+  const { token, login, setMe, logout } = useAuthStore()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm]   = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [shake, setShake] = useState(false)
 
   if (token) return <Navigate to="/" replace />
+
+  const now = new Date()
+  const [saisonLabel, saisonSub] = getSaison(now.getMonth())
+  const dateStr = DATE_FMT.format(now)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -18,78 +38,261 @@ export default function Login() {
     setLoading(true)
     try {
       const { data } = await axios.post('/api/token/', form)
+      // Pose le token d'abord, puis enrichit le store avec le profil serveur
+      // (rôle, modules, employé lié). Si /me échoue : on déloggue plutôt
+      // qu'entrer dans l'app sans rôle.
       login(data.access, data.refresh, { username: form.username })
+      try {
+        const { data: me } = await api.get('/auth/me/')
+        setMe(me)
+      } catch {
+        logout()
+        throw new Error('profile-failed')
+      }
       navigate('/')
-    } catch {
-      setError('Identifiants incorrects. Veuillez réessayer.')
+    } catch (err) {
+      const msg = err?.message === 'profile-failed'
+        ? 'Authentification OK mais profil indisponible. Réessayez.'
+        : 'Identifiants incorrects. Veuillez réessayer.'
+      setError(msg)
+      setShake(true)
+      setTimeout(() => setShake(false), 480)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-forest-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-forest-700 rounded-2xl mb-4">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-white">
-              <path d="M12 2C8 2 4 5 4 9c0 5 8 13 8 13s8-8 8-13c0-4-4-7-8-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
-            </svg>
+    <div className="min-h-screen flex flex-col md:flex-row bg-forest-950 overflow-hidden">
+      {/* ─────────── PANNEAU GAUCHE : le champ ─────────── */}
+      <section
+        className="relative md:flex-[3] min-h-[260px] md:min-h-screen bg-forest-950 text-sand-100 overflow-hidden flex flex-col p-8 md:p-12"
+        style={{ backgroundImage: `url("${GRAIN_URI}")` }}
+      >
+        {/* Plantation en perspective (cascade du fond vers le devant) */}
+        <svg
+          className="absolute inset-0 w-full h-full opacity-[0.18] pointer-events-none"
+          viewBox="0 0 800 800"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden
+        >
+          {(() => {
+            const ROWS = 7
+            const COLS = 10
+            const STEP = (800 - 80) / (COLS - 1)
+            const nodes = []
+            for (let r = 0; r < ROWS; r++) {
+              const t = r / (ROWS - 1)
+              const y = 200 + (820 - 200) * (t * t * 0.8 + t * 0.2)
+              const scale = 0.35 + t * t * 1.55
+              const offsetX = (r % 2) * (STEP / 2)
+              for (let c = 0; c < COLS; c++) {
+                const x = 40 + offsetX + c * STEP
+                const delay = r * 180 + c * 28
+                nodes.push(
+                  <g
+                    key={`${r}-${c}`}
+                    transform={`translate(${x} ${y}) scale(${scale})`}
+                    className="plant"
+                    style={{ animationDelay: `${delay}ms` }}
+                  >
+                    <path
+                      d="M0 0 L0 -10 M-5 -7 L0 -10 L5 -7"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                    <circle cx="0" cy="-11.5" r="1.2" fill="white" />
+                  </g>
+                )
+              }
+            }
+            return nodes
+          })()}
+        </svg>
+
+        {/* Éphéméride */}
+        <header className="relative z-10 reveal" style={{ animationDelay: '60ms' }}>
+          <p className="font-display font-bold text-[15px] md:text-[17px] text-sand-100 capitalize">
+            {dateStr}
+          </p>
+          <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-gold-400/90">
+            <span className="text-gold-500">●</span> {saisonLabel}
+            <span className="text-sand-100/30 mx-1.5">·</span>
+            <span className="text-sand-100/60">{saisonSub}</span>
+          </p>
+        </header>
+
+        {/* Logo monolithique */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center items-start py-10 md:py-12">
+          <h1
+            className="font-display font-extrabold text-white leading-[0.82] tracking-[-0.045em]
+                       text-[76px] sm:text-[110px] md:text-[140px] lg:text-[176px] reveal"
+            style={{ animationDelay: '200ms' }}
+          >
+            E<span className="text-forest-500">K</span>O
+          </h1>
+          <div className="mt-5 flex items-center gap-3 reveal" style={{ animationDelay: '320ms' }}>
+            <span className="h-px w-8 bg-gold-500" />
+            <p className="font-mono text-[10.5px] md:text-[11px] uppercase tracking-[0.22em] text-sand-100/70">
+              SARL · Côte d'Ivoire
+            </p>
           </div>
-          <h1 className="font-display font-bold text-white text-2xl">EKO SARL</h1>
-          <p className="text-forest-400 text-sm mt-1 font-body">Système de gestion intégré</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl p-8 shadow-2xl">
-          <h2 className="font-display font-semibold text-[#1C1817] text-lg mb-6">Connexion</h2>
+        {/* Coordonnées (md+ uniquement) */}
+        <footer
+          className="relative z-10 hidden md:block reveal"
+          style={{ animationDelay: '460ms' }}
+        >
+          <div className="font-mono text-[10px] leading-[1.8] text-sand-100/55 uppercase tracking-[0.14em]">
+            <p>Lat 5°20′N · Lon 4°02′W · Alt 18m</p>
+            <p>Abidjan · CI</p>
+          </div>
+        </footer>
+      </section>
 
-          {error && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm font-body">
-              {error}
-            </div>
-          )}
+      {/* ─────────── PANNEAU DROIT : le registre ─────────── */}
+      <section className="relative md:flex-[2] bg-sand-100 flex items-center justify-center p-8 md:p-12">
+        <div className={`w-full max-w-[360px] ${shake ? 'animate-shake' : ''}`}>
+          <div className="relative pl-6">
+            {/* Ruban gold vertical */}
+            <div className="absolute left-0 top-1 bottom-1 w-[3px] bg-gold-500 rounded-r-sm" />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block font-display text-xs font-medium text-[#1C1817] mb-1.5">
-                Nom d'utilisateur
+            <p
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-sand-500 mb-2 reveal"
+              style={{ animationDelay: '380ms' }}
+            >
+              Accès restreint
+            </p>
+            <h2
+              className="font-display font-bold text-ink text-[28px] leading-none tracking-tight reveal"
+              style={{ animationDelay: '440ms' }}
+            >
+              Identification
+            </h2>
+            <p
+              className="font-body text-[12.5px] text-sand-600 mt-2 reveal"
+              style={{ animationDelay: '500ms' }}
+            >
+              Connectez-vous à votre espace pour reprendre vos chantiers.
+            </p>
+
+            {error && (
+              <div className="mt-5 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-[12px] font-body flex items-start gap-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 mt-0.5 shrink-0">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4M12 16h.01" />
+                </svg>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit}
+              className="mt-6 space-y-5 reveal"
+              style={{ animationDelay: '560ms' }}
+            >
+              <label className="block">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-sand-500 mb-1.5">
+                  Identifiant
+                </span>
+                <input
+                  type="text"
+                  className="w-full bg-transparent border-0 border-b-[1.5px] border-sand-300 px-0 py-2
+                             text-[14px] font-display text-ink placeholder-sand-400
+                             focus:outline-none focus:border-forest-500 transition-colors"
+                  placeholder="prenom.nom"
+                  value={form.username}
+                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  required
+                  autoFocus
+                />
               </label>
-              <input
-                type="text"
-                className="input"
-                placeholder="timite"
-                value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
-                required
-              />
-            </div>
 
-            <div>
-              <label className="block font-display text-xs font-medium text-[#1C1817] mb-1.5">
-                Mot de passe
+              <label className="block">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-sand-500 mb-1.5">
+                  Mot de passe
+                </span>
+                <input
+                  type="password"
+                  className="w-full bg-transparent border-0 border-b-[1.5px] border-sand-300 px-0 py-2
+                             text-[14px] font-display text-ink placeholder-sand-400
+                             focus:outline-none focus:border-forest-500 transition-colors tracking-[0.22em]"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required
+                />
               </label>
-              <input
-                type="password"
-                className="input"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-              />
-            </div>
 
-            <button type="submit" className="btn-primary w-full mt-2" disabled={loading}>
-              {loading ? 'Connexion…' : 'Se connecter'}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`group w-full mt-6 flex items-center justify-between gap-2
+                            bg-forest-500 hover:bg-forest-600 text-white px-5 py-3.5 rounded-lg
+                            font-display font-medium text-[13px] tracking-wide transition-all
+                            disabled:opacity-60 disabled:cursor-not-allowed
+                            shadow-[0_4px_14px_rgba(31,143,83,0.28)]
+                            hover:shadow-[0_6px_22px_rgba(31,143,83,0.38)]
+                            active:translate-y-px
+                            ${loading ? 'animate-pulse-soft' : ''}`}
+              >
+                <span>{loading ? 'Authentification…' : 'Se connecter'}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-4 h-4 transition-transform group-hover:translate-x-1">
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-sand-400 mt-12 pl-6">
+            EKO SARL · v2026.5 · <span className="text-gold-600">Système de gestion</span>
+          </p>
         </div>
+      </section>
 
-        <p className="text-center text-forest-600 text-xs mt-6 font-body">
-          EKO SARL · Agriculture · BTP · Location · Espaces verts
-        </p>
-      </div>
+      {/* Animations locales */}
+      <style>{`
+        @keyframes reveal {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { opacity: 0; animation: reveal .7s cubic-bezier(.2,.7,.2,1) forwards; }
+
+        @keyframes plantFade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .plant {
+          opacity: 0;
+          animation: plantFade .55s cubic-bezier(.2,.7,.2,1) forwards;
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(5px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(3px); }
+        }
+        .animate-shake { animation: shake .45s cubic-bezier(.36,.07,.19,.97); }
+
+        @keyframes pulseSoft { 50% { opacity: .82; } }
+        .animate-pulse-soft { animation: pulseSoft 1.4s ease-in-out infinite; }
+
+        @keyframes stampIn {
+          from { opacity: 0; transform: rotate(-18deg) scale(.6); }
+          to   { opacity: 1; transform: rotate(-8deg)  scale(1); }
+        }
+        .stamp {
+          opacity: 0;
+          transform: rotate(-8deg);
+          animation: stampIn .55s cubic-bezier(.34,1.56,.64,1) .9s forwards;
+        }
+      `}</style>
     </div>
   )
 }

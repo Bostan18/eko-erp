@@ -1,15 +1,22 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import RowActions from '../../components/ui/RowActions'
+import ModuleTabs, { COMPTA_TABS } from '../../components/ui/ModuleTabs'
+import KpiCard from '../../components/ui/KpiCard'
+import { IconDocument, IconCheck, IconHourglass, IconClock } from '../../components/ui/Icons'
 import DevisForm from '../../components/forms/DevisForm'
 import { useFetchList } from '../../hooks/useFetchList'
 import { useConvertirDevis } from '../../hooks/useConvertirDevis'
 import { ConvertirDevisModal, ConvertirDevisToast } from '../../components/comptabilite/ConvertirDevisDialog'
 import { DEVIS_STATUT_BADGE, DEVIS_STATUT_LABEL } from '../../utils/constants'
+import { apiErrorMessage } from '../../utils/errors'
 import { fmt } from '../../utils/format'
 
-const FILTRES = [
-  { key: 'toutes',    label: 'Tous' },
+const STATUTS = [
+  { key: 'toutes',    label: 'Tous les statuts' },
   { key: 'brouillon', label: 'Brouillons' },
   { key: 'envoye',    label: 'Envoyés' },
   { key: 'accepte',   label: 'Acceptés' },
@@ -25,6 +32,23 @@ export default function DevisList() {
   const [confirmDevis, setConfirmDevis] = useState(null)
   const [toast, setToast] = useState(null)
   const [conversionError, setConversionError] = useState('')
+  const [editing, setEditing]   = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [actionError, setActionError] = useState('')
+
+  function fermerDrawer() { setModal(false); setEditing(null) }
+
+  async function confirmerSuppression() {
+    if (!deleting) return
+    setRemoving(true); setActionError('')
+    try {
+      await api.delete(`/comptabilite/devis/${deleting.id}/`)
+      setDeleting(null); charger()
+    } catch (err) {
+      setActionError(apiErrorMessage(err)); setDeleting(null)
+    } finally { setRemoving(false) }
+  }
 
   const { convertir } = useConvertirDevis({
     onSuccess: (data) => {
@@ -41,86 +65,128 @@ export default function DevisList() {
   })
 
   const filtres = devis.filter((d) => filtre === 'toutes' || d.statut === filtre)
+  const totalFacture = devis.reduce((s, d) => s + Number(d.total_ttc ?? 0), 0)
   const totalAccepte = devis
     .filter((d) => d.statut === 'accepte')
     .reduce((s, d) => s + Number(d.total_ttc ?? 0), 0)
   const totalEnAttente = devis
     .filter((d) => ['brouillon', 'envoye'].includes(d.statut))
     .reduce((s, d) => s + Number(d.total_ttc ?? 0), 0)
+  const nbExpire = devis.filter((d) => d.statut === 'expire').length
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <p className="font-body text-[#A59F9B] text-sm">
-          {loading ? '…' : `${devis.length} devis`}
-        </p>
-        <button className="btn-primary" onClick={() => setModal(true)}>+ Nouveau devis</button>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 max-w-2xl">
-        <div className="card p-4 ring-forest-100 bg-forest-50">
-          <p className="font-display text-xs text-forest-600 uppercase tracking-wide mb-1">Devis acceptés</p>
-          <p className="font-display font-bold text-forest-700 text-2xl">{fmt(totalAccepte)} F</p>
+    <div className="space-y-5">
+      {/* ─── sec-head ───────────────────────────────────── */}
+      <div className="sec-head">
+        <div>
+          <div className="sec-title">Devis</div>
+          <div className="sec-sub">
+            Devis commerciaux · Conversion en facture ·{' '}
+            {loading ? '…' : `${devis.length} devis`}
+          </div>
         </div>
-        <div className="card p-4">
-          <p className="font-display text-xs text-[#A59F9B] uppercase tracking-wide mb-1">En attente</p>
-          <p className="font-display font-bold text-[#1C1817] text-2xl">{fmt(totalEnAttente)} F</p>
-        </div>
+        <button className="btn-primary" onClick={() => setModal(true)}>
+          <IconPlus className="w-3.5 h-3.5" /> Nouveau devis
+        </button>
       </div>
 
-      <div className="flex gap-1 flex-wrap">
-        {FILTRES.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFiltre(key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium transition-colors ${
-              filtre === key
-                ? 'bg-forest-700 text-white'
-                : 'bg-white border border-[#ece2d3] text-[#1C1817] hover:border-forest-300'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      {/* ─── KPI grid ───────────────────────────────────── */}
+      <div className="kpi-grid">
+        <KpiCard
+          icon={<IconDocument />} tone="sand"
+          label="Total devis"
+          value={<>{fmt(totalFacture)} <span className="kpi-unit">FCFA</span></>}
+          sub={`${devis.length} devis · cumul`}
+        />
+        <KpiCard
+          icon={<IconCheck />} tone="forest"
+          label="Acceptés"
+          value={<>{fmt(totalAccepte)} <span className="kpi-unit">FCFA</span></>}
+          sub="Montant validé"
+        />
+        <KpiCard
+          icon={<IconHourglass />} tone="gold"
+          label="En attente"
+          value={<>{fmt(totalEnAttente)} <span className="kpi-unit">FCFA</span></>}
+          sub="Brouillons & envoyés"
+        />
+        <KpiCard
+          icon={<IconClock />} tone="red"
+          label="Expirés"
+          value={nbExpire}
+          sub={nbExpire > 0 ? 'À renouveler' : 'Aucun'}
+        />
       </div>
 
+      {/* ─── Carte : onglets module + th-row + table ────── */}
       <div className="card overflow-hidden">
-        {error && <p className="p-6 text-red-500 text-sm">{error}</p>}
+        <ModuleTabs items={COMPTA_TABS} />
+
+        <div className="th-row">
+          <div className="th-title">
+            Devis commerciaux ·{' '}
+            <span className="text-sand-500 font-normal">{filtres.length}</span>
+          </div>
+          <select
+            className="input input-sm w-auto"
+            value={filtre}
+            onChange={(e) => setFiltre(e.target.value)}
+          >
+            {STATUTS.map((s) => (
+              <option key={s.key} value={s.key}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {error && <p className="alert-red m-5">{error}</p>}
+        {actionError && (
+          <p className="alert-red m-5">
+            {actionError}
+            <button type="button" onClick={() => setActionError('')}
+              className="ml-3 text-[11px] underline decoration-dotted opacity-70 hover:opacity-100">Fermer</button>
+          </p>
+        )}
         {loading ? (
-          <div className="p-12 text-center text-[#A59F9B] font-body text-sm">Chargement…</div>
+          <div className="p-12 text-center text-sand-500 font-body text-sm">Chargement…</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] border-b border-[#ece2d3]">
+          <table className="table-eko">
+            <thead>
               <tr>
-                {['Numéro', 'Client', 'Projet', 'Total TTC', 'Statut', 'Validité', 'Actions'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left font-display font-semibold text-[#A59F9B] text-xs uppercase tracking-wide">{h}</th>
+                {['Numéro', 'Client', 'Projet', 'Total TTC', 'Statut', 'Validité', 'Conversion'].map((h) => (
+                  <th key={h}>{h}</th>
                 ))}
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f4ebe0]">
+            <tbody>
               {filtres.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-[#A59F9B] font-body">Aucun devis</td></tr>
-              ) : filtres.map((d) => (
-                <tr key={d.id} className="hover:bg-[#fbf7f0] transition-colors">
-                  <td className="px-4 py-3">
-                    <Link to={`/comptabilite/devis/${d.id}`} className="font-display font-medium text-forest-700 hover:text-forest-900">
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-sand-500 font-body">Aucun devis</td></tr>
+              ) : filtres.map((d) => {
+                const verrouille = !!d.facture_liee_id
+                const lockReason = verrouille
+                  ? `Devis converti en facture ${d.facture_liee_numero}`
+                  : null
+                return (
+                <tr key={d.id}>
+                  <td>
+                    <Link to={`/comptabilite/devis/${d.id}`} className="mono-cell text-forest-700 hover:text-forest-900 font-medium">
                       {d.numero}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-body text-[#1C1817]">{d.client_nom}</td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-xs">{d.projet_nom || '—'}</td>
-                  <td className="px-4 py-3 font-display font-semibold text-[#1C1817]">{fmt(d.total_ttc)} F</td>
-                  <td className="px-4 py-3">
+                  <td className="font-display font-medium text-ink">{d.client_nom}</td>
+                  <td className="text-[12px] text-sand-500">{d.projet_nom || '—'}</td>
+                  <td className="num">{fmt(d.total_ttc)} <span className="text-[10px] font-normal text-sand-500">F</span></td>
+                  <td>
                     <span className={DEVIS_STATUT_BADGE[d.statut] ?? 'badge-gray'}>
                       {DEVIS_STATUT_LABEL[d.statut] ?? d.statut}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-body text-[#A59F9B] text-sm">{d.date_validite || '—'}</td>
-                  <td className="px-4 py-3">
+                  <td className="text-sand-600">{d.date_validite || '—'}</td>
+                  <td>
                     {d.facture_liee_id ? (
                       <Link
                         to={`/comptabilite/factures/${d.facture_liee_id}`}
-                        className="text-[#A59F9B] font-mono text-[11px] hover:text-forest-700 transition-colors"
+                        className="text-sand-500 font-mono text-[11px] hover:text-forest-700 transition-colors"
                       >
                         {d.facture_liee_numero} ↗
                       </Link>
@@ -134,17 +200,45 @@ export default function DevisList() {
                       </button>
                     ) : null}
                   </td>
+                  <td>
+                    <RowActions
+                      onView={() => navigate(`/comptabilite/devis/${d.id}`)}
+                      onEdit={() => setEditing(d)}
+                      onDelete={() => setDeleting(d)}
+                      editDisabledReason={lockReason}
+                      deleteDisabledReason={lockReason}
+                    />
+                  </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         )}
       </div>
 
-      {modal && (
-        <Modal titre="Nouveau devis" onClose={() => setModal(false)}>
-          <DevisForm onClose={() => setModal(false)} onSuccess={() => { setModal(false); charger() }} />
+      {(modal || editing) && (
+        <Modal
+          titre={editing ? `Modifier ${editing.numero}` : 'Nouveau devis'}
+          onClose={fermerDrawer}
+        >
+          <DevisForm
+            initial={editing}
+            onClose={fermerDrawer}
+            onSuccess={() => { fermerDrawer(); charger() }}
+          />
         </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          titre="Supprimer ce devis ?"
+          message={`Le devis ${deleting.numero} (${deleting.client_nom}) sera supprimé. Cette action est irréversible.`}
+          confirmLabel="Supprimer"
+          tone="danger"
+          busy={removing}
+          onConfirm={confirmerSuppression}
+          onCancel={() => setDeleting(null)}
+        />
       )}
 
       {confirmDevis && (
@@ -163,5 +257,13 @@ export default function DevisList() {
         </div>
       )}
     </div>
+  )
+}
+
+function IconPlus({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   )
 }
